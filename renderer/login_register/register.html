@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-firestore.js"></script>
+
+    <script src="register.js"></script>
+    <link rel="stylesheet" href="register.css">
+
+    <!-- <meta charset="UTF-8"> -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'"> -->
+    <title>Rapid Code</title>
+  </head>
+
+  <body class="background">
+    <form>
+      <h1 id="Register" >Register</h1>
+
+      <label for="fnamelabel">First Name</label><br>
+      <input id="firstName" type="text" placeholder="Your name.."><br>
+    
+      <label for="lnamelabel">Last Name</label><br>
+      <input id="lastName" type="text" placeholder="Your last name.."><br>
+
+      <label for="emaillabel">Email</label><br>
+      <input id="email" type="email" placeholder="Your email.."><br>
+    
+      <label for="passwordlabel">Password</label><br>
+      <input id="password" type="password" placeholder="Enter password.."><br>
+            
+      <label for="confirmpasswordlabel">Confirm Password</label><br>
+      <input id="confirmpassword" type="password" placeholder="Re-enter password.."><br>
+    
+      <input id="registerButton" type="button" value="Register" onclick="registerUser(getFirstName(), getLastName(), getEmail(), getPassword(), getConfirmPassword())"><br><br>
+
+      <a id="loginLink" href="./login.html">Already have an account? Login here!</a>
+    </form>
+
+    <script>
+
+      function getFirstName()
+      {
+        console.log("Getting first name");
+        var fname = document.getElementById("firstName").value;
+        return fname;
+      }
+      function getLastName()
+      {
+        console.log("Getting last name");
+        var lname = document.getElementById("lastName").value;
+        return lname;
+      }
+      function getEmail()
+      {
+        console.log("Getting email");
+        var email = document.getElementById("email").value;
+        return email;
+      }
+      function getPassword()
+      {
+        console.log("Getting password");
+        var password = document.getElementById("password").value;
+        return password;
+      }
+      function getConfirmPassword()
+      {
+        console.log("Getting password2");
+        var password2 = document.getElementById("confirmpassword").value;
+        return password2;
+      }
+
+      // You can also require other files to run in this process
+      require('./register.js')
+    </script>
+  </body>
+</html>
