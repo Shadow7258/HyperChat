@@ -7,49 +7,58 @@
 
     <script src="register.js"></script>
     <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 
-    <!-- <meta charset="UTF-8"> -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'"> -->
+    <!-- <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'"> -->
+
     <title>Rapid Code</title>
   </head>
 
   <body class="background">
     <form>
-      <h1 id="Register" >Register</h1>
+      <div class="form-group">
+        <h1 id="Register" >Register</h1>
+      </div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" class="form-control" type="text" placeholder="Your username..">
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" class="form-control" type="email" placeholder="Your email..">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </div>
 
-      <label for="fnamelabel">First Name</label><br>
-      <input id="firstName" type="text" placeholder="Your name.."><br>
-    
-      <label for="lnamelabel">Last Name</label><br>
-      <input id="lastName" type="text" placeholder="Your last name.."><br>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" class="form-control" type="password" placeholder="Enter password..">
+      </div>
 
-      <label for="emaillabel">Email</label><br>
-      <input id="email" type="email" placeholder="Your email.."><br>
-    
-      <label for="passwordlabel">Password</label><br>
-      <input id="password" type="password" placeholder="Enter password.."><br>
-            
-      <label for="confirmpasswordlabel">Confirm Password</label><br>
-      <input id="confirmpassword" type="password" placeholder="Re-enter password.."><br>
-    
-      <input id="registerButton" type="button" value="Register" onclick="registerUser(getFirstName(), getLastName(), getEmail(), getPassword(), getConfirmPassword())"><br><br>
+      <div class="form-group">
+        <label for="confirmpassword">Confirm Password</label>
+        <input id="confirmpassword" class="form-control" type="password" placeholder="Re-enter password..">
+      </div>
 
-      <a id="loginLink" href="./login.html">Already have an account? Login here!</a>
+      <div class="form-group">
+        <div style="text-align: center;">
+          <input id="registerButton" class="btn btn-primary" type="button" value="Register" onclick="registerUser(getUsername(), getEmail(), getPassword(), getConfirmPassword())">
+        </div>
+      </div>
+
+      <div class="form-group" style="text-align: center; margin-bottom: 0%;">
+        <a id="loginLink" href="./login.html">Already have an account? Login here!</a>
+      </div>
     </form>
 
     <script>
 
-      function getFirstName()
+      function getUsername()
       {
-        console.log("Getting first name");
-        var fname = document.getElementById("firstName").value;
-        return fname;
-      }
-      function getLastName()
-      {
-        console.log("Getting last name");
-        var lname = document.getElementById("lastName").value;
-        return lname;
+        console.log("Getting username");
+        var username = document.getElementById("username").value;
+        return username;
       }
       function getEmail()
       {

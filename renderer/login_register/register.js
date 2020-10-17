@@ -1,5 +1,6 @@
-const firebase = require('firebase');
+const firebase = require('firebase')
 const { dialog } = require('electron').remote;
+const { ipcRenderer } = require('electron')
 
 const firebaseConfig = {
   apiKey: "AIzaSyBplQzncuIsYut1Pp7p8rox8f6O5mG8tow",
@@ -15,21 +16,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let auth = firebase.auth();
-let db = firebase.database();
+let db = firebase.firestore();
 
 
-function registerUser(fname, lname, email, password, password2)
+function registerUser(username, email, password, password2)
 {
   console.log("Register button clicked!");
-  if (validateUser(fname, lname, email, password, password2) == null)
+  if (validateUser(username, email, password, password2) == null)
   {
     console.log("User validated!");
     console.log("Registering user..")
     auth.createUserWithEmailAndPassword(email, password).then(() => {
       console.log("User created!");
-      saveUserData(fname, lname, email);
-       
-      // Go to home page
+      saveUserData(username, email);       
     }).catch(function(error) {
       console.log("Error while creating user: " + error.message);
       dialog.showErrorBox("Error!", error.message);
@@ -38,11 +37,11 @@ function registerUser(fname, lname, email, password, password2)
   else 
   {
     console.log("Validation failed!");
-    dialog.showErrorBox("Error!", validateUser(fname, lname, email, password, password2));
+    dialog.showErrorBox("Error!", validateUser(username, email, password, password2));
   }
 }
 
-function validateUser(fname, lname, email, password, password2)
+function validateUser(username, email, password, password2)
 {
   console.log("password is " + password);
   console.log("password2 is " + password2);
@@ -53,23 +52,20 @@ function validateUser(fname, lname, email, password, password2)
   return null;
 }
 
-function saveUserData(fname, lname, email)
+function saveUserData(username, email)
 { 
   const userData = {
-    fname: fname,
-    lname: lname,
+    username: username,
     email: email
   }
+
   console.log("Saving user data.." + JSON.stringify(userData));
   let userId = email.split('.').join("");
   console.log("User ID is " + userId);
 
-  firebase.database().ref('users/' + userId).set({
-    firstname: fname,
-    lastname: lname,
-    email: email
-  }).then( () => {
+  db.collection('users').doc(email).set(userData).then( () => {
     console.log("Finsihed saving data.");
+    ipcRenderer.send('homePageFromRegister');
   }).catch( (err) => {
     dialog.showErrorBox("Error!", err.message);
   });

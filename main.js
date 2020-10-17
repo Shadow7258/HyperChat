@@ -7,18 +7,27 @@ const Mousetrap = require('mousetrap');
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow, tray
 
-ipcMain.on('registerLink', (event, arg) => {
-  console.log(arg) 
-  mainWindow.loadFile('renderer/login_register/register.html')
+let trayMenu = Menu.buildFromTemplate([
+  { 
+  label: "Item 1",
+    submenu: [
+      {role: "quit"},
+      {label: "Reload", click() { mainWindow.reload() }}
+    ]}
+])
+
+ipcMain.on('homePageFromRegister', (event) => {
+  console.log("Going to home page from Register screen.");
+  mainWindow.loadFile('renderer/home.html')
 })
 
-let trayMenu = Menu.buildFromTemplate([
-  { label: "Item 1",
-submenu: [
-  {role: "quit"},
-  {label: "Reload", click() { mainWindow.reload() }}
-]}
-])
+ipcMain.on('homePageFromLogin', (event, arg) => {
+  console.log("Going to home page from Login screen.");
+  mainWindow.loadFile('renderer/home.html');
+  console.log("Sending email");
+  mainWindow.webContents.send('email', arg);
+})
+
 
 function createTray() 
 {
@@ -53,7 +62,8 @@ function createWindow() {
   });
 
   mainWindow = new BrowserWindow({
-    width: 800, height: 643,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     x: mainWindowState.x, y: mainWindowState.y,
     minHeight: 300, minWidth: 500,
     webPreferences: { nodeIntegration: true , enableRemoteModule: true}

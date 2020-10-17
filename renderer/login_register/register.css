@@ -4,17 +4,18 @@
 
 #Register {
     font-family: sans-serif;
-    font-size: 25px;
+    font-size: 27px;
     color: rgb(255, 184, 108);
     text-align: center;
     padding-top: 12px;
 }
 
 form {
+    padding: 20px;
     margin-left: 8%;
-    width: 340px;
-    margin-top: 9%;
-    height: 500px;
+    width: 370px;
+    margin-top: 24.25px;
+    height: 100%;
     background-color: rgb(60, 62, 79);
     border-radius: 25px;
 }
@@ -23,36 +24,22 @@ label {
     font-family: sans-serif;
     font-size: 15px;
     color: white;
-    margin-left: 15px;
+    padding-left: 2px;
 }
 
 #errorlabel {
     color: rgb(0, 255, 255);
 }
 
-input[type="text"], input[type="password"], input[type="email"] {
-    width: 85%;
-    height: 21px;
-    border-radius: 7px;
-    margin-top: 7px;
-    margin-bottom: 15px;
-    margin-left: 13px;
-}
-
-input[type="button"] {
-    margin-top: 15px;
-    width: 125px;
-    height: 33px;
-    margin-left: 107px;
-    color: rgb(255, 255, 255);
+#registerButton {
     background-color: rgb(189, 147, 249);
-    border-style: outset;
-    border-radius: 6px;
-    text-align: center;
+    border-color: black;
+    width: 35%;
+    height: 36.5px;
+    margin-top: 12px;
 }
 
 #loginLink {
-    margin-left: 50px;
     color: rgb(255, 184, 108);
 }
 

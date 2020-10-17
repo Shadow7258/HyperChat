@@ -1,4 +1,4 @@
-const firebase = require('firebase');
+const firebase = require('firebase')
 const { dialog } = require('electron').remote;
 const { ipcRenderer } = require('electron')
 
@@ -21,19 +21,11 @@ function loginUser(email, password)
 {
     auth.signInWithEmailAndPassword(email, password).then(() => {
         console.log("User logged in!");
-
-        // Go to home page
-        
+        ipcRenderer.send('homePageFromLogin', email);
     }).catch(function(error) {
         console.log("Error while logging in user: " + error.message);
         dialog.showErrorBox("Error!", error.message);
     });
 }
-
-function sendMessage()
-{
-    ipcRenderer.send('registerLink', 'register')
-}
-
 
 

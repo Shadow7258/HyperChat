@@ -2,57 +2,39 @@
     background-image: url('../../images/space.gif');
 }
 
-#Login {
-    font-family: sans-serif;
-    font-size: 25px;
-    color: rgb(255, 184, 108);
-    text-align: center;
-    padding-top: 12px;
-}
-
-form {
-    margin-left: 8%;
-    width: 400px;
-    margin-top: 150px;
-    height: 300px;
-    background-color: rgb(60, 62, 79);
-    border-radius: 25px;
-}
 
 label {
     font-family: sans-serif;
     font-size: 16px;
     color: white;
-    margin-left: 22px;
+    padding-left: 2px;
 }
 
-#errorlabel {
-    color: rgb(0, 255, 255);
-}
-
-#email, #password {
-    width: 87%;
-    height: 25px;
-    border-radius: 7px;
-    margin-top: 7px;
-    margin-bottom: 20px;
-    margin-left: 20px;
+form {
+    padding: 20px;
+    margin-left: 8%;
+    width: 400px;
+    height: 100%;
+    margin-top: 102.75px;
+    background-color: rgb(60, 62, 79);
+    border-radius: 25px;
 }
 
 #loginButton {
-    margin-top: 15px;
-    width: 125px;
-    height: 33px;
-    margin-left: 137.5px;
-    color: rgb(255, 255, 255);
     background-color: rgb(189, 147, 249);
-    border-style: outset;
-    border-radius: 6px;
-    text-align: center;
+    border-color: black;
+    width: 35%;
+    height: 36.5px;
 }
 
 #registerLink {
-    width: 100%;
-    margin-left: 25%;
     color: rgb(255, 184, 108);
+}
+
+#Login {
+    font-family: sans-serif;
+    font-size: 27px;
+    color: rgb(255, 184, 108);
+    text-align: center;
+    padding-top: 12px;
 }
