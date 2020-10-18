@@ -1,6 +1,7 @@
 // Modules
 const {app, BrowserWindow, globalShortcut, Menu, Tray, screen, ipcMain} = require('electron');
 const windowStateKeeper = require('electron-window-state');
+const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -16,17 +17,40 @@ let trayMenu = Menu.buildFromTemplate([
     ]}
 ])
 
-ipcMain.on('homePageFromRegister', (event) => {
+ipcMain.on('homePageFromRegister', (event, arg) => {
   console.log("Going to home page from Register screen.");
-  mainWindow.loadFile('renderer/home.html')
+  customizeHomeWindow()
+  console.log("Sending email");
+  event.reply('email', arg);
 })
 
 ipcMain.on('homePageFromLogin', (event, arg) => {
   console.log("Going to home page from Login screen.");
-  mainWindow.loadFile('renderer/home.html');
-  console.log("Sending email");
-  mainWindow.webContents.send('email', arg);
+  customizeHomeWindow()
+  setTimeout(() => {
+    console.log("Sending email");
+    event.reply('email', arg);
+  }, 1000);
 })
+
+function customizeHomeWindow()
+{
+  let homeWindowState = windowStateKeeper({
+    defaultWidth: 800,
+    defaultHeight: 650
+  });
+
+  mainWindow.width = homeWindowState.width;
+  mainWindow.height = homeWindowState.height;
+  mainWindow.x = homeWindowState.x;
+  mainWindow.y = homeWindowState.y;
+
+  mainWindow.resizable = true;
+
+  mainWindow.loadFile('renderer/home.html');
+
+  homeWindowState.manage(mainWindow);
+}
 
 
 function createTray() 
@@ -55,26 +79,20 @@ function createWindow() {
   globalShortcut.register('Alt+C', () => {
     console.log(screen.getCursorScreenPoint())
   })
-  
-  let mainWindowState = windowStateKeeper({
-    defaultWidth: 800,
-    defaultHeight: 643
-  });
 
   mainWindow = new BrowserWindow({
-    width: mainWindowState.width,
-    height: mainWindowState.height,
-    x: mainWindowState.x, y: mainWindowState.y,
-    minHeight: 300, minWidth: 500,
+    width: 800,
+    height: 650,
+    x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
     webPreferences: { nodeIntegration: true , enableRemoteModule: true}
   })
+
+  mainWindow.resizable = false;
 
   mainWindow.loadFile('renderer/login_register/login.html')
 
   // Open DevTools - Remove for PRODUCTION!
   mainWindow.webContents.openDevTools();
-
-  mainWindowState.manage(mainWindow);
 
   // Listen for window being closed
   mainWindow.on('closed',  () => {

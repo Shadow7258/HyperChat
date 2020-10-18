@@ -15,8 +15,9 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-let auth = firebase.auth();
 let db = firebase.firestore();
+let auth = firebase.auth();
+
 
 
 function registerUser(username, email, password, password2)
@@ -43,8 +44,10 @@ function registerUser(username, email, password, password2)
 
 function validateUser(username, email, password, password2)
 {
-  console.log("password is " + password);
-  console.log("password2 is " + password2);
+  if (username == "" || email == "" || password == "" || password2 == "" ) 
+  {
+    return "Please fill in all fields.";
+  }
   if (password != password2)
   {
     return "Passwords do not match.";
@@ -63,9 +66,9 @@ function saveUserData(username, email)
   let userId = email.split('.').join("");
   console.log("User ID is " + userId);
 
-  db.collection('users').doc(email).set(userData).then( () => {
+  db.collection('users').add(userData).then( () => {
     console.log("Finsihed saving data.");
-    ipcRenderer.send('homePageFromRegister');
+    ipcRenderer.send('homePageFromRegister', email);
   }).catch( (err) => {
     dialog.showErrorBox("Error!", err.message);
   });
