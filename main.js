@@ -91,8 +91,10 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/login_register/login.html')
 
+  customizeHomeWindow()
+
   // Open DevTools - Remove for PRODUCTION!
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // Listen for window being closed
   mainWindow.on('closed',  () => {
