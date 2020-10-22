@@ -17,8 +17,15 @@ firebase.initializeApp(firebaseConfig);
 
 let auth = firebase.auth();
 
+var user = auth.currentUser;
+
 function loginUser(email, password)
 {
+    if (user) {
+        console.log(user.email + " is logged in");
+    } else {
+      console.log("No user is signed in.");
+    }
     auth.signInWithEmailAndPassword(email, password).then(() => {
         console.log("User logged in!");
         ipcRenderer.send('homePageFromLogin', email);

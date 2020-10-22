@@ -21,7 +21,11 @@
 }
 
 #sidebar-wrapper {
+  position: relative;
+  display: flex;
+  flex-flow: column;
   min-height: 100vh;
+  height: 100%;
   -webkit-transition: margin .25s ease-out;
   -moz-transition: margin .25s ease-out;
   -o-transition: margin .25s ease-out;
@@ -31,18 +35,49 @@
 #sidebar-wrapper .sidebar-heading {
   padding: 0.875rem 1.25rem;
   font-size: 1.2rem;
+  height: auto;
 }
 
 #sidebar-wrapper .list-group {
+  margin-top: 10px;
   width: 15rem;
+  flex-grow: 1;
+  flex: 1 1 500px;
+  overflow-y: scroll;
+}
+
+#bottom {
+  flex: 0 1 40px;
+}
+
+#empty {
+  flex-grow: 1;
+}
+
+#userInfo {
+  height: auto;
 }
 
 #page-content-wrapper {
   min-width: 100vw;
+  overflow: hidden;
 }
 
 #wrapper.toggled #sidebar-wrapper {
   margin-left: 0;
+}
+
+#chatroom {
+  height: 85%;
+  overflow: auto;
+}
+
+.settingButton {
+  background-color: transparent; 
+  border: none; 
+  color: white; 
+  font-size: 16px; 
+  cursor: pointer; 
 }
 
 @media (min-width: 768px) {
