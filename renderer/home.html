@@ -17,6 +17,9 @@
     </head>
     <body>
         <div class="d-flex" id="wrapper">
+
+            <!-- SideBar -->
+
             <div class="bg-light border-right" id="sidebar-wrapper">
                 <div class="container-fluid" style="padding-right: 0%">
                     <div class="row" id="Chats">
@@ -24,25 +27,7 @@
                             <h5>Chats</h5>
                         </div>
                         <div class="col-3">
-                            <button id="addUserButton" type="button" data-toggle="modal" data-target="#modalExample" style="padding-right: 0%">+</button>
-                            <div class="modal" id="modalExample">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-body">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">Select User</h5><br>
-                                                    <input class="card-subtitle" type="text" placeholder="Enter the name of the user" style="width:100%; margin-bottom: 20px;"></input>
-                                                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                                    <div style="text-align: center">
-                                                        <button class="btn btn-info">Create Chat!</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <button id="addUserButton" type="button" data-toggle="modal" data-target="#addUser" style="padding-right: 0%">+</button>
                         </div>
                     </div>
                 </div>
@@ -58,32 +43,16 @@
                 <div class="d-flex justify-content-end" id="bottom">
                     <a href="#" class="list-group-item list-group-item-action active">
                         <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Pranav</h5>
+                            <h5 id="name" class="mb-1">Name</h5>
                             <button class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
                         </div>
                         <small>Status message</small>
                     </a>
                 </div>                    
             </div>    
-            
-            <div class="modal" id="settingsModal">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-body">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title" style="text-align:center;">Settings</h5><br>
-                                    <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
-                                    <div style="text-align: center">
-                                        <button class="btn btn-info">Save Changes</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        
+
+            <!-- Page Content -->
+                    
             <div id="page-content-wrapper">
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <label for="chatheading">Chat</label>
@@ -101,6 +70,45 @@
                     </div>
                 </div>
             </div>        
+        </div>
+
+
+
+        <div class="modal" id="settingsModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title" style="text-align:center;">Settings</h5><br>
+                                <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
+                                <div style="text-align: center">
+                                    <button class="btn btn-info">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="addUser">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Select User</h5><br>
+                                <input class="card-subtitle" type="text" placeholder="Enter the name of the user" style="width:100%; margin-bottom: 20px; border-radius: 4px; padding-left: 5px;"></input>
+                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                <div style="text-align: center">
+                                    <button class="btn btn-info">Create Chat!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <script>
             // You can also require other files to run in this process

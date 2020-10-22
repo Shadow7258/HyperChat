@@ -66,7 +66,7 @@ function saveUserData(username, email)
   let userId = email.split('.').join("");
   console.log("User ID is " + userId);
 
-  db.collection('users').add(userData).then( () => {
+  db.collection('users').doc(email).set(userData).then( () => {
     console.log("Finsihed saving data.");
     ipcRenderer.send('homePageFromRegister', email);
   }).catch( (err) => {
