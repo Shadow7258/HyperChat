@@ -32,13 +32,13 @@
                     </div>
                 </div>
 
-                <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat1</a>
+                <div id="chat-list" class="list-group list-group-flush">
+                    <!-- <a href="#" class="list-group-item list-group-item-action bg-light">Chat1</a>
                     <a href="#" class="list-group-item list-group-item-action bg-light">Chat2</a>
                     <a href="#" class="list-group-item list-group-item-action bg-light">Chat3</a>
                     <a href="#" class="list-group-item list-group-item-action bg-light">Chat4</a>
                     <a href="#" class="list-group-item list-group-item-action bg-light">Chat5</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat6</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat6</a> -->
                 </div>
                 <div class="d-flex justify-content-end" id="bottom">
                     <a href="#" class="list-group-item list-group-item-action active">
@@ -49,7 +49,7 @@
                         <small>Status message</small>
                     </a>
                 </div>                    
-            </div>    
+            </div>
 
             <!-- Page Content -->
                     
@@ -58,10 +58,10 @@
                     <label for="chatheading">Chat</label>
                 </nav>
 
-                <div class="container-fluid">
-                    <section id="chatroom">
+                <div id="page-container" class="container-fluid">
+                    <!-- <section id="chatroom">
                         <section id="feedback"></section>
-                    </section>                  
+                    </section>                   -->
                     <div class="input-group mb-3">
                         <input id="message-field" type="text" class="form-control" placeholder="Enter message" style="border-color: #17a2b8;">
                         <div class="input-group-append">
@@ -69,10 +69,8 @@
                         </div>
                     </div>
                 </div>
-            </div>        
+            </div>             
         </div>
-
-
 
         <div class="modal" id="settingsModal">
             <div class="modal-dialog modal-dialog-centered">
@@ -83,7 +81,7 @@
                                 <h5 class="card-title" style="text-align:center;">Settings</h5><br>
                                 <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
                                 <div style="text-align: center">
-                                    <button class="btn btn-info">Save Changes</button>
+                                    <button class="btn btn-info" data-dismiss="modal">Save Changes</button>
                                 </div>
                             </div>
                         </div>
@@ -99,10 +97,10 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Select User</h5><br>
-                                <input class="card-subtitle" type="text" placeholder="Enter the name of the user" style="width:100%; margin-bottom: 20px; border-radius: 4px; padding-left: 5px;"></input>
+                                <input id="newUserName" class="card-subtitle" type="text" placeholder="Enter the name of the user" style="width:100%; margin-bottom: 20px; border-radius: 4px; padding-left: 5px;"></input>
                                 <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                                 <div style="text-align: center">
-                                    <button class="btn btn-info">Create Chat!</button>
+                                    <button id="createChatBtn" class="btn btn-info" data-dismiss="modal">Create Chat!</button>
                                 </div>
                             </div>
                         </div>

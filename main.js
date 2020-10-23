@@ -77,6 +77,8 @@ function createHomeWindow()
 
   mainWindow.loadFile('renderer/home.html');
 
+  mainWindow.webContents.openDevTools();
+
   homeWindowState.manage(mainWindow);
 }
 
