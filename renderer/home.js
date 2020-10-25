@@ -18,18 +18,28 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 
-var email, socket;
+var email, socket, friendClickedOn;
 socket = io.connect('http://localhost:3000')
 
 
-let message = $('#message-field')
+let messageField = $('#message-field')
 let sendButton = $('#send-button')
 let createChatBtn = $('#createChatBtn')
 let chatList = $('#chat-list')
 let newUserName = $('#newUserName')
 let pageContainer = $('#page-container')
-let chatroom
-let feedback
+let chatroom, feedback
+let chatheading = $('#chat-heading')
+let username
+
+let message = {
+    sender: "",
+    message: "",
+    to: "",
+    time: ""
+}
+
+let userList = [], messages = {};
 
 ipcRenderer.on('email', (e, arg) => {
     console.log("Email received: " + arg);
@@ -37,44 +47,90 @@ ipcRenderer.on('email', (e, arg) => {
 })
 
 $(document).ready(function() {
-    console.log("User connected " + socket.username);
-    message = $('#message-field')
+    console.log("User connected " + socket.username)
+    messageField = $('#message-field')
     sendButton = $('#send-button')
     createChatBtn = $('#createChatBtn')
     chatList = $('#chat-list')
     newUserName = $('#newUserName')
     pageContainer = $('#page-container')
-
-    addFriends()
+    chatheading = $('#chat-heading')
 
     getUsername()
+
+    addFriends()
     
     sendButton.on('click', () => {
         console.log("Send button clicked.");
-        socket.emit('new_message', {message : message.val()})
+        socket.emit('new_message', {message : messageField.val()})
     })
 
     // Create Chat button clicked
     createChatBtn.on('click', () => {
         console.log("Create chat button clicked.")
+        userList.push(newUserName.val())
         chatList.append('<button type="button" id="usernameid" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
-
-        // chatList.append('<a href="#" id="usernameid" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action bg-light">' + newUserName.val() + '</a>')
+        
         fs.appendFile("user-list", newUserName.val() + '\n', (err) => {
             if(err){
                 console.log("An error ocurred creating the file "+ err.message)
             }
             console.log("User file has succesfully been created.");
         })
-        pageContainer.prepend('<section class="chatroom" id="' + newUserName.val() + 'Chatroom"><section id="' + newUserName.val() + 'Feedback"></section></section>')  
-        chatroom = $('#' + newUserName.val() + 'Chatroom')
-        feedback = $('#' + newUserName.val() + 'Feedback')  
-        // hide all chatrooms except this one
+
+        friendClickedOn = newUserName.val()
+
+        let nameWithoutSpace = newUserName.val().split(" ").join("")
+        pageContainer.prepend('<section class="chatroom" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')  
+
+        userList.forEach(user => {
+            let nameWithoutSpaceInLoop = user.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+            feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
+            chatroom.hide()
+        });
+
+        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        feedback = $('#' + nameWithoutSpace + 'Feedback')          
+        chatroom.show()
+        chatheading.html(newUserName.val())
     })
 });
 
 function buttonClicked(name) {
+    friendClickedOn = name;
     console.log("Clicked on: " + name);
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
+        chatroom.hide()
+    });
+    let nameWithoutSpace = name.split(" ").join("")
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    feedback = $('#' + nameWithoutSpace + 'Feedback')          
+    chatroom.show()
+    chatheading.html(name)
+}
+
+function addMessages() {
+    messageField.val('');
+
+    fs.readFile('messages', 'utf-8', (err, data) => {
+        dataObj = JSON.parse(data);
+        // while (username === undefined) {
+        //     setTimeout(() => {}, 20)
+        // }
+        console.log("Username from addMessages function is " + username);
+        console.log("Data is " + dataObj[username]);
+        messageArr = dataObj["Pranav"];
+        messageArr.forEach(message => {
+            let nameWithoutSpace = message.to.split(" ").join("")
+            console.log("Name without space is " + nameWithoutSpace);
+            let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+        });
+    })
 }
 
 function addFriends() {
@@ -83,24 +139,71 @@ function addFriends() {
         output: process.stdout, 
         terminal: false
     }); 
+
     file.on('line', (line) => { 
         console.log(line); 
-        pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + line + 'Chatroom"><section id="' + line + 'Feedback"></section></section>')    
-        // chatList.append('<a href="#" id="usernameid" data-username="' + line + '" class="list-group-item list-group-item-action bg-light">' + line + '</a>')
+        userList.push(line)
+        let nameWithoutSpaceInLoop = line.split(" ").join("") 
+        pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')    
         chatList.append('<button type="button" onclick="buttonClicked(\'' + line + '\')" id="usernameid" data-username="' + line + '" class="list-group-item list-group-item-action">' + line + '</button>')
-        // hide all chatrooms 
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
+        chatroom.hide()   
+        console.log('First element is ' + userList[0])
+        let nameWithoutSpace = userList[0].split(" ").join("")
+        let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        firstChatroom.show()
+        chatheading.html(userList[0])
+        friendClickedOn = userList[0];
     }); 
 }
 
 //Listen on new_message
 socket.on("new_message", (data) => {
     feedback.html('');
-    message.val('');
+    messageField.val('');
+    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    console.log("Friend which user is messagin is " + friendClickedOn);
     chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
+    var currentdate = new Date(); 
+    var time = currentdate.getDate() + "/" 
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+    message = {
+        sender: data.username,
+        message: data.message,
+        to: friendClickedOn,
+        time: time
+    }
+
+    let messageHistory = messages[data.username]
+
+    if (messageHistory === undefined) {
+        messageHistory = []
+    }
+
+    messageHistory.push(message)
+
+    messages[data.username] = messageHistory
+
+    let messagejson = JSON.stringify(messages)
+
+    console.log("Messages is " + messagejson); 
+
+    console.log("Writing file from messages dictionary");
+    
+    fs.writeFile("messages", messagejson, (err) => {
+        if(err) {
+            console.log("An error ocurred creating the file "+ err.message)
+        }
+        console.log("User file has succesfully been created.");
+      })
 })
 
 //Emit typing
-message.bind("keypress", () => {
+messageField.bind("keypress", () => {
     socket.emit('typing')
 })
 
@@ -121,11 +224,12 @@ function getUsername() {
             if (doc.exists) {
                 console.log("Document data:", doc.data());
                 let userData = doc.data()
-                let username = userData['username']
+                username = userData['username']
                 console.log("Username is " + username);
                 let nameElement = $('#name')
                 nameElement.text(username)
                 socket.emit('change_username', {username : username}) 
+                addMessages()
             } else {
                 console.log("No such document!");
             }

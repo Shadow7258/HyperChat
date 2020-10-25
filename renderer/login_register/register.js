@@ -15,9 +15,12 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-let db = firebase.firestore();
-let auth = firebase.auth();
+let db, auth;
 
+$(document).ready(function() {
+  db = firebase.firestore();
+  auth = firebase.auth();
+})
 
 
 function registerUser(username, email, password, password2)
