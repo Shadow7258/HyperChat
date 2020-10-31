@@ -69,7 +69,7 @@ $(document).ready(function() {
     createChatBtn.on('click', () => {
         console.log("Create chat button clicked.")
         userList.push(newUserName.val())
-        chatList.append('<button type="button" id="usernameid" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
+        chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
         
         fs.appendFile("user-list", newUserName.val() + '\n', (err) => {
             if(err){
@@ -122,7 +122,6 @@ function addMessages() {
         //     setTimeout(() => {}, 20)
         // }
         console.log("Username from addMessages function is " + username);
-        console.log("Data is " + dataObj[username]);
         messageArr = dataObj["Pranav"];
         messageArr.forEach(message => {
             let nameWithoutSpace = message.to.split(" ").join("")
@@ -141,11 +140,13 @@ function addFriends() {
     }); 
 
     file.on('line', (line) => { 
+        socket.emit('is_online', {username: line})
         console.log(line); 
         userList.push(line)
         let nameWithoutSpaceInLoop = line.split(" ").join("") 
         pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')    
-        chatList.append('<button type="button" onclick="buttonClicked(\'' + line + '\')" id="usernameid" data-username="' + line + '" class="list-group-item list-group-item-action">' + line + '</button>')
+        chatList.append('<button style="padding-right: 5px" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + line + '_id" data-username="'
+         + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" class="badge badge-success">' + status + '</span></button>')
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
         chatroom.hide()   
@@ -157,6 +158,24 @@ function addFriends() {
         friendClickedOn = userList[0];
     }); 
 }
+
+//Listen on user status
+socket.on('is_online', (data) => {
+    let status = "offline"
+    console.log(data.username + "'s status is " + data.status);
+    let usernameidbtn = $('#' + data.username + '_id')
+    let statusSpan = usernameidbtn.find('span')
+    if (data.status == true) {
+        status = "online"
+        statusSpan.removeClass("badge-danger")
+        statusSpan.addClass("badge-success")
+    }
+    else {
+        statusSpan.removeClass("badge-success")
+        statusSpan.addClass("badge-danger")
+    }
+    statusSpan.text(status)
+})
 
 //Listen on new_message
 socket.on("new_message", (data) => {
@@ -229,6 +248,7 @@ function getUsername() {
                 let nameElement = $('#name')
                 nameElement.text(username)
                 socket.emit('change_username', {username : username}) 
+                socket.emit('user_online', {username : username})
                 addMessages()
             } else {
                 console.log("No such document!");
