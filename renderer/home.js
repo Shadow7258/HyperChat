@@ -18,7 +18,7 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 
-var email, socket, friendClickedOn;
+var socket, friendClickedOn;
 socket = io.connect('http://localhost:3000')
 
 
@@ -40,7 +40,7 @@ let message = {
     time: ""
 }
 
-let userList = [], messages = {};
+let userList = [], messages = [];
 
 remote.getCurrentWindow().on('close', () => {
     socket.emit('logout', {username: username})
@@ -81,7 +81,10 @@ $(document).ready(function() {
     
     sendButton.on('click', () => {
         console.log("Send button clicked.");
-        socket.emit('new_message', {message : messageField.val()})
+        feedback.html('');
+        // socket.emit('new_message', {message : messageField.val()})
+        socket.emit('send_message', {username: username, to: friendClickedOn, message: messageField.val()})
+        messageField.val('');
     })
 
     // Save changes button clicked
@@ -123,6 +126,19 @@ $(document).ready(function() {
         chatroom.show()
         chatheading.html(newUserName.val())
     })
+
+    //Emit typing
+    messageField.bind("keypress", () => {
+        var searchTimeout;
+        console.log("I am typing");
+        socket.emit('typing', {username: username, to: friendClickedOn})
+        if (searchTimeout != undefined) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            console.log("Stopped typing");
+            socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+        }, 4000);
+    })
+
 });
 
 function buttonClicked(name) {
@@ -142,16 +158,19 @@ function buttonClicked(name) {
 }
 
 function addMessages() {
-    messageField.val('');
-
     fs.readFile('messages', 'utf-8', (err, data) => {
-        dataObj = JSON.parse(data);
-        messageArr = dataObj["Pranav"];
-        messageArr.forEach(message => {
-            let nameWithoutSpace = message.to.split(" ").join("")
+        if (data) {
+            dataObj = JSON.parse(data);
+            messages = dataObj;
+            console.log("Data is " + JSON.stringify(dataObj));
+            messageArr = dataObj;
+            let nameWithoutSpace = friendClickedOn.split(" ").join("")
             let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-        });
+            messageArr.forEach(message => {
+                console.log( message.sender + ": " + message.message);
+                chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+            });
+        }
     })
 }
 
@@ -198,9 +217,8 @@ socket.on('is_online', (data) => {
 })
 
 //Listen on new_message
-socket.on("new_message", (data) => {
+socket.on("message_sent", (data) => {
     feedback.html('');
-    messageField.val('');
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
@@ -212,38 +230,37 @@ socket.on("new_message", (data) => {
     message = {
         sender: data.username,
         message: data.message,
-        to: friendClickedOn,
+        to: data.to,
         time: time
     }
 
-    let messageHistory = messages[data.username]
+    messages.push(message)
 
-    if (messageHistory === undefined) {
-        messageHistory = []
-    }
-
-    messageHistory.push(message)
-
-    messages[data.username] = messageHistory
-
-    let messagejson = JSON.stringify(messages)
+    if (messages) {
+        let messagejson = JSON.stringify(messages)
     
-    fs.writeFile("messages", messagejson, (err) => {
-        if(err) {
-            console.log("An error ocurred creating the file "+ err.message)
-        }
-        console.log("User file has succesfully been created.");
-      })
-})
-
-//Emit typing
-messageField.bind("keypress", () => {
-    socket.emit('typing')
+        console.log("Messages2 is " + messagejson);
+        
+        fs.writeFile("messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
 })
 
 //Listen on typing
 socket.on('typing', (data) => {
+    let nameWithoutSpace = data.username.split(' ').join('');
+    console.log("Recieving typing message from " + nameWithoutSpace);
+    feedback = $('#' + nameWithoutSpace + 'Feedback') 
     feedback.html("<p><i>" + data.username + " is typing a message..." + "</i></p>")
+})
+
+//Listen on stopped typing
+socket.on('stopped_typing', () => {
+    feedback.html('')
 })
 
 function logout() {
@@ -263,6 +280,7 @@ function getUsername() {
                 let statusElement = $('#status-message')
                 statusElement.text('Online')
                 socket.emit('change_username', {username : username}) 
+                console.log("Confirming that user is online");
                 socket.emit('user_online', {username : username})
                 addMessages()
             } else {
