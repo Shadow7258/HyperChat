@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron')
+const { ipcRenderer, remote } = require('electron')
 const firebase = require('firebase')
 const fs = require('fs')
 const readline = require('readline')
@@ -30,6 +30,7 @@ let newUserName = $('#newUserName')
 let pageContainer = $('#page-container')
 let chatroom, feedback
 let chatheading = $('#chat-heading')
+let saveChangesBtn = $('#saveChangesBtn')
 let username
 
 let message = {
@@ -41,13 +42,30 @@ let message = {
 
 let userList = [], messages = {};
 
+remote.getCurrentWindow().on('close', () => {
+    socket.emit('logout', {username: username})
+});
+
 ipcRenderer.on('email', (e, arg) => {
     console.log("Email received: " + arg);
     email = arg;
 })
 
+ipcRenderer.on('status_idle', () => {
+    console.log("Setting status to idle");
+    let statusElement = $('#status-message')
+    statusElement.text('Idle')
+    socket.emit('change_status', {username: username, status: 'idle'})
+})
+
+ipcRenderer.on('status_online', () => {
+    console.log("Setting status to online");
+    let statusElement = $('#status-message')
+    statusElement.text('Online')
+    socket.emit('change_status', {username: username, status: 'online'})
+})
+
 $(document).ready(function() {
-    console.log("User connected " + socket.username)
     messageField = $('#message-field')
     sendButton = $('#send-button')
     createChatBtn = $('#createChatBtn')
@@ -55,6 +73,7 @@ $(document).ready(function() {
     newUserName = $('#newUserName')
     pageContainer = $('#page-container')
     chatheading = $('#chat-heading')
+    saveChangesBtn = $('#saveChangesBtn')
 
     getUsername()
 
@@ -63,6 +82,15 @@ $(document).ready(function() {
     sendButton.on('click', () => {
         console.log("Send button clicked.");
         socket.emit('new_message', {message : messageField.val()})
+    })
+
+    // Save changes button clicked
+    saveChangesBtn .on('click', () => {
+        let optionClicked = $('#inputGroupSelect01')
+        console.log("Option clicked is " + optionClicked.val());
+        let statusElement = $('#status-message')
+        statusElement.text(optionClicked.val())
+        socket.emit('change_status', {username: username, status: optionClicked.val()})
     })
 
     // Create Chat button clicked
@@ -118,14 +146,9 @@ function addMessages() {
 
     fs.readFile('messages', 'utf-8', (err, data) => {
         dataObj = JSON.parse(data);
-        // while (username === undefined) {
-        //     setTimeout(() => {}, 20)
-        // }
-        console.log("Username from addMessages function is " + username);
         messageArr = dataObj["Pranav"];
         messageArr.forEach(message => {
             let nameWithoutSpace = message.to.split(" ").join("")
-            console.log("Name without space is " + nameWithoutSpace);
             let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
             chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
         });
@@ -141,7 +164,6 @@ function addFriends() {
 
     file.on('line', (line) => { 
         socket.emit('is_online', {username: line})
-        console.log(line); 
         userList.push(line)
         let nameWithoutSpaceInLoop = line.split(" ").join("") 
         pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')    
@@ -150,7 +172,6 @@ function addFriends() {
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
         chatroom.hide()   
-        console.log('First element is ' + userList[0])
         let nameWithoutSpace = userList[0].split(" ").join("")
         let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
         firstChatroom.show()
@@ -162,7 +183,6 @@ function addFriends() {
 //Listen on user status
 socket.on('is_online', (data) => {
     let status = "offline"
-    console.log(data.username + "'s status is " + data.status);
     let usernameidbtn = $('#' + data.username + '_id')
     let statusSpan = usernameidbtn.find('span')
     if (data.status == true) {
@@ -183,7 +203,6 @@ socket.on("new_message", (data) => {
     messageField.val('');
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    console.log("Friend which user is messagin is " + friendClickedOn);
     chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
     var currentdate = new Date(); 
     var time = currentdate.getDate() + "/" 
@@ -208,10 +227,6 @@ socket.on("new_message", (data) => {
     messages[data.username] = messageHistory
 
     let messagejson = JSON.stringify(messages)
-
-    console.log("Messages is " + messagejson); 
-
-    console.log("Writing file from messages dictionary");
     
     fs.writeFile("messages", messagejson, (err) => {
         if(err) {
@@ -232,21 +247,21 @@ socket.on('typing', (data) => {
 })
 
 function logout() {
+    socket.emit('logout', {username: username})
     console.log("Logging out");
     ipcRenderer.send('logout');
 }
 
 function getUsername() {
     fs.readFile('logged-in', 'utf-8', (err, data) => {
-        console.log("Email is " + data);
         db.collection('users').doc(data).get().then(function(doc) {
             if (doc.exists) {
-                console.log("Document data:", doc.data());
                 let userData = doc.data()
                 username = userData['username']
-                console.log("Username is " + username);
                 let nameElement = $('#name')
                 nameElement.text(username)
+                let statusElement = $('#status-message')
+                statusElement.text('Online')
                 socket.emit('change_username', {username : username}) 
                 socket.emit('user_online', {username : username})
                 addMessages()

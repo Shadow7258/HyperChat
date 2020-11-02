@@ -4,6 +4,7 @@ const windowStateKeeper = require('electron-window-state');
 const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 const fs = require('fs');
+// const { ipcRenderer } = require('electron/renderer');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -119,6 +120,29 @@ function onReady()
 
   mainWindow.resizable = true;
 
+  let focused = true;
+  let focusedTimeout = null;
+
+  mainWindow.on('blur', () => {
+    focused = false;
+    focusedTimeout = setTimeout(() => {
+      console.log("Set status to idle");
+      mainWindow.webContents.send('status_idle', {})
+    }, 5000)
+    console.log("Window is unfocused: ");
+  })
+
+  mainWindow.on('focus', () => {
+    focused = true;
+    if (focusedTimeout) {
+      clearTimeout(focusedTimeout)
+      console.log("Change status to online");
+      mainWindow.webContents.send('status_online', {})
+    }
+    focusedTimeout  = null;
+    console.log("Window is focused: ");
+  })
+  
   fs.readFile('logged-in', 'utf-8', (err, data) => {
     if(err) {
       createLoginWindow()
@@ -155,6 +179,7 @@ app.on('ready', onReady)
 // Quit when all windows are closed - (Not macOS - Darwin)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
+  console.log("All windows are closed");
 })
 
 // When app icon is clicked and app is running, (macOS) recreate the BrowserWindow

@@ -46,7 +46,7 @@
                             <h5 id="name" class="mb-1">Name</h5>
                             <button class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
                         </div>
-                        <small>Status message</small>
+                        <small id="status-message">Status message</small>
                     </a>
                 </div>                    
             </div>
@@ -76,9 +76,20 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title" style="text-align:center;">Settings</h5><br>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                      <label class="input-group-text" for="inputGroupSelect01">Change Status</label>
+                                    </div>
+                                    <select class="custom-select" id="inputGroupSelect01">
+                                      <option value="Online">Online</option>
+                                      <option value="Do not disturb">Do not disturb</option>
+                                      <option value="Idle">Idle</option>
+                                      <option value="Invisible">Invisible</option>
+                                    </select>
+                                  </div>                             
                                 <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
                                 <div style="text-align: center">
-                                    <button class="btn btn-info" data-dismiss="modal">Save Changes</button>
+                                    <button id="saveChangesBtn" class="btn btn-info" data-dismiss="modal">Save Changes</button>
                                 </div>
                             </div>
                         </div>
