@@ -79,22 +79,14 @@ function createUserFile(email)
 
 function createHomeWindow()
 {
-  let homeWindowState = windowStateKeeper({
-    defaultWidth: 986,
-    defaultHeight: 693
-  });
-
   mainWindow.setSize(986, 720)
   mainWindow.setMinimumSize(986, 710)
-  mainWindow.setPosition(homeWindowState.x, homeWindowState.y)
 
   mainWindow.resizable = true;
 
   mainWindow.loadFile('renderer/home.html');
 
   mainWindow.webContents.openDevTools();
-
-  homeWindowState.manage(mainWindow);
 }
 
 

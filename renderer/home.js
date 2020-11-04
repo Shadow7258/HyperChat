@@ -143,7 +143,7 @@ $(document).ready(function() {
 
     //on keydown, clear the countdown 
     messageField.on('keydown', function () {
-        console.log("I am typing");
+        console.log("I: " + username + " am typing to " + friendClickedOn);
         socket.emit('typing', {username: username, to: friendClickedOn})
         clearTimeout(typingTimer);
     });
@@ -301,7 +301,7 @@ socket.on("message_sent", (data) => {
 })
 
 //Listen on typing
-socket.on('typing', (data) => {
+socket.on('receive_typing', (data) => {
     let nameWithoutSpace = data.username.split(' ').join('');
     console.log("Recieving typing message from " + nameWithoutSpace);
     feedback = $('#' + nameWithoutSpace + 'Feedback') 
