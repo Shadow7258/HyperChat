@@ -1,7 +1,6 @@
 
-const { remote } = require('electron');
 const { ipcRenderer } = require('electron')
-const dialog = require('electron').remote;
+const { dialog, remote } = require('electron').remote;
 const firebase = require('firebase')
 const storage = require('firebase/storage')
 const fs = require('fs')
@@ -21,12 +20,18 @@ firebase.initializeApp(firebaseConfig);
 
 let db, auth, storageRef;
 
+let registerButton = $('#registerButton')
+let confirmpassword = $('#confirmpassword')
+let password = $('#password')
+let email = $('#email')
+let username = $('#username')
+
 $(document).ready(function() {
   db = firebase.firestore();
   auth = firebase.auth();
   storageRef = firebase.storage().ref();
   
-  ipcRenderer.send('choose_image')
+  // ipcRenderer.send('choose_image')
 })
 
 ipcRenderer.on('receive_image', (e, args) => {
@@ -46,10 +51,15 @@ function saveProfilePic(path) {
   })
 }
 
-function registerUser(username, email, password, password2)
-{
+registerButton.on('click', () => {
+  registerButton = $('#registerButton').val();
+  confirmpassword = $('#confirmpassword').val();
+  password = $('#password').val();
+  email = $('#email').val();
+  username = $('#username').val();
+  console.log("Email is " + email + ", password is " + password + ", conform password is " + confirmpassword);
   console.log("Register button clicked!");
-  if (validateUser(username, email, password, password2) == null)
+  if (validateUser(username, email, password, confirmpassword) == null)
   {
     console.log("User validated!");
     console.log("Registering user..")
@@ -64,9 +74,31 @@ function registerUser(username, email, password, password2)
   else 
   {
     console.log("Validation failed!");
-    dialog.showErrorBox("Error!", validateUser(username, email, password, password2));
+    dialog.showErrorBox("Error!", validateUser(username, email, password, confirmpassword));
   }
-}
+})
+
+// function registerUser(username, email, password, password2)
+// {
+//   console.log("Register button clicked!");
+//   if (validateUser(username, email, password, password2) == null)
+//   {
+//     console.log("User validated!");
+//     console.log("Registering user..")
+//     auth.createUserWithEmailAndPassword(email, password).then(() => {
+//       console.log("User created!");
+//       saveUserData(username, email);       
+//     }).catch(function(error) {
+//       console.log("Error while creating user: " + error.message);
+//       dialog.showErrorBox("Error!", error.message);
+//     });
+//   }
+//   else 
+//   {
+//     console.log("Validation failed!");
+//     dialog.showErrorBox("Error!", validateUser(username, email, password, password2));
+//   }
+// }
 
 function validateUser(username, email, password, password2)
 {

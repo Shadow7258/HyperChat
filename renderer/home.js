@@ -133,19 +133,19 @@ $(document).ready(function() {
     //Emit typing
     var typingTimer;
 
-    message.on('keyup', function () {
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-        console.log("Stopped typing");
-        socket.emit('stopped_typing', {username: username, to: friendClickedOn})
-    }, 3000)
+    messageField.on('keyup', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            console.log("Stopped typing");
+            socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+        }, 3000)
     });
 
     //on keydown, clear the countdown 
-    message.on('keydown', function () {
-    console.log("I am typing");
-    socket.emit('typing', {username: username, to: friendClickedOn})
-    clearTimeout(typingTimer);
+    messageField.on('keydown', function () {
+        console.log("I am typing");
+        socket.emit('typing', {username: username, to: friendClickedOn})
+        clearTimeout(typingTimer);
     });
 });
 
