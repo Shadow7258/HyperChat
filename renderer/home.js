@@ -131,6 +131,7 @@ $(document).ready(function() {
     })
 
     //Emit typing
+<<<<<<< HEAD
     var typingTimer;
 
     message.on('keyup', function () {
@@ -147,6 +148,18 @@ $(document).ready(function() {
     socket.emit('typing', {username: username, to: friendClickedOn})
     clearTimeout(typingTimer);
     });
+=======
+    messageField.bind("keypress", () => {
+        var searchTimeout;
+        console.log("I am typing");
+        socket.emit('typing', {username: username, to: friendClickedOn})
+        if (searchTimeout != undefined) clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            console.log("Stopped typing");
+            socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+        }, 4000);
+    })
+>>>>>>> 11b07453d6c46f906d1752ec1fc3fae7677e002e
 
 });
 
