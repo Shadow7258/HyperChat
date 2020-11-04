@@ -1,9 +1,10 @@
 // Modules
-const {app, BrowserWindow, globalShortcut, Menu, Tray, screen, ipcMain} = require('electron');
+const {app, BrowserWindow, globalShortcut, Menu, Tray, screen, ipcMain, dialog} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 const fs = require('fs');
+const { defaultApp } = require('process');
 // const { ipcRenderer } = require('electron/renderer');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -28,6 +29,19 @@ ipcMain.on('logout', () => {
     }
     console.log("File removed");
     createLoginWindow()
+  })
+})
+
+ipcMain.on('choose_image', (e) => {
+  console.log("Choosing profile picture now");
+  dialog.showOpenDialog(mainWindow, {
+    buttonLabel: "Choose Image",
+    defaultPath: app.getPath('pictures'),
+    properties: ['openFile'],
+    filters: [{ name: "Images", extensions: ["png","jpg","jpeg"] }]
+  }).then((result) => {
+    console.log(result);
+    e.reply('receive_image', result)
   })
 })
 
@@ -126,21 +140,17 @@ function onReady()
   mainWindow.on('blur', () => {
     focused = false;
     focusedTimeout = setTimeout(() => {
-      console.log("Set status to idle");
       mainWindow.webContents.send('status_idle', {})
     }, 5000)
-    console.log("Window is unfocused: ");
   })
 
   mainWindow.on('focus', () => {
     focused = true;
     if (focusedTimeout) {
       clearTimeout(focusedTimeout)
-      console.log("Change status to online");
       mainWindow.webContents.send('status_online', {})
     }
     focusedTimeout  = null;
-    console.log("Window is focused: ");
   })
   
   fs.readFile('logged-in', 'utf-8', (err, data) => {

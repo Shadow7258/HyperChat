@@ -1,6 +1,10 @@
-const firebase = require('firebase')
-const { dialog } = require('electron').remote;
+
+const { remote } = require('electron');
 const { ipcRenderer } = require('electron')
+const dialog = require('electron').remote;
+const firebase = require('firebase')
+const storage = require('firebase/storage')
+const fs = require('fs')
 
 const firebaseConfig = {
   apiKey: "AIzaSyBplQzncuIsYut1Pp7p8rox8f6O5mG8tow",
@@ -15,13 +19,32 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-let db, auth;
+let db, auth, storageRef;
 
 $(document).ready(function() {
   db = firebase.firestore();
   auth = firebase.auth();
+  storageRef = firebase.storage().ref();
+  
+  ipcRenderer.send('choose_image')
 })
 
+ipcRenderer.on('receive_image', (e, args) => {
+  console.log("Received profile pic from main process: " + JSON.stringify(args["filePaths"]));
+  saveProfilePic(args["filePaths"])
+})
+
+function saveProfilePic(path) {
+  path = "" + path
+  console.log("Path - " + path);
+  // var ImagesRef = storageRef.child('User/ProfilePic');
+  fs.readFile("neon_wolf.jpg", (err, data) => {
+    // if (err !== undefined) {
+      console.log("error is " + err.message);
+    // }
+    console.log("Data is " + data);
+  })
+}
 
 function registerUser(username, email, password, password2)
 {

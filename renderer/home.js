@@ -88,20 +88,23 @@ $(document).ready(function() {
     })
 
     // Save changes button clicked
-    saveChangesBtn .on('click', () => {
+    saveChangesBtn.on('click', () => {
         let optionClicked = $('#inputGroupSelect01')
-        console.log("Option clicked is " + optionClicked.val());
         let statusElement = $('#status-message')
         statusElement.text(optionClicked.val())
-        socket.emit('change_status', {username: username, status: optionClicked.val()})
+        let status = optionClicked.val().toLowerCase()
+        console.log("Option clicked is " + status);
+        socket.emit('change_status', {username: username, status: status})
     })
 
     // Create Chat button clicked
     createChatBtn.on('click', () => {
         console.log("Create chat button clicked.")
         userList.push(newUserName.val())
-        chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
-        
+        socket.emit('get_status', {username: newUserName.val()})
+        // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
+        addChatListToHtml(newUserName.val())
+
         fs.appendFile("user-list", newUserName.val() + '\n', (err) => {
             if(err){
                 console.log("An error ocurred creating the file "+ err.message)
@@ -128,16 +131,22 @@ $(document).ready(function() {
     })
 
     //Emit typing
-    messageField.bind("keypress", () => {
-        var searchTimeout;
-        console.log("I am typing");
-        socket.emit('typing', {username: username, to: friendClickedOn})
-        if (searchTimeout != undefined) clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            console.log("Stopped typing");
-            socket.emit('stopped_typing', {username: username, to: friendClickedOn})
-        }, 4000);
-    })
+    var typingTimer;
+
+    message.on('keyup', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+        console.log("Stopped typing");
+        socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+    }, 3000)
+    });
+
+    //on keydown, clear the countdown 
+    message.on('keydown', function () {
+    console.log("I am typing");
+    socket.emit('typing', {username: username, to: friendClickedOn})
+    clearTimeout(typingTimer);
+    });
 
 });
 
@@ -182,12 +191,14 @@ function addFriends() {
     }); 
 
     file.on('line', (line) => { 
-        socket.emit('is_online', {username: line})
+        socket.emit('get_status', {username: line})
         userList.push(line)
         let nameWithoutSpaceInLoop = line.split(" ").join("") 
+        console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
         pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')    
-        chatList.append('<button style="padding-right: 5px" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + line + '_id" data-username="'
-         + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" class="badge badge-success">' + status + '</span></button>')
+        // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
+        //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
+        addChatListToHtml(line)
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
         chatroom.hide()   
@@ -199,21 +210,60 @@ function addFriends() {
     }); 
 }
 
+function addChatListToHtml(name) {
+    let nameWithoutSpace = name.split(" ").join("") 
+    chatList.append(
+    '<button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' + 
+        '<div class="row">' + 
+            '<div class="col-4">' + 
+                '<img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' + 
+            '</div>' + 
+            '<div class="col-8" style="padding-left: 5px;">' + 
+                '<div class="row">' + name + '</div>' + 
+                '<div class="row">' + 
+                    '<small style="height: 21px; margin-top: -3px;" id="' + nameWithoutSpace + '_statusid" class="text-success"></small>' + 
+                '</div>' + 
+            '</div>' + 
+        '</div>' + 
+    '</button>')
+}
+
+//Listen on other user status change
+socket.on('status_changed', (data) => {
+    console.log("Getting status for " + data.username);
+    socket.emit('get_status', {username: data.username})
+})
+
 //Listen on user status
-socket.on('is_online', (data) => {
-    let status = "offline"
-    let usernameidbtn = $('#' + data.username + '_id')
-    let statusSpan = usernameidbtn.find('span')
-    if (data.status == true) {
-        status = "online"
-        statusSpan.removeClass("badge-danger")
-        statusSpan.addClass("badge-success")
+socket.on('get_status', (data) => {
+    var status, statusCol;
+    let nameWithoutSpace = data.username.split(" ").join("") 
+    console.log("Received status from username: " + nameWithoutSpace);
+    if (data.status === undefined) {
+        status = "offline"
+        statusCol = false;
+    }
+    else if(data.status == "invisible" || data.status == "offline") {
+        status = "offline"
+        statusCol = false;
     }
     else {
-        statusSpan.removeClass("badge-success")
-        statusSpan.addClass("badge-danger")
+        status = data.status;
+        statusCol = true;
     }
-    statusSpan.text(status)
+    let usernameidbtn = $('#' + nameWithoutSpace + '_id')
+    let statusid = $('#' + nameWithoutSpace + '_statusid')
+    let statusSpan = usernameidbtn.find('span')
+    if (statusCol == false) {
+        statusid.removeClass("text-success")
+        statusid.addClass("text-danger")
+    }
+    else {
+        statusid.removeClass("text-danger")
+        statusid.addClass("text-success")
+    }
+    console.log("Status is " + status + " and color is " + statusCol);
+    statusid.text(status)
 })
 
 //Listen on new_message
@@ -227,6 +277,7 @@ socket.on("message_sent", (data) => {
                 + currentdate.getHours() + ":"  
                 + currentdate.getMinutes() + ":" 
                 + currentdate.getSeconds();
+                
     message = {
         sender: data.username,
         message: data.message,

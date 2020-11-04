@@ -27,24 +27,34 @@
                             <h5>Chats</h5>
                         </div>
                         <div class="col-3">
-                            <button id="addUserButton" type="button" data-toggle="modal" data-target="#addUser" style="padding-right: 0%">+</button>
+                            <button id="addUserButton" type="button" data-toggle="modal" data-target="#addUser" style="padding-right: 0%; outline: none;">+</button>
                         </div>
                     </div>
                 </div>
 
-                <div id="chat-list" class="list-group list-group-flush">
-                    <!-- <a href="#" class="list-group-item list-group-item-action bg-light">Chat1</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat2</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat3</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat4</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat5</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-light">Chat6</a> -->
+                <div id="chat-list" class="dropdown list-group list-group-flush">
+                    <!-- <button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action">
+                        <div class="row">
+                            <div class="col-4">
+                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
+                            </div>
+                            <div class="col-8" style="padding-left: 5px;">
+                                <div class="row">
+                                    Test User
+                                </div>
+                                <div class="row">
+                                    <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
+                                </div>
+                            </div>
+                        </div>
+                    </button> -->
                 </div>
+
                 <div class="d-flex justify-content-end" id="bottom">
                     <a href="#" class="list-group-item list-group-item-action active">
-                        <div class="d-flex w-100 justify-content-between">
+                        <div class="d-flex w-100 justify-content-centre">
                             <h5 id="name" class="mb-1">Name</h5>
-                            <button class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
+                            <button style="padding-right: 0px; margin-left: 108px;" class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
                         </div>
                         <small id="status-message">Status message</small>
                     </a>
@@ -118,7 +128,7 @@
         </div>
         <script>
             // You can also require other files to run in this process
-            require('./home.js')
+            // require('./home.js')
         </script>
     </body>
 </html>
