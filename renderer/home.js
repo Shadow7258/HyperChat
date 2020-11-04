@@ -76,14 +76,44 @@ $(document).ready(function() {
     saveChangesBtn = $('#saveChangesBtn')
 
     getUsername()
-
-    addFriends()
     
     sendButton.on('click', () => {
         console.log("Send button clicked.");
         feedback.html('');
         // socket.emit('new_message', {message : messageField.val()})
         socket.emit('send_message', {username: username, to: friendClickedOn, message: messageField.val()})
+        let nameWithoutSpace = friendClickedOn.split(" ").join("") 
+        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        chatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+        var currentdate = new Date(); 
+        var time = currentdate.getDate() + "/" 
+                    + currentdate.getHours() + ":"  
+                    + currentdate.getMinutes() + ":" 
+                    + currentdate.getSeconds();
+                    
+        message = {
+            sender: username,
+            message: messageField.val(),
+            to: friendClickedOn,
+            time: time
+        }
+
+        messages.push(message)
+        console.log("messages array is " + JSON.stringify(messages));
+
+        if (messages) {
+            let messagejson = JSON.stringify(messages)
+        
+            console.log("Messages2 is " + messagejson);
+            
+            fs.writeFile("messages", messagejson, (err) => {
+                if(err) {
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })
+        }
+
         messageField.val('');
     })
 
@@ -172,9 +202,15 @@ function addMessages() {
             messages = dataObj;
             console.log("Data is " + JSON.stringify(dataObj));
             messageArr = dataObj;
-            let nameWithoutSpace = friendClickedOn.split(" ").join("")
-            let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
             messageArr.forEach(message => {
+                let nameWithoutSpace = message.sender.split(" ").join("")
+                console.log("Recepient is " + nameWithoutSpace + " and sender is " + message.sender + " and chatroom id is " + '#' + nameWithoutSpace + 'Chatroom');
+                if (message.sender == username) {
+                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                }
+                else {
+                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                }
                 console.log( message.sender + ": " + message.message);
                 chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
             });
@@ -332,6 +368,7 @@ function getUsername() {
                 socket.emit('change_username', {username : username}) 
                 console.log("Confirming that user is online");
                 socket.emit('user_online', {username : username})
+                addFriends()
                 addMessages()
             } else {
                 console.log("No such document!");
