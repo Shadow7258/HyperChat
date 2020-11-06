@@ -5,6 +5,7 @@ const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 const fs = require('fs');
 const { defaultApp } = require('process');
+  
 // const { ipcRenderer } = require('electron/renderer');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -121,6 +122,7 @@ function onReady()
     width: 800,
     height: 650,
     x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
+    frame: false, titleBarStyle: 'hidden',
     webPreferences: { nodeIntegration: true , enableRemoteModule: true}
   })
 
@@ -160,7 +162,8 @@ function onReady()
 
 function createLoginWindow()
 {
-  mainWindow.setSize(800, 650);
+  // mainWindow.setSize(800, 650)
+  mainWindow.setSize(600, 420);
 
   mainWindow.resizable = false;
 

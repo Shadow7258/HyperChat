@@ -23,9 +23,11 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
+    "custom-electron-titlebar": "^3.2.5",
     "electron-window-state": "^5.0.3",
     "firebase": "^7.24.0",
     "jquery": "^3.5.1",
+    "mongodb": "^3.6.2",
     "mousetrap": "^1.6.5",
     "socket.io": "^2.3.0"
   }

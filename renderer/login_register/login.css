@@ -1,40 +1,70 @@
-.background {
-    background-image: url('../../images/space.gif');
+@font-face {
+  font-family: Karla;
+  src: url(../../Assets/Fonts/Karla-Regular.ttf);
 }
 
-
-label {
-    font-family: sans-serif;
-    font-size: 16px;
-    color: white;
-    padding-left: 2px;
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+  outline: none;
 }
 
-form {
-    padding: 20px;
-    margin-left: 8%;
-    width: 400px;
-    height: 100%;
-    margin-top: 102.75px;
-    background-color: rgb(60, 62, 79);
-    border-radius: 25px;
+html {
+  font-family: Karla;
+  background-image: url("../../images/space.gif");
+  color: #50fa7b;
+}
+
+#emailField {
+  height: 20px;
+  margin-top: 10px;
+  font-family: Karla;
+  border-radius: 10px;
+  border: 2px solid #50fa7b;
+  padding-left: 10px;
+  color: white;
+  background-color: #44475a;
+}
+
+#passwordField {
+  height: 20px;
+  margin-top: 10px;
+  font-family: Karla;
+  margin-left: 50px;
+  border-radius: 10px;
+  border: 2px solid #50fa7b;
+  padding-left: 10px;
+  color: white;
+  background-color: #44475a;
+}
+
+#showButton {
+  border: 2px solid #50fa7b;
+  border-radius: 15px;
+  background-color: #44475a;
+  color: white;
+  font-family: Karla;
+  font-size: 10px;
 }
 
 #loginButton {
-    background-color: rgb(189, 147, 249);
-    border-color: black;
-    width: 35%;
-    height: 36.5px;
+  height: 30px;
+  width: 60px;
+  background-color: rgb(53, 53, 53);
+  border-radius: 7px;
+  border: 2px solid #50fa79; 
+  padding-left: 5px;
+  color: white;
+  font: 8pt Karla;
+  margin-top: 10px;
 }
 
-#registerLink {
-    color: rgb(255, 184, 108);
-}
-
-#Login {
-    font-family: sans-serif;
-    font-size: 27px;
-    color: rgb(255, 184, 108);
-    text-align: center;
-    padding-top: 12px;
+#clicklink {
+  background-color: transparent;
+  color: #9feaf9;
+  display: inline-block;
+  border-width: 0px;
+  margin-top: 10px;
+  font-family: Karla;
 }

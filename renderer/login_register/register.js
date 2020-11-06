@@ -21,16 +21,15 @@ firebase.initializeApp(firebaseConfig);
 let db, auth, storageRef;
 
 let registerButton = $('#registerButton')
-let confirmpassword = $('#confirmpassword')
-let password = $('#password')
-let email = $('#email')
-let username = $('#username')
+let confirmpassword = $('#confirmPasswordField')
+let password = $('#passwordField')
+let email = $('#emailField')
+let username = $('#usernameField')
 
 $(document).ready(function() {
   db = firebase.firestore();
   auth = firebase.auth();
   storageRef = firebase.storage().ref();
-  
   // ipcRenderer.send('choose_image')
 })
 

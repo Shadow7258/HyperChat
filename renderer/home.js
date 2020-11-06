@@ -177,6 +177,10 @@ $(document).ready(function() {
         socket.emit('typing', {username: username, to: friendClickedOn})
         clearTimeout(typingTimer);
     });
+
+    $('#chat-list').on('contextmenu', 'button', (e) => {
+        console.log("ID: " + e.currentTarget.id);
+    });
 });
 
 function buttonClicked(name) {
@@ -185,7 +189,7 @@ function buttonClicked(name) {
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback') 
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
         chatroom.hide()
     });
     let nameWithoutSpace = name.split(" ").join("")
@@ -248,17 +252,25 @@ function addFriends() {
 function addChatListToHtml(name) {
     let nameWithoutSpace = name.split(" ").join("") 
     chatList.append(
-    '<button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' + 
-        '<div class="row">' + 
-            '<div class="col-4">' + 
-                '<img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' + 
+    '<button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action ' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' + 
+        '<div class="row ' + nameWithoutSpace + '_nameclass">' + 
+            '<div class="col-4 ' + nameWithoutSpace + '_nameclass">' + 
+                '<img class="' + nameWithoutSpace + '_nameclass" style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' + 
             '</div>' + 
-            '<div class="col-8" style="padding-left: 5px;">' + 
-                '<div class="row">' + name + '</div>' + 
-                '<div class="row">' + 
-                    '<small style="height: 21px; margin-top: -3px;" id="' + nameWithoutSpace + '_statusid" class="text-success"></small>' + 
+            '<div class="col-6 ' + nameWithoutSpace + '_nameclass" style="padding-left: 5px;">' + 
+                '<div class="row ' + nameWithoutSpace + '_nameclass">' + name + '</div>' + 
+                '<div class="row ' + nameWithoutSpace + '_nameclass">' + 
+                    '<small style="height: 21px; margin-top: -3px;" id="' + nameWithoutSpace + '_statusid" class="text-success ' + nameWithoutSpace + '_nameclass"></small>' + 
                 '</div>' + 
+            '</div>' +
+            '<div class="col-2 dropdown" style="padding-left: 0px">' + 
+                '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' + 
+                '<div class="dropdown-menu" id="userDropdown">' + 
+                '<a class="dropdown-item" id="removeFriendOption" href="#">Remove Friend</a>' + 
+                '<a class="dropdown-item" href="#">Another action</a>' + 
+                '<a class="dropdown-item" href="#">Something else here</a>' + 
             '</div>' + 
+            '</div>' +   
         '</div>' + 
     '</button>')
 }
@@ -356,6 +368,7 @@ function logout() {
 }
 
 function getUsername() {
+    console.log("Getting username");
     fs.readFile('logged-in', 'utf-8', (err, data) => {
         db.collection('users').doc(data).get().then(function(doc) {
             if (doc.exists) {
