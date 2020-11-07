@@ -1,0 +1,50 @@
+.background {
+    background-image: url('../../images/space.gif');
+}
+
+@font-face {
+    font-family: Karla;
+    src: url(../../Assets/Fonts/Karla-Regular.ttf);
+}
+
+label {
+    font-family: Karla;
+    font-size: 16px;
+    color: white;
+    padding-left: 3px;
+}
+
+#email, #password {
+    border-radius: 13px;
+}
+
+form {
+    padding: 20px;
+    margin-left: 8%;
+    width: 400px;
+    height: 100%;
+    margin-top: 102.75px;
+    background-color: rgb(60, 62, 79);
+    border-radius: 25px;
+}
+
+#loginButton {
+    background-color: rgb(189, 147, 249);
+    width: 35%;
+    height: 36.5px;
+    border: none;
+    padding-bottom: 30px;
+    border-radius: 9px;
+}
+
+#registerLink {
+    color: rgb(255, 184, 108);
+}
+
+#Login {
+    font-family: Karla;
+    font-size: 27px;
+    color: rgb(255, 184, 108);
+    text-align: center;
+    padding-top: 12px;
+}

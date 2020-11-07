@@ -18,7 +18,7 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 
-var socket, friendClickedOn;
+var socket, friendClickedOn, friendRightClickedOn;
 socket = io.connect('http://localhost:3000')
 
 
@@ -135,7 +135,7 @@ $(document).ready(function() {
         // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
         addChatListToHtml(newUserName.val())
 
-        fs.appendFile("user-list", newUserName.val() + '\n', (err) => {
+        fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
             if(err){
                 console.log("An error ocurred creating the file "+ err.message)
             }
@@ -224,7 +224,7 @@ function addMessages() {
 
 function addFriends() {
     const file = readline.createInterface({ 
-        input: fs.createReadStream('user-list'), 
+        input: fs.createReadStream('friend-list'), 
         output: process.stdout, 
         terminal: false
     }); 
@@ -266,13 +266,46 @@ function addChatListToHtml(name) {
             '<div class="col-2 dropdown" style="padding-left: 0px">' + 
                 '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' + 
                 '<div class="dropdown-menu" id="userDropdown">' + 
-                '<a class="dropdown-item" id="removeFriendOption" href="#">Remove Friend</a>' + 
+                '<a class="dropdown-item" id="remove' + nameWithoutSpace + 'Option" onClick="removeFriend(\'' + name + '\')" href="#">Remove Friend</a>' + 
                 '<a class="dropdown-item" href="#">Another action</a>' + 
                 '<a class="dropdown-item" href="#">Something else here</a>' + 
             '</div>' + 
             '</div>' +   
         '</div>' + 
     '</button>')
+}
+
+function removeFriend(name) {
+    console.log("Removing friend " + name);
+    let nameWithoutSpace = name.split(" ").join("") 
+    let user = $('#' + nameWithoutSpace + '_id')
+    user.remove()
+
+    const file = readline.createInterface({ 
+        input: fs.createReadStream('friend-list'), 
+        output: process.stdout, 
+        terminal: false
+    }); 
+
+    file.on('line', (line) => { 
+        if (line != name) { 
+            console.log(line);        
+
+            fs.writeFile("friend-list", "", (err) => {
+                if(err) {
+                    console.log("An error ocurred removing the file "+ err.message)
+                }
+                console.log("User file has succesfully been removed.");
+            })
+    
+            fs.appendFile("friend-list", line + '\n', (err) => {
+                if(err){
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })  
+        }        
+    });
 }
 
 //Listen on other user status change
