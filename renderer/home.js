@@ -2,6 +2,8 @@ const { ipcRenderer, remote } = require('electron')
 const firebase = require('firebase')
 const fs = require('fs')
 const readline = require('readline')
+const { dialog } = require('electron').remote;
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyBplQzncuIsYut1Pp7p8rox8f6O5mG8tow",
@@ -131,35 +133,62 @@ $(document).ready(function() {
 
     // Create Chat button clicked
     createChatBtn.on('click', () => {
-        console.log("Create chat button clicked.")
-        userList.push(newUserName.val())
-        socket.emit('get_status', {username: newUserName.val()})
-        // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
-        addChatListToHtml(newUserName.val())
-
-        fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
-            if(err){
-                console.log("An error ocurred creating the file "+ err.message)
-            }
-            console.log("User file has succesfully been created.");
-        })
-
-        friendClickedOn = newUserName.val()
-
-        let nameWithoutSpace = newUserName.val().split(" ").join("")
-        pageContainer.prepend('<section class="chatroom" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
-
-        userList.forEach(user => {
-            let nameWithoutSpaceInLoop = user.split(" ").join("")
-            chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-            feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-            chatroom.hide()
-        });
-
-        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-        feedback = $('#' + nameWithoutSpace + 'Feedback')
-        chatroom.show()
-        chatheading.html(newUserName.val())
+        if (userList.includes(newUserName.val())) {
+            console.log("FRIEND ALREADY EXISTS");
+            dialog.showErrorBox("Error!", "Friend alrady exists!");
+        }
+        else {
+            console.log("Create chat button clicked.")
+            userList.push(newUserName.val())
+            socket.emit('get_status', {username: newUserName.val()})
+            // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
+            addChatListToHtml(newUserName.val())
+    
+            fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
+                if(err){
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })
+    
+            friendClickedOn = newUserName.val()
+    
+            let nameWithoutSpace = newUserName.val().split(" ").join("")
+            pageContainer.prepend('<section class="chatroom" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
+    
+            userList.forEach(user => {
+                let nameWithoutSpaceInLoop = user.split(" ").join("")
+                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+                chatroom.hide()
+            });
+    
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            feedback = $('#' + nameWithoutSpace + 'Feedback')
+            chatroom.show()
+            chatheading.html(newUserName.val())
+    
+            fs.readFile('messages', 'utf-8', (err, data) => {
+                if(data) {
+                    let dataObj = JSON.parse(data)
+                    messageArr = dataObj;
+                    messageArr.forEach(message => {
+                        let nameWithoutSpace = message.sender.split(" ").join("")
+                        console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                        if (message.to == newUserName.val() && message.sender == username) {
+                            chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                            console.log( message.sender + ": " + message.message);
+                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                        }
+                        else if (message.sender == newUserName.val() && message.to == username) {
+                            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                            console.log( message.sender + ": " + message.message);
+                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                        }
+                    });
+                }
+            })
+        }
     })
 
     //Emit typing
@@ -210,7 +239,7 @@ function addMessages() {
             messageArr = dataObj;
             messageArr.forEach(message => {
                 let nameWithoutSpace = message.sender.split(" ").join("")
-                console.log("Recepient is " + nameWithoutSpace + " and sender is " + message.sender + " and chatroom id is " + '#' + nameWithoutSpace + 'Chatroom');
+                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
                 if (message.sender == username) {
                     chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
                 }
@@ -232,22 +261,24 @@ function addFriends() {
     });
 
     file.on('line', (line) => {
-        socket.emit('get_status', {username: line})
-        userList.push(line)
-        let nameWithoutSpaceInLoop = line.split(" ").join("")
-        console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
-        pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')
-        // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
-        //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
-        addChatListToHtml(line)
-        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-        chatroom.hide()
-        let nameWithoutSpace = userList[0].split(" ").join("")
-        let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
-        firstChatroom.show()
-        chatheading.html(userList[0])
-        friendClickedOn = userList[0];
+        if (line != "") {
+            socket.emit('get_status', {username: line})
+            userList.push(line)
+            let nameWithoutSpaceInLoop = line.split(" ").join("")
+            console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
+            pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')
+            // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
+            //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
+            addChatListToHtml(line)
+            chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+            feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+            chatroom.hide()
+            let nameWithoutSpace = userList[0].split(" ").join("")
+            let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            firstChatroom.show()
+            chatheading.html(userList[0])
+            friendClickedOn = userList[0];
+        }
     });
 }
 
@@ -282,32 +313,41 @@ function removeFriend(name) {
     let nameWithoutSpace = name.split(" ").join("")
     let user = $('#' + nameWithoutSpace + '_id')
     user.remove()
+    var nextFriend
 
-    const file = readline.createInterface({
-        input: fs.createReadStream('friend-list'),
-        output: process.stdout,
-        terminal: false
-    });
+    var userListTmp = fs.readFileSync('friend-list').toString().split("\n");
 
-    file.on('line', (line) => {
-        if (line != name) {
-            console.log(line);
+    console.log("Array Before is " + userListTmp)
 
-            fs.writeFile("friend-list", "", (err) => {
-                if(err) {
-                    console.log("An error ocurred removing the file "+ err.message)
-                }
-                console.log("User file has succesfully been removed.");
-            })
+    var usernameIndex = userListTmp.indexOf(name);
+    console.log("Next friend is " + userListTmp[usernameIndex + 1]);
+    nextFriend = userListTmp[usernameIndex + 1]
+    userListTmp.splice(usernameIndex, 1);
+    console.log("Array After is " + userListTmp)
 
-            fs.appendFile("friend-list", line + '\n', (err) => {
-                if(err){
-                    console.log("An error ocurred creating the file "+ err.message)
-                }
-                console.log("User file has succesfully been created.");
-            })
+    console.log("Friend to remove is " + name);
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.remove()
+
+    fs.writeFile("friend-list", "", (err) => {
+        if(err) {
+            console.log("An error ocurred removing the file "+ err.message)
         }
-    });
+        console.log("User file has succesfully been removed.");
+    })
+
+    userListTmp.forEach(user => {
+        fs.appendFile("friend-list", user + '\n', (err) => {
+            if(err){
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    })
+
+    setTimeout(() => {
+        buttonClicked(nextFriend)
+    }, 100)
 }
 
 //Listen on other user status change
