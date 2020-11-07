@@ -50,31 +50,34 @@ function saveProfilePic(path) {
   })
 }
 
-registerButton.on('click', () => {
-  registerButton = $('#registerButton').val();
-  confirmpassword = $('#confirmpassword').val();
-  password = $('#password').val();
-  email = $('#email').val();
-  username = $('#username').val();
-  console.log("Email is " + email + ", password is " + password + ", conform password is " + confirmpassword);
-  console.log("Register button clicked!");
-  if (validateUser(username, email, password, confirmpassword) == null)
-  {
-    console.log("User validated!");
-    console.log("Registering user..")
-    auth.createUserWithEmailAndPassword(email, password).then(() => {
-      console.log("User created!");
-      saveUserData(username, email);       
-    }).catch(function(error) {
-      console.log("Error while creating user: " + error.message);
-      dialog.showErrorBox("Error!", error.message);
-    });
-  }
-  else 
-  {
-    console.log("Validation failed!");
-    dialog.showErrorBox("Error!", validateUser(username, email, password, confirmpassword));
-  }
+function registerUser() {
+    confirmpassword = $('#confirmPasswordField').val();
+    password = $('#passwordField').val();
+    email = $('#emailField').val();
+    username = $('#usernameField').val();
+    console.log("Email is " + email + ", password is " + password + ", conform password is " + confirmpassword);
+    console.log("Register button clicked!");
+    if (validateUser(username, email, password, confirmpassword) == null)
+    {
+      console.log("User validated!");
+      console.log("Registering user..")
+      auth.createUserWithEmailAndPassword(email, password).then(() => {
+        console.log("User created!");
+        saveUserData(username, email);
+      }).catch(function(error) {
+        console.log("Error while creating user: " + error.message);
+        dialog.showErrorBox("Error!", error.message);
+      });
+    }
+    else
+    {
+      console.log("Validation failed!");
+      dialog.showErrorBox("Error!", validateUser(username, email, password, confirmpassword));
+    }
+}
+
+$('#registerButton').on('click', () => {
+
 })
 
 // function registerUser(username, email, password, password2)
@@ -86,13 +89,13 @@ registerButton.on('click', () => {
 //     console.log("Registering user..")
 //     auth.createUserWithEmailAndPassword(email, password).then(() => {
 //       console.log("User created!");
-//       saveUserData(username, email);       
+//       saveUserData(username, email);
 //     }).catch(function(error) {
 //       console.log("Error while creating user: " + error.message);
 //       dialog.showErrorBox("Error!", error.message);
 //     });
 //   }
-//   else 
+//   else
 //   {
 //     console.log("Validation failed!");
 //     dialog.showErrorBox("Error!", validateUser(username, email, password, password2));
@@ -101,7 +104,7 @@ registerButton.on('click', () => {
 
 function validateUser(username, email, password, password2)
 {
-  if (username == "" || email == "" || password == "" || password2 == "" ) 
+  if (username == "" || email == "" || password == "" || password2 == "" )
   {
     return "Please fill in all fields.";
   }
@@ -113,7 +116,7 @@ function validateUser(username, email, password, password2)
 }
 
 function saveUserData(username, email)
-{ 
+{
   const userData = {
     username: username,
     email: email
@@ -130,7 +133,3 @@ function saveUserData(username, email)
     dialog.showErrorBox("Error!", err.message);
   });
 }
-
-
-
-

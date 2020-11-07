@@ -5,7 +5,7 @@ const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 const fs = require('fs');
 const { defaultApp } = require('process');
-  
+
 // const { ipcRenderer } = require('electron/renderer');
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -13,7 +13,7 @@ const { defaultApp } = require('process');
 let mainWindow, tray
 
 let trayMenu = Menu.buildFromTemplate([
-  { 
+  {
   label: "Item 1",
     submenu: [
       {role: "quit"},
@@ -91,7 +91,7 @@ function createHomeWindow()
 }
 
 
-function createTray() 
+function createTray()
 {
   tray = new Tray('images/trayTemplate@2x.png')
   tray.setToolTip('Tray details')
@@ -110,19 +110,19 @@ function createTray()
 }
 
 // Create a new BrowserWindow when `app` is ready
-function onReady() 
+function onReady()
 {
   createTray()
 
   globalShortcut.register('Alt+C', () => {
     console.log(screen.getCursorScreenPoint())
   })
-  
+
   mainWindow = new BrowserWindow({
     width: 800,
     height: 650,
     x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
-    frame: false, titleBarStyle: 'hidden',
+    // frame: false, titleBarStyle: 'hidden',
     webPreferences: { nodeIntegration: true , enableRemoteModule: true}
   })
 
@@ -146,7 +146,7 @@ function onReady()
     }
     focusedTimeout  = null;
   })
-  
+
   fs.readFile('logged-in', 'utf-8', (err, data) => {
     if(err) {
       createLoginWindow()
