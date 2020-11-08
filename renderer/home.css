@@ -12,6 +12,14 @@
   margin-top: 10px;
 }
 
+.list-group-item {
+    cursor: pointer;
+}
+
+.list-group-item:active {
+  cursor: move;
+}
+
 #addUserButton {
     border: none;
     background-color: transparent;

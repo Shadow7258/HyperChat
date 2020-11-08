@@ -9,12 +9,20 @@
         </script>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
         <script src="home.js"></script>
 
         <meta charset="UTF-8">
         <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'"> -->
+
+        <script>
+            $( function() {
+              $( "#chat-list" ).sortable();
+            });
+        </script>
 
         <title>Home Screen</title>
     </head>
@@ -36,7 +44,7 @@
                 </div>
 
                 <div id="chat-list" class="dropdown list-group list-group-flush">
-                    <!-- <button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action">
+                    <!-- <div style="padding-right: 5px; outline: none; cursor: move;" type="button" onclick="buttonClicked('User 1')" class="list-group-item list-group-item-action">
                         <div class="row">
                             <div class="col-4">
                                 <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
@@ -58,7 +66,56 @@
                                 </div>
                             </div>
                         </div>
-                    </button> -->
+                    </div>
+
+                    <div style="padding-right: 5px; outline: none; cursor: move;" type="button" class="list-group-item list-group-item-action">
+                        <div class="row">
+                            <div class="col-4">
+                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
+                            </div>
+                            <div class="col-6" style="padding-left: 5px;">
+                                <div class="row">
+                                    Test User 2
+                                </div>
+                                <div class="row">
+                                    <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
+                                </div>
+                            </div>
+                            <div class="col-2 dropdown" style="padding-left: 0px">
+                                <a href="#" style="border: none; padding: 0px;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 10px;"></i></a>
+                                <div class="dropdown-menu" id="userDropdown">
+                                    <a class="dropdown-item" onClick="removeFriend('TestUser')" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                
+                    <div style="padding-right: 5px; outline: none; cursor: move;" type="button" class="list-group-item list-group-item-action">
+                        <div class="row">
+                            <div class="col-4">
+                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
+                            </div>
+                            <div class="col-6" style="padding-left: 5px;">
+                                <div class="row">
+                                    Test User 3
+                                </div>
+                                <div class="row">
+                                    <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
+                                </div>
+                            </div>
+                            <div class="col-2 dropdown" style="padding-left: 0px">
+                                <a href="#" style="border: none; padding: 0px;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 10px;"></i></a>
+                                <div class="dropdown-menu" id="userDropdown">
+                                    <a class="dropdown-item" onClick="removeFriend('TestUser')" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
 
                 <div class="d-flex justify-content-end" id="bottom">
@@ -137,7 +194,7 @@
                 </div>
             </div>
         </div>
-        <script>
+        <script>          
             // You can also require other files to run in this process
             // require('./home.js')
         </script>

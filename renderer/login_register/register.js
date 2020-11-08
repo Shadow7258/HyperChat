@@ -76,32 +76,6 @@ function registerUser() {
     }
 }
 
-$('#registerButton').on('click', () => {
-
-})
-
-// function registerUser(username, email, password, password2)
-// {
-//   console.log("Register button clicked!");
-//   if (validateUser(username, email, password, password2) == null)
-//   {
-//     console.log("User validated!");
-//     console.log("Registering user..")
-//     auth.createUserWithEmailAndPassword(email, password).then(() => {
-//       console.log("User created!");
-//       saveUserData(username, email);
-//     }).catch(function(error) {
-//       console.log("Error while creating user: " + error.message);
-//       dialog.showErrorBox("Error!", error.message);
-//     });
-//   }
-//   else
-//   {
-//     console.log("Validation failed!");
-//     dialog.showErrorBox("Error!", validateUser(username, email, password, password2));
-//   }
-// }
-
 function validateUser(username, email, password, password2)
 {
   if (username == "" || email == "" || password == "" || password2 == "" )

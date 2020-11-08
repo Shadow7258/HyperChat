@@ -4,7 +4,6 @@ const fs = require('fs')
 const readline = require('readline')
 const { dialog } = require('electron').remote;
 
-
 const firebaseConfig = {
     apiKey: "AIzaSyBplQzncuIsYut1Pp7p8rox8f6O5mG8tow",
     authDomain: "rapidcode-98812.firebaseapp.com",
@@ -285,7 +284,7 @@ function addFriends() {
 function addChatListToHtml(name) {
     let nameWithoutSpace = name.split(" ").join("")
     chatList.append(
-    '<button style="padding-right: 5px; outline: none" type="button" class="list-group-item list-group-item-action ' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' +
+    '<div style="padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action ' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' +
         '<div class="row ' + nameWithoutSpace + '_nameclass">' +
             '<div class="col-4 ' + nameWithoutSpace + '_nameclass">' +
                 '<img class="' + nameWithoutSpace + '_nameclass" style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
@@ -305,7 +304,7 @@ function addChatListToHtml(name) {
             '</div>' +
             '</div>' +
         '</div>' +
-    '</button>')
+    '</div>')
 }
 
 function removeFriend(name) {
@@ -313,6 +312,8 @@ function removeFriend(name) {
     let nameWithoutSpace = name.split(" ").join("")
     let user = $('#' + nameWithoutSpace + '_id')
     user.remove()
+    var i = userList.indexOf(name);
+    userList.splice(i, 1);
     var nextFriend
 
     var userListTmp = fs.readFileSync('friend-list').toString().split("\n");
