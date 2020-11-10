@@ -131,6 +131,7 @@ ipcMain.on('uploadImage', (e, data) => {
     var query = { email: data };
     collection.updateOne(filter, field, (err, res) => {
       if (err) throw err;
+      e.reply('imageUpdated')
     })
   });
 })

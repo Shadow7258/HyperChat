@@ -72,7 +72,6 @@ function registerUser() {
       auth.createUserWithEmailAndPassword(email, password).then(() => {
         console.log("User created!");
         saveUserData(username, email);
-        saveProfilePic(path)
       }).catch(function(error) {
         console.log("Error while creating user: " + error.message);
         dialog.showErrorBox("Error!", error.message);
@@ -104,6 +103,7 @@ function saveUserData(username, email)
   ipcRenderer.send('saveUserData', {username: username, email: email});
 
   ipcRenderer.on('savedUserData', () => {
+    saveProfilePic(path)
     console.log("Finished saving data");
     ipcRenderer.send('homePageFromRegister', email);
   })

@@ -478,7 +478,7 @@ function saveProfilePic(path) {
     path = "" + path
     console.log("Path - " + path);
     fs.writeFileSync('profile-pic', path)
-      console.log("User file has succesfully been created.");
+    console.log("User file has succesfully been created.");
     addImage()
 }
 
@@ -490,7 +490,9 @@ function addImage() {
     fs.readFile(imagePath, 'base64', (err, data) => {
         console.log("Image data is " + data);
         ipcRenderer.send('uploadImage', {email: email, image: data})
-        socket.emit('set_profile_pic', username)
+        ipcRenderer.on('imageUpdated', () => {
+            socket.emit('set_profile_pic', username)
+        })
     })
 }
 
