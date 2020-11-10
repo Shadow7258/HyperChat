@@ -21,6 +21,7 @@
         <script>
             $( function() {
               $( "#chat-list" ).sortable();
+              $('#chat-list').disableSelection();
             });
         </script>
 
@@ -47,60 +48,11 @@
                     <!-- <div style="padding-right: 5px; outline: none; cursor: move;" type="button" onclick="buttonClicked('User 1')" class="list-group-item list-group-item-action">
                         <div class="row">
                             <div class="col-4">
-                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
+                                <img id="profile-pic-test" style="border-radius: 50%; width: 40px;" alt="Avatar">
                             </div>
                             <div class="col-6" style="padding-left: 5px;">
                                 <div class="row">
                                     Test User
-                                </div>
-                                <div class="row">
-                                    <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
-                                </div>
-                            </div>
-                            <div class="col-2 dropdown" style="padding-left: 0px">
-                                <a href="#" style="border: none; padding: 0px;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 10px;"></i></a>
-                                <div class="dropdown-menu" id="userDropdown">
-                                    <a class="dropdown-item" onClick="removeFriend('TestUser')" href="#">Action</a>
-                                    <a class="dropdown-item" href="#">Another action</a>
-                                    <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="padding-right: 5px; outline: none; cursor: move;" type="button" class="list-group-item list-group-item-action">
-                        <div class="row">
-                            <div class="col-4">
-                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
-                            </div>
-                            <div class="col-6" style="padding-left: 5px;">
-                                <div class="row">
-                                    Test User 2
-                                </div>
-                                <div class="row">
-                                    <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
-                                </div>
-                            </div>
-                            <div class="col-2 dropdown" style="padding-left: 0px">
-                                <a href="#" style="border: none; padding: 0px;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 10px;"></i></a>
-                                <div class="dropdown-menu" id="userDropdown">
-                                    <a class="dropdown-item" onClick="removeFriend('TestUser')" href="#">Action</a>
-                                    <a class="dropdown-item" href="#">Another action</a>
-                                    <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                
-                    <div style="padding-right: 5px; outline: none; cursor: move;" type="button" class="list-group-item list-group-item-action">
-                        <div class="row">
-                            <div class="col-4">
-                                <img style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">
-                            </div>
-                            <div class="col-6" style="padding-left: 5px;">
-                                <div class="row">
-                                    Test User 3
                                 </div>
                                 <div class="row">
                                     <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
@@ -120,11 +72,22 @@
 
                 <div class="d-flex justify-content-end" id="bottom">
                     <a href="#" class="list-group-item list-group-item-action active">
-                        <div class="d-flex w-100 justify-content-centre">
-                            <h5 id="name" class="mb-1">Name</h5>
-                            <button style="padding-right: 0px; margin-left: 108px; outline: none;" class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
+                        <div style="padding-right: 5px; outline: none;" class="d-flex w-100 justify-content-centre">
+                            <div class="row">
+                                <div class="col-4">
+                                    <img id="profile-pic" style="border-radius: 50%; width: 50px; height: 50px;" alt="Avatar">
+                                </div>
+                                <div class="col-8" style="padding-left: 25px;">
+                                    <div class="row">
+                                        <h5 id="name" class="mb-1">Name</h5>
+                                        <button style="padding-right: 0px; outline: none; margin-left: 45px" class="settingButton" data-toggle="modal" data-target="#settingsModal"><i class="fa fa-cog"></i></button>
+                                    </div>
+                                    <div class="row">
+                                        <small id="status-message">Status message</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <small id="status-message">Status message</small>
                     </a>
                 </div>                    
             </div>
@@ -164,7 +127,8 @@
                                       <option value="Idle">Idle</option>
                                       <option value="Invisible">Invisible</option>
                                     </select>
-                                  </div>                             
+                                </div>                             
+                                <button type="button" class="btn" id="changeProfilePicBtn" onclick="changeProfilePic()">Change Profile Pic</button>
                                 <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
                                 <div style="text-align: center">
                                     <button id="saveChangesBtn" class="btn btn-info" data-dismiss="modal">Save Changes</button>

@@ -6,11 +6,13 @@ const Mousetrap = require('mousetrap');
 const fs = require('fs');
 const { defaultApp } = require('process');
 
-// const { ipcRenderer } = require('electron/renderer');
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow, tray
+
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://Pranav:PranavRocks01@cluster0.nvhen.mongodb.net/HyperChat?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true , useUnifiedTopology: true});
 
 let trayMenu = Menu.buildFromTemplate([
   {
@@ -20,6 +22,58 @@ let trayMenu = Menu.buildFromTemplate([
       {label: "Reload", click() { mainWindow.reload() }}
     ]}
 ])
+
+ipcMain.on('saveUserData', (e, data) => {
+  let username = data.username;
+  let email = data.email;
+  console.log("Username is " + username + " and email is " + email);
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var myobj = { username: username, email: email};
+    collection.insertOne(myobj, function(err, res) {
+      if (err) throw err;
+      console.log("1 document inserted");
+      e.reply('savedUserData')
+      // db.close();
+    });
+    // client.close();
+  });
+})
+
+ipcMain.on('getUsername', (e, data) => {
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { email: data };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let username = obj['username'];
+      console.log(username);
+      e.reply('usernameReceived', username)
+      // db.close();
+    });
+    // client.close();
+  });
+})
+
+ipcMain.on('getUsernameAgain', (e, data) => {
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { email: data };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let username = obj['username'];
+      console.log(username);
+      e.reply('usernameReceivedAgain', username)
+      // db.close();
+    });
+    // client.close();
+  });
+})
 
 ipcMain.on('logout', () => {
   console.log("Logging out");
@@ -31,6 +85,60 @@ ipcMain.on('logout', () => {
     console.log("File removed");
     createLoginWindow()
   })
+})
+
+ipcMain.on('change_image', (e) => {
+  console.log("Choosing profile picture now");
+  dialog.showOpenDialog(mainWindow, {
+    buttonLabel: "Choose Image",
+    defaultPath: app.getPath('pictures'),
+    properties: ['openFile'],
+    filters: [{ name: "Images", extensions: ["png","jpg","jpeg"] }]
+  }).then((result) => {
+    // console.log(result);
+    e.reply('receive_image_change', result)
+  })
+})
+
+ipcMain.on('getImage', (e, data) => {
+  let email = data.email;
+  let username = data.username;
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { email: email };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let image = obj['image'];
+      // console.log("Image is " + image);
+      console.log("RESULT is " + JSON.stringify(result));
+      console.log("Username is " + username);
+      e.reply('imageReceived', {image: image, username: username})
+    });
+  });
+})
+
+ipcMain.on('uploadImage', (e, data) => {
+  console.log("Uploading image");
+  console.log("Email is " + data.email + " and image is " + data.image);
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    const filter = { email: data.email };
+    const field = { $set: {image: data.image} }
+    var query = { email: data };
+    collection.updateOne(filter, field, (err, res) => {
+      if (err) throw err;
+    })
+    // collection.find(query).toArray(function(err, result) {
+    //   if (err) throw err;
+    //   let obj = result[0];
+    //   let username = obj['username'];
+    //   console.log(username);
+    //   e.reply('usernameReceivedAgain', username)
+    // });
+  });
 })
 
 ipcMain.on('choose_image', (e) => {

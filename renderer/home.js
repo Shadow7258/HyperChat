@@ -20,7 +20,7 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore()
 
 var socket, friendClickedOn, friendRightClickedOn;
-socket = io.connect('http://localhost:3000')
+socket = io.connect('http://10.0.0.127:3000')
 
 
 let messageField = $('#message-field')
@@ -32,7 +32,7 @@ let pageContainer = $('#page-container')
 let chatroom, feedback
 let chatheading = $('#chat-heading')
 let saveChangesBtn = $('#saveChangesBtn')
-let username
+let username, email
 
 let message = {
     sender: "",
@@ -142,31 +142,31 @@ $(document).ready(function() {
             socket.emit('get_status', {username: newUserName.val()})
             // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
             addChatListToHtml(newUserName.val())
-    
+
             fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
                 if(err){
                     console.log("An error ocurred creating the file "+ err.message)
                 }
                 console.log("User file has succesfully been created.");
             })
-    
+
             friendClickedOn = newUserName.val()
-    
+
             let nameWithoutSpace = newUserName.val().split(" ").join("")
             pageContainer.prepend('<section class="chatroom" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
-    
+
             userList.forEach(user => {
                 let nameWithoutSpaceInLoop = user.split(" ").join("")
                 chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
                 feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
                 chatroom.hide()
             });
-    
+
             chatroom = $('#' + nameWithoutSpace + 'Chatroom')
             feedback = $('#' + nameWithoutSpace + 'Feedback')
             chatroom.show()
             chatheading.html(newUserName.val())
-    
+
             fs.readFile('messages', 'utf-8', (err, data) => {
                 if(data) {
                     let dataObj = JSON.parse(data)
@@ -211,11 +211,14 @@ $(document).ready(function() {
     $('#chat-list').on('contextmenu', 'button', (e) => {
         console.log("ID: " + e.currentTarget.id);
     });
-});
+
+    let imagePath;
+    imagePath = fs.readFileSync('profile-pic')
+    $('#profile-pic').attr('src', imagePath)});
 
 function buttonClicked(name) {
     friendClickedOn = name;
-    console.log("Clicked on: " + name);
+    console.log("Clicked on " + name);
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
@@ -287,7 +290,7 @@ function addChatListToHtml(name) {
     '<div style="padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action ' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' +
         '<div class="row ' + nameWithoutSpace + '_nameclass">' +
             '<div class="col-4 ' + nameWithoutSpace + '_nameclass">' +
-                '<img class="' + nameWithoutSpace + '_nameclass" style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
+                '<img class="' + nameWithoutSpace + '_nameclass" id="' + nameWithoutSpace + '_pic" style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
             '</div>' +
             '<div class="col-6 ' + nameWithoutSpace + '_nameclass" style="padding-left: 5px;">' +
                 '<div class="row ' + nameWithoutSpace + '_nameclass">' + name + '</div>' +
@@ -437,47 +440,88 @@ socket.on('stopped_typing', () => {
     feedback.html('')
 })
 
+// Listen on change profiel pic
+socket.on('set_profile_pic', (data) => {
+    let email = data.email;
+    let username = data.username;
+    ipcRenderer.send('getImage', {email: email, username: username})
+})
+
+ipcRenderer.on('imageReceived', (e, data) => {
+    let image = data.image;
+    let username = data.username;
+    let nameWithoutSpace = username.split(' ').join('');
+    console.log("Image received " + image);
+    let profilePic = $('#' + nameWithoutSpace + '_pic')
+    var base46Img = 'data:image/jpeg;base64,' + image
+    profilePic.attr('src', base46Img)
+})
+
 function logout() {
     socket.emit('logout', {username: username})
     console.log("Logging out");
     ipcRenderer.send('logout');
 }
 
+function changeProfilePic() {
+    console.log("Changing Profile pic");
+    ipcRenderer.send('change_image')
+    ipcRenderer.on('receive_image_change', (e, args) => {
+        console.log("Received profile pic from main process: " + JSON.stringify(args["filePaths"]));
+        saveProfilePic(args["filePaths"])
+    })
+}
+
+function saveProfilePic(path) {
+    path = "" + path
+    console.log("Path - " + path);
+    fs.writeFileSync('profile-pic', path)
+      console.log("User file has succesfully been created.");
+    addImage()
+}
+
+function addImage() {
+    let imagePath;
+    imagePath = fs.readFileSync('profile-pic')
+    console.log("Image path is " + imagePath);
+    $('#profile-pic').attr('src', imagePath)
+    fs.readFile(imagePath, 'base64', (err, data) => {
+        console.log("Image data is " + data);
+        ipcRenderer.send('uploadImage', {email: email, image: data})
+        socket.emit('set_profile_pic', {email: email, username: username})
+    })
+}
+
 function getUsername() {
     console.log("Getting username");
     fs.readFile('logged-in', 'utf-8', (err, data) => {
-        db.collection('users').doc(data).get().then(function(doc) {
-            if (doc.exists) {
-                let userData = doc.data()
-                username = userData['username']
-                let nameElement = $('#name')
-                nameElement.text(username)
-                let statusElement = $('#status-message')
-                statusElement.text('Online')
-                socket.emit('change_username', {username : username})
-                console.log("Confirming that user is online");
-                socket.emit('user_online', {username : username})
-                addFriends()
-                addMessages()
-            } else {
-                console.log("No such document!");
-            }
-        }).catch(function(error) {
-            console.log("Error getting document:", error);
-        });
+        email = data;
+        ipcRenderer.send('getUsername', data);
+        ipcRenderer.on('usernameReceived', (e, data) => {
+            username = data;
+            let nameElement = $('#name')
+            nameElement.text(username)
+            let statusElement = $('#status-message')
+            statusElement.text('Online')
+            socket.emit('change_username', {username : username})
+            console.log("Confirming that user is online");
+            socket.emit('user_online', {username : username})
+            addFriends()
+            addMessages()
+        })
     })
 }
 
 function getUsers() {
-    console.log("Getting user list from firestore database");
-    db.collection('users').get().then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            let data = doc.data()
-            let username = data['username']
-            // console.log(username);
+    fs.readFile('logged-in', 'utf-8', (err, data) => {
+        email = data;
+        console.log("Getting user list from firestore database");
+        ipcRenderer.send('getUsernameAgain', data);
+        ipcRenderer.on('usernameReceivedAgain', (e, data) => {
+            let username = data;
             users.push(username)
-        });
-        console.log("Users array " + users);
-        socket.emit('get_users', users)
+            console.log("Users array " + users);
+            socket.emit('get_users', users)
+        })
     })
 }

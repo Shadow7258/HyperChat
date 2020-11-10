@@ -1,4 +1,5 @@
 
+const { UV_FS_O_FILEMAP } = require('constants');
 const { ipcRenderer } = require('electron')
 const { dialog, remote } = require('electron').remote;
 const firebase = require('firebase')
@@ -30,7 +31,7 @@ $(document).ready(function() {
   db = firebase.firestore();
   auth = firebase.auth();
   storageRef = firebase.storage().ref();
-  // ipcRenderer.send('choose_image')
+  ipcRenderer.send('choose_image')
 })
 
 ipcRenderer.on('receive_image', (e, args) => {
@@ -41,12 +42,11 @@ ipcRenderer.on('receive_image', (e, args) => {
 function saveProfilePic(path) {
   path = "" + path
   console.log("Path - " + path);
-  // var ImagesRef = storageRef.child('User/ProfilePic');
-  fs.readFile("neon_wolf.jpg", (err, data) => {
-    // if (err !== undefined) {
-      console.log("error is " + err.message);
-    // }
-    console.log("Data is " + data);
+  fs.writeFile('profile-pic', path, (err) => {
+    if(err) {
+      console.log("An error ocurred in creating the file "+ err.message)
+    }
+    console.log("User file has succesfully been created.");
   })
 }
 
@@ -91,19 +91,27 @@ function validateUser(username, email, password, password2)
 
 function saveUserData(username, email)
 {
-  const userData = {
-    username: username,
-    email: email
-  }
+  console.log("Saving user data");
+  ipcRenderer.send('saveUserData', {username: username, email: email});
 
-  console.log("Saving user data.." + JSON.stringify(userData));
-  let userId = email.split('.').join("");
-  console.log("User ID is " + userId);
-
-  db.collection('users').doc(email).set(userData).then( () => {
-    console.log("Finsihed saving data.");
+  ipcRenderer.on('savedUserData', () => {
+    console.log("Finished saving data");
     ipcRenderer.send('homePageFromRegister', email);
-  }).catch( (err) => {
-    dialog.showErrorBox("Error!", err.message);
-  });
+  })
+
+  // const userData = {
+  //   username: username,
+  //   email: email
+  // }
+
+  // console.log("Saving user data.." + JSON.stringify(userData));
+  // let userId = email.split('.').join("");
+  // console.log("User ID is " + userId);
+
+  // db.collection('users').doc(email).set(userData).then( () => {
+  //   console.log("Finsihed saving data.");
+  //   ipcRenderer.send('homePageFromRegister', email);
+  // }).catch( (err) => {
+  //   dialog.showErrorBox("Error!", err.message);
+  // });
 }
