@@ -22,6 +22,7 @@ let db = firebase.firestore()
 var socket, friendClickedOn;
 socket = io.connect('http://10.0.0.127:3000')
 
+var userExists = false;
 
 let messageField = $('#message-field')
 let sendButton = $('#send-button')
@@ -135,6 +136,12 @@ $(document).ready(function() {
         if (userList.includes(newUserName.val())) {
             console.log("FRIEND ALREADY EXISTS");
             dialog.showErrorBox("Error!", "Friend alrady exists!");
+            newUserName.val('')
+        }
+        else if (userExists == false) {
+            console.log("User doesn't exist");
+            dialog.showErrorBox("Error!", "User doesn't exist!");
+            newUserName.val('')
         }
         else {
             console.log("Create chat button clicked.")
@@ -213,9 +220,36 @@ $(document).ready(function() {
         console.log("ID: " + e.currentTarget.id);
     });
 
+    newUserName.on('keyup', function() {
+        // console.log("New user name value is now " + newUserName.val());
+        socket.emit('checkUsers', newUserName.val())
+    });
+
     let imagePath;
     imagePath = fs.readFileSync('profile-pic')
-    $('#profile-pic').attr('src', imagePath)});
+    $('#profile-pic').attr('src', imagePath)
+
+    newUserName.autocomplete({
+        source: users
+    });
+});
+
+socket.on('checkUsers', (exists) => {
+    if (exists == true && !userList.includes(newUserName.val()) && newUserName.val() != username) {
+        console.log("User exits");
+        newUserName.css('border', '2px solid green')
+        newUserName.removeClass('text-danger')
+        newUserName.addClass('text-success')
+        userExists = true;
+    }
+    else {
+        console.log("User doesn't exist");
+        newUserName.css('border', '2px solid red')
+        newUserName.addClass('text-danger')
+        newUserName.removeClass('text-success')
+        userExists = false;
+    }
+})
 
 function buttonClicked(name) {
     friendClickedOn = name;
@@ -453,7 +487,7 @@ ipcRenderer.on('imageReceived', (e, data) => {
     let image = data.image;
     let username = data.username;
     let nameWithoutSpace = username.split(' ').join('');
-    console.log("Image received " + image);
+    // console.log("Image received " + image);
     let profilePic = $('#' + nameWithoutSpace + '_pic')
     var base46Img = 'data:image/jpeg;base64,' + image
     profilePic.attr('src', base46Img)
@@ -519,13 +553,13 @@ function getUsername() {
 function getUsers() {
     fs.readFile('logged-in', 'utf-8', (err, data) => {
         email = data;
-        console.log("Getting user list from firestore database");
-        ipcRenderer.send('getUsernameAgain', data);
-        ipcRenderer.on('usernameReceivedAgain', (e, data) => {
-            let username = data;
-            users.push(username)
-            console.log("Users array " + users);
-            socket.emit('get_users', users)
+        ipcRenderer.send('getAllUsers', email)
+    })
+    ipcRenderer.on('getAllUsers', (e, userArr) => {
+        console.log(JSON.stringify(userArr));
+        userArr.forEach(user => {
+            users.push(user)
         })
+        console.log("Users array is " + users);
     })
 }

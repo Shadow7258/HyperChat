@@ -58,20 +58,22 @@ ipcMain.on('getUsername', (e, data) => {
   });
 })
 
-ipcMain.on('getUsernameAgain', (e, data) => {
+ipcMain.on('getAllUsers', (e) => {
   client.connect((err, db) => {
     if (err) throw err;
     const collection = client.db("HyperChat").collection("Users");
-    var query = { email: data };
-    collection.find(query).toArray(function(err, result) {
+    collection.find().toArray(function(err, result) {
       if (err) throw err;
-      let obj = result[0];
-      let username = obj['username'];
-      console.log(username);
-      e.reply('usernameReceivedAgain', username)
-      // db.close();
+      let users = []
+      // console.log("Result is " + JSON.stringify(result));
+      result.forEach(doc => {
+          let username = doc['username']
+          console.log("USERNAME IS " + username);
+          users.push(username)
+      });
+      console.log("Users is " + users);
+      e.reply('getAllUsers', users)
     });
-    // client.close();
   });
 })
 
@@ -111,7 +113,7 @@ ipcMain.on('getImage', (e, data) => {
       let obj = result[0];
       let image = obj['image'];
       // console.log("Image is " + image);
-      console.log("RESULT is " + JSON.stringify(result));
+      // console.log("RESULT is " + JSON.stringify(result));
       console.log("Username is " + username);
       if (image !== undefined) {
         e.reply('imageReceived', {image: image, username: username})
