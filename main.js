@@ -101,12 +101,11 @@ ipcMain.on('change_image', (e) => {
 })
 
 ipcMain.on('getImage', (e, data) => {
-  let email = data.email;
-  let username = data.username;
+  let username = data;
   client.connect((err, db) => {
     if (err) throw err;
     const collection = client.db("HyperChat").collection("Users");
-    var query = { email: email };
+    var query = { username: username };
     collection.find(query).toArray(function(err, result) {
       if (err) throw err;
       let obj = result[0];
@@ -114,6 +113,26 @@ ipcMain.on('getImage', (e, data) => {
       // console.log("Image is " + image);
       console.log("RESULT is " + JSON.stringify(result));
       console.log("Username is " + username);
+      if (image !== undefined) {
+        e.reply('imageReceived', {image: image, username: username})
+      }
+    });
+  });
+})
+
+ipcMain.on('getFriendsImage', (e, data) => {
+  let username = data;
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { username: username };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let image = obj['image'];
+      // console.log("Image is " + image);
+      // console.log("RESULT is " + JSON.stringify(result));
+      // console.log("Username is " + username);
       e.reply('imageReceived', {image: image, username: username})
     });
   });

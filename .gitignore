@@ -10,7 +10,7 @@ firebase-debug.*.log*
 # Data files
 logged-in
 messages
-user-list
+friend-list
 
 # Firebase cache
 .firebase/

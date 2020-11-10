@@ -82,6 +82,18 @@ input {
   margin-top: 10px;
 }
 
+#setProfilePicButton {
+  height: 30px;
+  width: auto;
+  background-color: rgb(53, 53, 53);
+  border-radius: 7px;
+  border: 2px solid #50fa7b; 
+  padding-left: 5px;
+  color: white;
+  font: 8pt Karla;
+  margin-top: 10px;
+}
+
 #clicklink {
   background-color: transparent;
   color: #9feaf9;

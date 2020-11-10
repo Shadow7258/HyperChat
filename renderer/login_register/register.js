@@ -31,7 +31,6 @@ $(document).ready(function() {
   db = firebase.firestore();
   auth = firebase.auth();
   storageRef = firebase.storage().ref();
-  ipcRenderer.send('choose_image')
 })
 
 ipcRenderer.on('receive_image', (e, args) => {
@@ -48,6 +47,10 @@ function saveProfilePic(path) {
     }
     console.log("User file has succesfully been created.");
   })
+}
+
+function setProfilePic() {
+  ipcRenderer.send('choose_image')
 }
 
 function registerUser() {

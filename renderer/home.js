@@ -19,7 +19,7 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 
-var socket, friendClickedOn, friendRightClickedOn;
+var socket, friendClickedOn;
 socket = io.connect('http://10.0.0.127:3000')
 
 
@@ -142,6 +142,7 @@ $(document).ready(function() {
             socket.emit('get_status', {username: newUserName.val()})
             // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
             addChatListToHtml(newUserName.val())
+            ipcRenderer.send('getImage', newUserName.val())
 
             fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
                 if(err){
@@ -266,6 +267,7 @@ function addFriends() {
         if (line != "") {
             socket.emit('get_status', {username: line})
             userList.push(line)
+            ipcRenderer.send('getImage', line)
             let nameWithoutSpaceInLoop = line.split(" ").join("")
             console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
             pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')
@@ -290,7 +292,7 @@ function addChatListToHtml(name) {
     '<div style="padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action ' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' +
         '<div class="row ' + nameWithoutSpace + '_nameclass">' +
             '<div class="col-4 ' + nameWithoutSpace + '_nameclass">' +
-                '<img class="' + nameWithoutSpace + '_nameclass" id="' + nameWithoutSpace + '_pic" style="border-radius: 50%; width: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
+                '<img class="' + nameWithoutSpace + '_nameclass" id="' + nameWithoutSpace + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
             '</div>' +
             '<div class="col-6 ' + nameWithoutSpace + '_nameclass" style="padding-left: 5px;">' +
                 '<div class="row ' + nameWithoutSpace + '_nameclass">' + name + '</div>' +
@@ -394,6 +396,7 @@ socket.on('get_status', (data) => {
 
 //Listen on new_message
 socket.on("message_sent", (data) => {
+    console.log("Received message from " + data.username);
     feedback.html('');
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
@@ -442,9 +445,8 @@ socket.on('stopped_typing', () => {
 
 // Listen on change profiel pic
 socket.on('set_profile_pic', (data) => {
-    let email = data.email;
-    let username = data.username;
-    ipcRenderer.send('getImage', {email: email, username: username})
+    let username = data;
+    ipcRenderer.send('getImage', username)
 })
 
 ipcRenderer.on('imageReceived', (e, data) => {
@@ -488,7 +490,7 @@ function addImage() {
     fs.readFile(imagePath, 'base64', (err, data) => {
         console.log("Image data is " + data);
         ipcRenderer.send('uploadImage', {email: email, image: data})
-        socket.emit('set_profile_pic', {email: email, username: username})
+        socket.emit('set_profile_pic', username)
     })
 }
 
