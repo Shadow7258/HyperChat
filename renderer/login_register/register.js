@@ -19,7 +19,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-let db, auth, storageRef;
+let db, auth, storageRef, path;
 
 let registerButton = $('#registerButton')
 let confirmpassword = $('#confirmPasswordField')
@@ -35,22 +35,27 @@ $(document).ready(function() {
 
 ipcRenderer.on('receive_image', (e, args) => {
   console.log("Received profile pic from main process: " + JSON.stringify(args["filePaths"]));
-  saveProfilePic(args["filePaths"])
+  // saveProfilePic(args["filePaths"])
+  path = args["filePaths"]
 })
 
 function saveProfilePic(path) {
   path = "" + path
   console.log("Path - " + path);
-  fs.writeFile('profile-pic', path, (err) => {
-    if(err) {
-      console.log("An error ocurred in creating the file "+ err.message)
-    }
-    console.log("User file has succesfully been created.");
+  fs.writeFileSync('profile-pic', path)
+  console.log("Profile pic file has succesfully been created.");
+
+  let email = $('#emailField').val()
+  console.log("Image path is " + path);
+  fs.readFile(path, 'base64', (err, data) => {
+      console.log("Image data is " + data);
+      ipcRenderer.send('uploadImage', {email: email, image: data})
+      // socket.emit('set_profile_pic', username)
   })
 }
 
 function setProfilePic() {
-  ipcRenderer.send('choose_image')
+  ipcRenderer.send('choose_image', $('#emailField').val())
 }
 
 function registerUser() {
@@ -67,6 +72,7 @@ function registerUser() {
       auth.createUserWithEmailAndPassword(email, password).then(() => {
         console.log("User created!");
         saveUserData(username, email);
+        saveProfilePic(path)
       }).catch(function(error) {
         console.log("Error while creating user: " + error.message);
         dialog.showErrorBox("Error!", error.message);

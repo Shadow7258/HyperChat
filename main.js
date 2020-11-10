@@ -120,24 +120,6 @@ ipcMain.on('getImage', (e, data) => {
   });
 })
 
-ipcMain.on('getFriendsImage', (e, data) => {
-  let username = data;
-  client.connect((err, db) => {
-    if (err) throw err;
-    const collection = client.db("HyperChat").collection("Users");
-    var query = { username: username };
-    collection.find(query).toArray(function(err, result) {
-      if (err) throw err;
-      let obj = result[0];
-      let image = obj['image'];
-      // console.log("Image is " + image);
-      // console.log("RESULT is " + JSON.stringify(result));
-      // console.log("Username is " + username);
-      e.reply('imageReceived', {image: image, username: username})
-    });
-  });
-})
-
 ipcMain.on('uploadImage', (e, data) => {
   console.log("Uploading image");
   console.log("Email is " + data.email + " and image is " + data.image);
@@ -150,13 +132,6 @@ ipcMain.on('uploadImage', (e, data) => {
     collection.updateOne(filter, field, (err, res) => {
       if (err) throw err;
     })
-    // collection.find(query).toArray(function(err, result) {
-    //   if (err) throw err;
-    //   let obj = result[0];
-    //   let username = obj['username'];
-    //   console.log(username);
-    //   e.reply('usernameReceivedAgain', username)
-    // });
   });
 })
 
