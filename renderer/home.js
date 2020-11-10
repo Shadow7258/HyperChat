@@ -81,45 +81,12 @@ $(document).ready(function() {
 
     getUsername()
 
-    sendButton.on('click', () => {
-        console.log("Send button clicked.");
-        feedback.html('');
-        // socket.emit('new_message', {message : messageField.val()})
-        socket.emit('send_message', {username: username, to: friendClickedOn, message: messageField.val()})
-        let nameWithoutSpace = friendClickedOn.split(" ").join("")
-        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-        chatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
-        var currentdate = new Date();
-        var time = currentdate.getDate() + "/"
-                    + currentdate.getHours() + ":"
-                    + currentdate.getMinutes() + ":"
-                    + currentdate.getSeconds();
-
-        message = {
-            sender: username,
-            message: messageField.val(),
-            to: friendClickedOn,
-            time: time
+    messageField.on("keyup", (e) => {
+        if (e.key == 'Enter') {
+            console.log("Enter clicked");
+            sendMessage()
         }
-
-        messages.push(message)
-        console.log("messages array is " + JSON.stringify(messages));
-
-        if (messages) {
-            let messagejson = JSON.stringify(messages)
-
-            console.log("Messages2 is " + messagejson);
-
-            fs.writeFile("messages", messagejson, (err) => {
-                if(err) {
-                    console.log("An error ocurred creating the file "+ err.message)
-                }
-                console.log("User file has succesfully been created.");
-            })
-        }
-
-        messageField.val('');
-    })
+    });
 
     // Save changes button clicked
     saveChangesBtn.on('click', () => {
@@ -250,6 +217,46 @@ socket.on('checkUsers', (exists) => {
         userExists = false;
     }
 })
+
+function sendMessage() {
+    console.log("Send button clicked.");
+    feedback.html('');
+    // socket.emit('new_message', {message : messageField.val()})
+    socket.emit('send_message', {username: username, to: friendClickedOn, message: messageField.val()})
+    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    message = {
+        sender: username,
+        message: messageField.val(),
+        to: friendClickedOn,
+        time: time
+    }
+
+    messages.push(message)
+    console.log("messages array is " + JSON.stringify(messages));
+
+    if (messages) {
+        let messagejson = JSON.stringify(messages)
+
+        console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
+
+    messageField.val('');
+}
 
 function buttonClicked(name) {
     friendClickedOn = name;
