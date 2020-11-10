@@ -11,6 +11,7 @@ firebase-debug.*.log*
 logged-in
 messages
 friend-list
+profile-pic
 
 # Firebase cache
 .firebase/
