@@ -27,7 +27,7 @@
             });
         </script>
 
-        <title>Home Screen</title>
+        <!-- <title>Home Screen</title> -->
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -102,11 +102,12 @@
                 </nav>
 
                 <div id="page-container" class="container-fluid">
-                    <div class="input-group mb-3">
-                        <input id="message-field" type="text" class="form-control" placeholder="Enter message" style="border-color: #17a2b8;">
-                        <div class="input-group-append">
-                            <button class="btn btn-info" type="button" id="send-button">Send</button>
-                        </div>
+  
+                </div>
+                <div class="input-group mb-3 d-flex align-items-end">
+                    <input id="message-field" type="text" class="form-control" placeholder="Enter message" style="border-color: #17a2b8;">
+                    <div class="input-group-append">
+                        <button class="btn btn-info" type="button" id="send-image-button"><i class="fa fa-image"></i></button>
                     </div>
                 </div>
             </div>             
@@ -160,7 +161,14 @@
                 </div>
             </div>
         </div>
-        <script>          
+        <script>    
+            const { customTitlebar, Menu, Titlebar, Color, MenuItem } = require('custom-electron-titlebar');
+
+            titleBar = new Titlebar({
+                backgroundColor: Color.fromHex('#282a36'),
+                minimizable: false,
+                itemBackgroundColor: Color.fromHex('#44475a'),
+            })
             // You can also require other files to run in this process
             // require('./home.js')
         </script>

@@ -151,6 +151,19 @@ ipcMain.on('choose_image', (e) => {
   })
 })
 
+ipcMain.on('sendImage', (e) => {
+  console.log("Choosing image to send now");
+  dialog.showOpenDialog(mainWindow, {
+    buttonLabel: "Choose Image",
+    defaultPath: app.getPath('pictures'),
+    properties: ['openFile'],
+    filters: [{ name: "Images", extensions: ["png","jpg","jpeg"] }]
+  }).then((result) => {
+    console.log(result);
+    e.reply('imagePathReceived', result)
+  })
+})
+
 ipcMain.on('homePageFromRegister', (event, arg) => {
   console.log("Creating user file");
   createUserFile(arg)
@@ -227,7 +240,7 @@ function onReady()
     width: 800,
     height: 650,
     x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
-    // frame: false, titleBarStyle: 'hidden',
+    frame: false, titleBarStyle: 'hidden',
     webPreferences: { nodeIntegration: true , enableRemoteModule: true}
   })
 
@@ -269,7 +282,6 @@ function createLoginWindow()
 {
   // mainWindow.setSize(800, 650)
   mainWindow.setSize(600, 420);
-
   mainWindow.resizable = false;
 
   mainWindow.loadFile('renderer/login_register/login.html')

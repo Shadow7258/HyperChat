@@ -56,6 +56,7 @@
 
 #bottom {
   flex: 0 1 40px;
+  padding-bottom: 30px;
 }
 
 #empty {

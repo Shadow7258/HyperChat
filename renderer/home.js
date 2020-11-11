@@ -1,6 +1,7 @@
 const { ipcRenderer, remote } = require('electron')
 const firebase = require('firebase')
-const fs = require('fs')
+const fs = require('fs');
+const { type } = require('os');
 const readline = require('readline')
 const { dialog } = require('electron').remote;
 
@@ -25,7 +26,7 @@ socket = io.connect('http://10.0.0.127:3000')
 var userExists = false;
 
 let messageField = $('#message-field')
-let sendButton = $('#send-button')
+let sendImageButton = $('#send-image-button')
 let createChatBtn = $('#createChatBtn')
 let chatList = $('#chat-list')
 let newUserName = $('#newUserName')
@@ -39,7 +40,8 @@ let message = {
     sender: "",
     message: "",
     to: "",
-    time: ""
+    time: "",
+    type: ""
 }
 
 let userList = [], messages = [], users = [];
@@ -69,7 +71,7 @@ ipcRenderer.on('status_online', () => {
 
 $(document).ready(function() {
     messageField = $('#message-field')
-    sendButton = $('#send-button')
+    sendImageButton = $('#send-image-button')
     createChatBtn = $('#createChatBtn')
     chatList = $('#chat-list')
     newUserName = $('#newUserName')
@@ -87,6 +89,17 @@ $(document).ready(function() {
             sendMessage()
         }
     });
+
+    sendImageButton.on("click", () => {
+        console.log("Sending Image");
+        ipcRenderer.send('sendImage')
+    })
+
+    ipcRenderer.on('imagePathReceived', (e, args) => {
+        let imagePath = args['filePaths']
+        console.log("Image path is " + imagePath);
+        sendImage(imagePath)
+    })
 
     // Save changes button clicked
     saveChangesBtn.on('click', () => {
@@ -218,6 +231,50 @@ socket.on('checkUsers', (exists) => {
     }
 })
 
+function sendImage(imagePath) {
+    feedback.html('');
+    let imagePathString = "" + imagePath;
+
+    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.append("<p class='message'>" + username + ": <img src='" + imagePath + "'> </p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    fs.readFile(imagePathString, 'base64', (err, data) => {
+        console.log("Image to be sent is " + data);
+        message = {
+            sender: username,
+            message: data,
+            to: friendClickedOn,
+            time: time,
+            type: 'image'
+        }
+
+        socket.emit('send_image', {username: username, to: friendClickedOn, message: data})
+            
+        messages.push(message)
+        console.log("messages array is " + JSON.stringify(messages));
+
+        if (messages) {
+            let messagejson = JSON.stringify(messages)
+
+            console.log("Messages2 is " + messagejson);
+
+            fs.writeFile("messages", messagejson, (err) => {
+                if(err) {
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })
+        }
+    })
+}
+
 function sendMessage() {
     console.log("Send button clicked.");
     feedback.html('');
@@ -236,7 +293,8 @@ function sendMessage() {
         sender: username,
         message: messageField.val(),
         to: friendClickedOn,
-        time: time
+        time: time,
+        type: 'text'
     }
 
     messages.push(message)
@@ -283,15 +341,28 @@ function addMessages() {
             messageArr = dataObj;
             messageArr.forEach(message => {
                 let nameWithoutSpace = message.sender.split(" ").join("")
-                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
-                if (message.sender == username) {
-                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                if (message.type == 'text') {
+                    console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                    if (message.sender == username) {
+                        chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    }
+                    else {
+                        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    }
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
                 }
-                else {
-                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                else if(message.type == 'image') {
+                    if (message.sender == username) {
+                        chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    }
+                    else {
+                        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    }
+                    // console.log( message.sender + ": " + message.message);
+                    var base46Img = 'data:image/jpeg;base64,' + message.message
+                    chatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'></p>")
                 }
-                console.log( message.sender + ": " + message.message);
-                chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
             });
         }
     })
@@ -435,6 +506,46 @@ socket.on('get_status', (data) => {
     statusid.text(status)
 })
 
+socket.on("image_sent", (data) => {
+    var base46Img = 'data:image/jpeg;base64,' + data.message
+    console.log("Received image from " + data.username);
+    feedback.html('');
+
+    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.append("<p class='message'>" + data.username + ": <img src='" + base46Img + "'> </p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    message = {
+        sender: data.username,
+        message: data.message,
+        to: data.to,
+        time: time,
+        type: 'image'
+    }
+        
+    messages.push(message)
+    console.log("messages array is " + JSON.stringify(messages));
+
+    if (messages) {
+        let messagejson = JSON.stringify(messages)
+
+        console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
+})
+
 //Listen on new_message
 socket.on("message_sent", (data) => {
     console.log("Received message from " + data.username);
@@ -452,7 +563,8 @@ socket.on("message_sent", (data) => {
         sender: data.username,
         message: data.message,
         to: data.to,
-        time: time
+        time: time,
+        type: 'text'
     }
 
     messages.push(message)
