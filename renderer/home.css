@@ -6,6 +6,11 @@
 
 #wrapper {
     overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.container-after-titlebar {
+  overflow: hidden!important;
 }
 
 #Chats {
@@ -52,6 +57,7 @@
   flex-grow: 1;
   flex: 1 1 500px;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 #bottom {

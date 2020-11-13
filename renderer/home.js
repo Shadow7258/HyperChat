@@ -141,7 +141,7 @@ $(document).ready(function() {
             friendClickedOn = newUserName.val()
 
             let nameWithoutSpace = newUserName.val().split(" ").join("")
-            pageContainer.prepend('<section class="chatroom" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
+            pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
 
             userList.forEach(user => {
                 let nameWithoutSpaceInLoop = user.split(" ").join("")
@@ -370,33 +370,35 @@ function addMessages() {
 }
 
 function addFriends() {
-    const file = readline.createInterface({
-        input: fs.createReadStream('friend-list'),
-        output: process.stdout,
-        terminal: false
-    });
-
-    file.on('line', (line) => {
-        if (line != "") {
-            socket.emit('get_status', {username: line})
-            userList.push(line)
-            ipcRenderer.send('getImage', line)
-            let nameWithoutSpaceInLoop = line.split(" ").join("")
-            console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
-            pageContainer.prepend('<section style="height: 85%; overflow: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')
-            // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
-            //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
-            addChatListToHtml(line)
-            chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-            feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-            chatroom.hide()
-            let nameWithoutSpace = userList[0].split(" ").join("")
-            let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            firstChatroom.show()
-            chatheading.html(userList[0])
-            friendClickedOn = userList[0];
-        }
-    });
+    if (fs.existsSync('friend-list')) {
+        const file = readline.createInterface({
+            input: fs.createReadStream('friend-list'),
+            output: process.stdout,
+            terminal: false
+        });
+    
+        file.on('line', (line) => {
+            if (line != "") {
+                socket.emit('get_status', {username: line})
+                userList.push(line)
+                ipcRenderer.send('getImage', line)
+                let nameWithoutSpaceInLoop = line.split(" ").join("")
+                console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
+                pageContainer.prepend('<section style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpaceInLoop + 'Chatroom"><section id="' + nameWithoutSpaceInLoop + 'Feedback"></section></section>')
+                // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
+                //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
+                addChatListToHtml(line)
+                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+                chatroom.hide()
+                let nameWithoutSpace = userList[0].split(" ").join("")
+                let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                firstChatroom.show()
+                chatheading.html(userList[0])
+                friendClickedOn = userList[0];
+            }
+        });
+    }
 }
 
 function addChatListToHtml(name) {
