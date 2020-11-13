@@ -155,7 +155,7 @@ $(document).ready(function() {
             chatroom.show()
             chatheading.html(newUserName.val())
 
-            fs.readFile('messages', 'utf-8', (err, data) => {
+            fs.readFile('messages', (err, data) => {
                 if(data) {
                     let dataObj = JSON.parse(data)
                     messageArr = dataObj;
@@ -279,7 +279,6 @@ function sendMessage() {
     console.log("Send button clicked.");
     feedback.html('');
     // socket.emit('new_message', {message : messageField.val()})
-    socket.emit('send_message', {username: username, to: friendClickedOn, message: messageField.val()})
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     chatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
@@ -296,6 +295,8 @@ function sendMessage() {
         time: time,
         type: 'text'
     }
+
+    socket.emit('send_message', message);
 
     messages.push(message)
     console.log("messages array is " + JSON.stringify(messages));
@@ -548,11 +549,11 @@ socket.on("image_sent", (data) => {
 
 //Listen on new_message
 socket.on("message_sent", (data) => {
-    console.log("Received message from " + data.username);
+    console.log("Received message from " + data.sender);
     feedback.html('');
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + data.username + ": " + data.message + "</p>")
+    chatroom.append("<p class='message'>" + data.sender + ": " + data.message + "</p>")
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
                 + currentdate.getHours() + ":"
@@ -560,7 +561,7 @@ socket.on("message_sent", (data) => {
                 + currentdate.getSeconds();
 
     message = {
-        sender: data.username,
+        sender: data.sender,
         message: data.message,
         to: data.to,
         time: time,
