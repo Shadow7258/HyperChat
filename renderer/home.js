@@ -518,12 +518,12 @@ socket.on('get_status', (data) => {
 
 socket.on("image_sent", (data) => {
     var base46Img = 'data:image/jpeg;base64,' + data.message
-    console.log("Received image from " + data.username);
+    console.log("Received image from " + data.sender);
     feedback.html('');
 
     let nameWithoutSpace = friendClickedOn.split(" ").join("")
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + data.username + ": <img src='" + base46Img + "'> </p>")
+    chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -532,7 +532,7 @@ socket.on("image_sent", (data) => {
                 + currentdate.getSeconds();
 
     message = {
-        sender: data.username,
+        sender: data.sender,
         message: data.message,
         to: data.to,
         time: time,
