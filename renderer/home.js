@@ -23,7 +23,7 @@ let db = firebase.firestore()
 var socket, friendClickedOn;
 socket = io.connect('http://10.0.0.127:3000')
 
-var userExists = false;
+var userExists = false, friendsAdded = false;
 
 let messageField = $('#message-field')
 let sendImageButton = $('#send-image-button')
@@ -334,42 +334,45 @@ function buttonClicked(name) {
 }
 
 function addMessages() {
-    let data = fs.readFileSync('messages')
-    if (data != '') {
-        dataObj = JSON.parse(data);
-        messages = dataObj;
-        console.log("Data is " + JSON.stringify(dataObj));
-        messageArr = dataObj;
-        messageArr.forEach(message => {
-            let nameWithoutSpace = message.sender.split(" ").join("")
-            if (message.type == 'text') {
-                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
-                if (message.sender == username) {
-                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+    if (fs.existsSync('messages')) {
+        let data = fs.readFileSync('messages')
+        if (data != '') {
+            dataObj = JSON.parse(data);
+            messages = dataObj;
+            console.log("Data is " + JSON.stringify(dataObj));
+            messageArr = dataObj;
+            messageArr.forEach(message => {
+                let nameWithoutSpace = message.sender.split(" ").join("")
+                if (message.type == 'text') {
+                    console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                    if (message.sender == username) {
+                        chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    }
+                    else {
+                        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    }
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
                 }
-                else {
-                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                else if(message.type == 'image') {
+                    if (message.sender == username) {
+                        chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    }
+                    else {
+                        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    }
+                    // console.log( message.sender + ": " + message.message);
+                    var base46Img = 'data:image/jpeg;base64,' + message.message
+                    chatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'></p>")
                 }
-                console.log( message.sender + ": " + message.message);
-                chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-            }
-            else if(message.type == 'image') {
-                if (message.sender == username) {
-                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
-                }
-                else {
-                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-                }
-                // console.log( message.sender + ": " + message.message);
-                var base46Img = 'data:image/jpeg;base64,' + message.message
-                chatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'></p>")
-            }
-        });
+            });
+        }
     }
     socket.emit('user_online', {username : username})
 }
 
 function addFriends() {
+    friendsAdded = false
     if (fs.existsSync('friend-list')) {
         const file = readline.createInterface({
             input: fs.createReadStream('friend-list'),
@@ -398,6 +401,10 @@ function addFriends() {
                 friendClickedOn = userList[0];
             }
         });
+        friendsAdded = true;
+    }
+    else {
+        friendsAdded = true;
     }
 }
 
@@ -667,8 +674,11 @@ function getUsername() {
             console.log("Confirming that user is online");
             addFriends()
             setTimeout(() => {
-                addMessages()
-            }, 500)
+                console.log("Friends add = " + friendsAdded);
+                if (friendsAdded) {
+                    addMessages()
+                }
+            }, 10)
         })
     })
 }
