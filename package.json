@@ -1,23 +1,26 @@
 {
-  "name": "master-electron",
+  "name": "hyper-chat",
   "version": "1.0.0",
-  "description": "Master Electron Course Code",
+  "description": "Chat application",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "watch": "nodemon --exec electron .",
-    "reset": "git reset --hard"
+    "reset": "git reset --hard",
+    "build": "electron-builder --help"
   },
   "repository": "https://github.com/stackacademytv/master-electron",
+  "homepage": "https://github.com/stackacademytv/master-electron",
   "keywords": [
     "Electron",
     "Master Electron",
     "demo"
   ],
-  "author": "GitHub, Stackacademytv",
+  "author": "Pranav Doshi",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^9.3.4",
+    "electron-builder": "^22.9.1",
     "electron-rebuild": "^2.3.2",
     "nodemon": "^2.0.6"
   },
@@ -30,5 +33,19 @@
     "mongodb": "^3.6.2",
     "mousetrap": "^1.6.5",
     "socket.io": "^2.3.0"
+  },
+  "build": {
+    "appId": "com.pranav.hyper-chat",
+    "copyright": "Copyright Pranav",
+    "mac": {
+      "category": "public.app-category.social-networking",
+      "target": "dmg"
+    },
+    "win": {
+      "target": "zip"
+    },
+    "linux": {
+       "category": "Utility"
+    }
   }
 }

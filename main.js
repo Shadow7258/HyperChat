@@ -205,32 +205,32 @@ function createHomeWindow()
 
   mainWindow.loadFile('renderer/home.html');
 
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 
-function createTray()
-{
-  tray = new Tray('images/trayTemplate@2x.png')
-  tray.setToolTip('Tray details')
-  tray.on('click', e => {
-    if (mainWindow.isVisible())
-    {
-      mainWindow.hide()
-    }
-    else
-    {
-      mainWindow.show()
-    }
-  })
+// function createTray()
+// {
+//   tray = new Tray('./images/trayTemplate@2x.png')
+//   tray.setToolTip('Tray details')
+//   tray.on('click', e => {
+//     if (mainWindow.isVisible())
+//     {
+//       mainWindow.hide()
+//     }
+//     else
+//     {
+//       mainWindow.show()
+//     }
+//   })
 
-  tray.setContextMenu(trayMenu)
-}
+//   tray.setContextMenu(trayMenu)
+// }
 
 // Create a new BrowserWindow when `app` is ready
 function onReady()
 {
-  createTray()
+  // createTray()
 
   globalShortcut.register('Alt+C', () => {
     console.log(screen.getCursorScreenPoint())
@@ -287,7 +287,7 @@ function createLoginWindow()
   mainWindow.loadFile('renderer/login_register/login.html')
 
   // Open DevTools - Remove for PRODUCTION!
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   // Listen for window being closed
   mainWindow.on('closed',  () => {
