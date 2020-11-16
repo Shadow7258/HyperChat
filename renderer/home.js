@@ -21,7 +21,7 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore()
 
 var socket, friendClickedOn;
-socket = io.connect('http://10.0.0.127:3000')
+socket = io.connect('http://34.93.56.182:3000')
 
 var userExists = false, friendsAdded = false;
 
