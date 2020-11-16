@@ -255,7 +255,7 @@ function sendImage(imagePath) {
             type: 'image'
         }
 
-        socket.emit('send_image', {username: username, to: friendClickedOn, message: data})
+        socket.emit('send_image', message)
             
         messages.push(message)
         console.log("messages array is " + JSON.stringify(messages));
