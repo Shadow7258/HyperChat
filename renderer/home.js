@@ -90,6 +90,17 @@ $(document).ready(function() {
         }
     });
 
+    const button = document.querySelector('#emoji-button');
+
+    const picker = new EmojiButton();
+    picker.on('emoji', emoji => {
+        document.querySelector('#message-field').value += emoji;
+    });
+
+    button.addEventListener('click', () => {
+      picker.togglePicker(button);
+    });
+
     sendImageButton.on("click", () => {
         console.log("Sending Image");
         ipcRenderer.send('sendImage')
