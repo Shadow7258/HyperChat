@@ -6,9 +6,8 @@
   "scripts": {
     "start": "electron .",
     "watch": "nodemon --exec electron .",
-    "reset": "git reset --hard",
-    "build": "electron-builder -m",
-    "release": "electron-builder -m --publish 'onTagOrDraft'",
+    "build": "electron-builder -w",
+    "release": "electron-builder -w --publish 'onTagOrDraft'",
     "win-cert": "electron-builder create-self-signed-cert -p pranav"
   },
   "repository": "https://github.com/Shadow7258/HyperChat",
@@ -47,10 +46,8 @@
       "category": "public.app-category.social-networking"
     },
     "win": {
-      "target": "zip",
-      "certificateFile": "private/pranav.p12",
+      "certificateFile": "private/pranav.pfx",
       "certificatePassword": "",
-      "verifyUpdateCodeSignature": false,
       "publisherName": "pranav"
     },
     "linux": {
