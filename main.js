@@ -5,6 +5,7 @@ const { truncateSync } = require('fs');
 const Mousetrap = require('mousetrap');
 const fs = require('fs');
 const { defaultApp } = require('process');
+const updater = require('./updater');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -230,6 +231,7 @@ function createHomeWindow()
 // Create a new BrowserWindow when `app` is ready
 function onReady()
 {
+  setTimeout(updater, 1500)
   // createTray()
 
   globalShortcut.register('Alt+C', () => {

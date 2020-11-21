@@ -7,10 +7,12 @@
     "start": "electron .",
     "watch": "nodemon --exec electron .",
     "reset": "git reset --hard",
-    "build": "electron-builder --help"
+    "build": "electron-builder -m",
+    "release": "electron-builder -m --publish 'onTagOrDraft'",
+    "win-cert": "electron-builder create-self-signed-cert -p pranav"
   },
-  "repository": "https://github.com/stackacademytv/master-electron",
-  "homepage": "https://github.com/stackacademytv/master-electron",
+  "repository": "https://github.com/Shadow7258/HyperChat",
+  "homepage": "https://github.com/Shadow7258/HyperChat",
   "keywords": [
     "Electron",
     "Master Electron",
@@ -21,12 +23,13 @@
   "devDependencies": {
     "electron": "^9.3.4",
     "electron-builder": "^22.9.1",
-    "electron-rebuild": "^2.3.2",
     "nodemon": "^2.0.6"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
     "custom-electron-titlebar": "^3.2.5",
+    "electron-log": "^4.3.0",
+    "electron-updater": "^4.3.5",
     "electron-window-state": "^5.0.3",
     "firebase": "^7.24.0",
     "jquery": "^3.5.1",
@@ -37,15 +40,21 @@
   "build": {
     "appId": "com.pranav.hyper-chat",
     "copyright": "Copyright Pranav",
+    "publish": {
+      "provider": "github"
+    },
     "mac": {
-      "category": "public.app-category.social-networking",
-      "target": "dmg"
+      "category": "public.app-category.social-networking"
     },
     "win": {
-      "target": "zip"
+      "target": "zip",
+      "certificateFile": "private/pranav.p12",
+      "certificatePassword": "",
+      "verifyUpdateCodeSignature": false,
+      "publisherName": "pranav"
     },
     "linux": {
-       "category": "Utility"
+      "category": "Utility"
     }
   }
 }
