@@ -13,7 +13,6 @@ messages
 friend-list
 profile-pic
 private/
-private/GH_TOKEN.txt
 dist/
 
 # Firebase cache
