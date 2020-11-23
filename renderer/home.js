@@ -254,6 +254,7 @@ function createGroup(friends) {
 
     let group = {
         friends: friends,
+        owner: username,
         grpId: grpId,
         icon: 'grp icon'
     }
@@ -798,6 +799,7 @@ socket.on("image_sent", (data) => {
 socket.on('group_invite', (data) => {
     let grpName = data.grpName;
     let sender = data.sender;
+    let friends = data.friends;
     console.log("Group: " + grpName + " invite received from " + sender);
     dialog.showMessageBox({
         title: "Group Invite!", 
@@ -807,6 +809,42 @@ socket.on('group_invite', (data) => {
         let buttonIndex = res.response
         if (buttonIndex === 0) {
             console.log("Accepted group invite");
+            addGroupToHtml(friends, grpName)
+
+            let group = {
+                friends: friends,
+                owner: sender,
+                grpId: grpName,
+                icon: 'grp icon'
+            }
+                
+            groups.push(group)
+        
+            let groupjson = JSON.stringify(groups)
+            fs.writeFile("group-list", groupjson, (err) => {
+                console.log("Group file created");
+            })
+        
+            pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpName + 'GroupChatroom"><section id="' + grpName + 'GroupFeedback"></section></section>')
+        
+            userList.forEach(user => {
+                let nameWithoutSpaceInLoop = user.split(" ").join("")
+                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+                chatroom.hide()
+            });
+        
+            groups.forEach(group => {
+                let grpId = group['grpId']
+                grpChatroom = $('#' + grpId + 'GroupChatroom')
+                grpFeedback = $('#' + grpId + 'GroupFeedback')
+                grpChatroom.hide()
+            })
+        
+            grpChatroom = $('#' + grpName + 'GroupChatroom')
+            grpFeedback = $('#' + grpName + 'GroupFeedback')
+            grpChatroom.show()
+            
             socket.emit('accepted_group_invite', {username: username, grpName: grpName})
         }
         else {
