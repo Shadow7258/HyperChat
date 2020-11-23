@@ -520,6 +520,7 @@ function groupClicked(grpId) {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
+    chatheading.html(grpId)
 }
 
 function buttonClicked(name) {
@@ -540,7 +541,7 @@ function buttonClicked(name) {
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
     })
-    
+
     let nameWithoutSpace = name.split(" ").join("")
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     feedback = $('#' + nameWithoutSpace + 'Feedback')
@@ -856,6 +857,11 @@ socket.on('dm_invite', (sender) => {
         let buttonIndex = res.response;
         if (buttonIndex === 0) {
             console.log("Accepted dm invite");
+
+            socket.emit('get_status', {username: sender})
+
+            userList.push(sender);
+
             addChatListToHtml(sender)
 
             ipcRenderer.send('getImage', sender)
