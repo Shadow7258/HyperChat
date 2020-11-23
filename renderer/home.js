@@ -1,4 +1,5 @@
-const { ipcRenderer, remote } = require('electron')
+const { ipcRenderer, remote } = require('electron');
+const { create, log } = require('electron-log');
 const firebase = require('firebase')
 const fs = require('fs');
 const { type } = require('os');
@@ -20,10 +21,11 @@ firebase.initializeApp(firebaseConfig);
 
 let db = firebase.firestore()
 
-var socket, friendClickedOn;
-socket = io.connect('http://34.93.56.182:3000')
+var socket, friendClickedOn, groupName;
+// socket = io.connect('http://34.93.56.182:3000')
+socket = io.connect('http://localhost:3000')
 
-var userExists = false, friendsAdded = false;
+var userExists = false, friendsAdded = false, groupClickedOn = false;
 
 let messageField = $('#message-field')
 let sendImageButton = $('#send-image-button')
@@ -31,7 +33,7 @@ let createChatBtn = $('#createChatBtn')
 let chatList = $('#chat-list')
 let newUserName = $('#newUserName')
 let pageContainer = $('#page-container')
-let chatroom, feedback
+let chatroom, feedback, grpChatroom, grpFeedback
 let chatheading = $('#chat-heading')
 let saveChangesBtn = $('#saveChangesBtn')
 let username, email
@@ -44,7 +46,7 @@ let message = {
     type: ""
 }
 
-let userList = [], messages = [], users = [];
+let userList = [], messages = [], users = [], friendsInGroup = [], groups = [];
 
 remote.getCurrentWindow().on('close', () => {
     socket.emit('logout', {username: username})
@@ -83,10 +85,39 @@ $(document).ready(function() {
 
     getUsername()
 
+    newUserName.on("keyup", (e) => {
+        if (e.key == 'Enter') {
+            console.log("Enter clicked");
+            if (userList.includes(newUserName.val())) {
+                console.log("FRIEND ALREADY EXISTS");
+                dialog.showErrorBox("Error!", "Friend alrady exists!");
+                newUserName.val('')
+            }
+            else if (userExists == false) {
+                console.log("User doesn't exist");
+                dialog.showErrorBox("Error!", "User doesn't exist!");
+                newUserName.val('')
+            }
+            else {
+                console.log("User Exists");
+                let input = $('#addUserInput');
+                friendsInGroup.push(newUserName.val())
+                let nameWithoutSpace = newUserName.val().split(" ").join("");
+                input.append('<span class="input-group-text" style="height: 90%;">' + newUserName.val() +'<i onClick="removeButton(\'' + newUserName.val() + '\')" class="fa fa-times" id="' + nameWithoutSpace + '_crossButton" style="padding-left: 10px; margin-right: -5px;"></i></span>');
+                newUserName.val('');
+            }
+        }
+    });
+
     messageField.on("keyup", (e) => {
         if (e.key == 'Enter') {
             console.log("Enter clicked");
-            sendMessage()
+            if (groupClickedOn == false) {
+                sendMessage()
+            }
+            else {
+                sendGroupMessage()
+            }
         }
     });
 
@@ -124,7 +155,19 @@ $(document).ready(function() {
 
     // Create Chat button clicked
     createChatBtn.on('click', () => {
-        if (userList.includes(newUserName.val())) {
+        console.log("FRIENDS IN GROUP IS " + friendsInGroup);
+        if (friendsInGroup.length != 0) {
+            if (friendsInGroup.length == 1) {
+                createChat(friendsInGroup[0])
+            }
+            else {
+                var friends = friendsInGroup;
+                friends.push(username)
+                createGroup(friends)
+            }
+            friendsInGroup = [];
+        }
+        else if (userList.includes(newUserName.val())) {
             console.log("FRIEND ALREADY EXISTS");
             dialog.showErrorBox("Error!", "Friend alrady exists!");
             newUserName.val('')
@@ -135,57 +178,7 @@ $(document).ready(function() {
             newUserName.val('')
         }
         else {
-            console.log("Create chat button clicked.")
-            userList.push(newUserName.val())
-            socket.emit('get_status', {username: newUserName.val()})
-            // chatList.append('<button type="button" id="' + newUserName.val() + '_id" data-username="' + newUserName.val() + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
-            addChatListToHtml(newUserName.val())
-            ipcRenderer.send('getImage', newUserName.val())
-
-            fs.appendFile("friend-list", newUserName.val() + '\n', (err) => {
-                if(err){
-                    console.log("An error ocurred creating the file "+ err.message)
-                }
-                console.log("User file has succesfully been created.");
-            })
-
-            friendClickedOn = newUserName.val()
-
-            let nameWithoutSpace = newUserName.val().split(" ").join("")
-            pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
-
-            userList.forEach(user => {
-                let nameWithoutSpaceInLoop = user.split(" ").join("")
-                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-                chatroom.hide()
-            });
-
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            feedback = $('#' + nameWithoutSpace + 'Feedback')
-            chatroom.show()
-            chatheading.html(newUserName.val())
-
-            fs.readFile('messages', (err, data) => {
-                if(data) {
-                    let dataObj = JSON.parse(data)
-                    messageArr = dataObj;
-                    messageArr.forEach(message => {
-                        let nameWithoutSpace = message.sender.split(" ").join("")
-                        console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
-                        if (message.to == newUserName.val() && message.sender == username) {
-                            chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
-                            console.log( message.sender + ": " + message.message);
-                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                        }
-                        else if (message.sender == newUserName.val() && message.to == username) {
-                            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-                            console.log( message.sender + ": " + message.message);
-                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                        }
-                    });
-                }
-            })
+            createChat(newUserName.val())
         }
     })
 
@@ -242,6 +235,128 @@ socket.on('checkUsers', (exists) => {
     }
 })
 
+function createGroup(friends) {
+    console.log("Creating group with friends: " + friends);
+
+    var grpId = friends[0];
+
+    for (let i = 1; i < friends.length; i++) {
+        grpId += friends[i]
+    }
+
+    grpId = grpId.split(" ").join("");
+    console.log("GROUP ID: " + grpId);
+
+    addGroupToHtml(friends, grpId)
+
+    groupClickedOn = true;
+    groupName = grpId;
+
+    let group = {
+        friends: friends,
+        grpId: grpId,
+        icon: 'grp icon'
+    }
+
+    socket.emit('create_group', {friends: friends, grpName: grpId, sender: username})
+
+    groups.push(group)
+
+    let groupjson = JSON.stringify(groups)
+    fs.writeFile("group-list", groupjson, (err) => {
+        console.log("Group file created");
+    })
+
+    pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
+
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpFeedback = $('#' + grpId + 'GroupFeedback')
+    grpChatroom.show()
+}
+
+function createChat(name) {
+    console.log("Create chat button clicked.")
+    userList.push(name)
+    socket.emit('get_status', {username: name})
+    // chatList.append('<button type="button" id="' + name + '_id" data-username="' + name + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
+    addChatListToHtml(name)
+    ipcRenderer.send('getImage', name)
+
+    fs.appendFile("friend-list", name + '\n', (err) => {
+        if(err){
+            console.log("An error ocurred creating the file "+ err.message)
+        }
+        console.log("User file has succesfully been created.");
+    })
+
+    friendClickedOn = name;
+    groupClickedOn = false;
+
+    let nameWithoutSpace = name.split(" ").join("")
+    pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
+
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    feedback = $('#' + nameWithoutSpace + 'Feedback')
+    chatroom.show()
+    chatheading.html(name)
+
+    fs.readFile('messages', (err, data) => {
+        if(data) {
+            let dataObj = JSON.parse(data)
+            messageArr = dataObj;
+            messageArr.forEach(message => {
+                let nameWithoutSpace = message.sender.split(" ").join("")
+                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                if (message.to == name && message.sender == username) {
+                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+                else if (message.sender == name && message.to == username) {
+                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+            });
+        }
+    })
+}
+
+function removeButton(name) {
+    console.log("Removing user: " + name);
+    let nameWithoutSpace = name.split(" ").join("");
+    let crossBtn = $('#' + nameWithoutSpace + '_crossButton');
+    crossBtn.parent().remove()
+}
+
 function sendImage(imagePath) {
     feedback.html('');
     let imagePathString = "" + imagePath;
@@ -286,6 +401,43 @@ function sendImage(imagePath) {
     })
 }
 
+function sendGroupMessage() {
+    console.log("Sending message in group");
+    grpChatroom = $('#' + groupName + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    let groupFile = fs.readFileSync('group-list');
+    groupFile = JSON.parse(groupFile)
+    var friends = [];
+    var grpId;
+    groupFile.forEach(group => {
+        if (group['grpId'] = groupName) {
+            console.log("Group is " + JSON.stringify(group));
+            friends = group['friends']
+            grpId = group['grpId']
+        }
+    })
+    console.log("Group members: " + friends);
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    message = {
+        sender: username,
+        grpId: grpId,
+        message: messageField.val(),
+        to: friends,
+        time: time,
+        type: 'text'
+    }
+
+    socket.emit('send_group_message', message);
+
+    messageField.val('');
+}
+
 function sendMessage() {
     console.log("Send button clicked.");
     feedback.html('');
@@ -328,8 +480,24 @@ function sendMessage() {
     messageField.val('');
 }
 
+function groupClicked(grpId) {
+    groupName = grpId;
+    groupClickedOn = true;
+    console.log("Clicked on group: " + grpId);
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpFeedback = $('#' + grpId + 'GroupFeedback')
+    grpChatroom.show()
+}
+
 function buttonClicked(name) {
     friendClickedOn = name;
+    groupClickedOn = false;
     console.log("Clicked on " + name);
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
@@ -380,6 +548,35 @@ function addMessages() {
         }
     }
     socket.emit('user_online', {username : username})
+}
+
+function addGroups() {
+    if (fs.existsSync('group-list')) {
+        let groupFile = fs.readFileSync('group-list')
+        if (groupFile != '') {
+            let groupsArr = JSON.parse(groupFile)
+            groupsjson = JSON.stringify(groupsArr)
+            console.log("Groups are " + groupsjson);
+            groupsArr.forEach(group => {
+                let friends = group['friends']
+                let grpId = group['grpId']
+                let groupItem = {
+                    friends: friends,
+                    grpId: grpId,
+                    icon: 'grp icon'
+                }
+            
+                groups.push(groupItem)
+        
+                console.log("Groups array is " + JSON.stringify(groups));
+        
+                console.log("Group id is " + grpId);
+                grpChatroom = $('#' + grpId + 'GroupChatroom')
+                pageContainer.prepend('<section style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
+                addGroupToHtml(friends, grpId)
+            })
+        }
+    }
 }
 
 function addFriends() {
@@ -443,6 +640,37 @@ function addChatListToHtml(name) {
             '</div>' +
         '</div>' +
     '</div>')
+}
+
+function addGroupToHtml(friends, grpId) {
+    chatList.append(
+    '<div style="padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action ' + grpId + '_nameclass" id="' + grpId + '_id" onClick="groupClicked(\'' + grpId + '\')">' +
+        '<div class="row ' + grpId + '_nameclass">' +
+            '<div class="col-4 ' + grpId + '_nameclass">' +
+                '<img class="' + grpId + '_nameclass" id="' + grpId + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
+            '</div>' +
+            '<div class="col-6 ' + grpId + '_nameclass" style="padding-left: 5px;">' +
+                '<div style="padding-top: 6px; padding-bottom: 10px;" id="' + grpId + 'friends" class="row ' + grpId + '_nameclass"></div>' +
+            '</div>' +
+            '<div class="col-2 dropdown" style="padding-left: 0px">' +
+                '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
+                '<div class="dropdown-menu" id="userDropdown">' +
+                '<a class="dropdown-item" id="remove' + grpId + 'Option" href="#">Remove Friend</a>' +
+                '<a class="dropdown-item" href="#">Another action</a>' +
+                '<a class="dropdown-item" href="#">Something else here</a>' +
+            '</div>' +
+            '</div>' +
+        '</div>' +
+    '</div>')
+
+    let friendsGrp = $('#' + grpId + 'friends')
+    var friendsStr = friends[0];
+    for (let i = 1; i < friends.length; i++) {
+        friendsStr += ", " + friends[i];  
+    }
+    console.log("Friends str is " + friendsStr);
+    friendsGrp.html(friendsStr)
+    chatheading.html(friendsStr)
 }
 
 function removeFriend(name) {
@@ -567,6 +795,37 @@ socket.on("image_sent", (data) => {
     }
 })
 
+socket.on('group_invite', (data) => {
+    let grpName = data.grpName;
+    let sender = data.sender;
+    console.log("Group: " + grpName + " invite received from " + sender);
+    dialog.showMessageBox({
+        title: "Group Invite!", 
+        message: sender + " has invited you to his group: " + grpName,
+        buttons: ['Accept', 'Cancel']
+    }).then(res => {
+        let buttonIndex = res.response
+        if (buttonIndex === 0) {
+            console.log("Accepted group invite");
+            socket.emit('accepted_group_invite', {username: username, grpName: grpName})
+        }
+        else {
+            console.log("Declined group invite");
+            socket.emit('declined_group_invite', {username: username, sender: sender, grpName: grpName})
+        }
+    })
+})
+
+socket.on('declined_invitation', (data) => {
+    let username = data.username;
+    let grpName = data.grpName;
+    console.log(username + "has declined you invitation to join the group: " + grpName);
+    dialog.showMessageBox({
+        title: "Invitation Declined!",
+        message: username + " has declined your invitation to join the group: " + grpName
+    })
+})
+
 //Listen on new_message
 socket.on("message_sent", (data) => {
     console.log("Received message from " + data.sender);
@@ -684,6 +943,7 @@ function getUsername() {
             socket.emit('change_username', {username : username})
             console.log("Confirming that user is online");
             addFriends()
+            addGroups()
             setTimeout(() => {
                 console.log("Friends add = " + friendsAdded);
                 if (friendsAdded) {

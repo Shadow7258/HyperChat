@@ -14,6 +14,8 @@ friend-list
 profile-pic
 private/
 dist/
+dev-app-update.yml
+group-list
 
 # Firebase cache
 .firebase/
