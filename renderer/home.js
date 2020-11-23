@@ -22,8 +22,8 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore()
 
 var socket, friendClickedOn, groupName;
-// socket = io.connect('http://34.93.56.182:3000')
-socket = io.connect('http://localhost:3000')
+socket = io.connect('http://34.93.56.182:3000')
+// socket = io.connect('http://localhost:3000')
 
 var userExists = false, friendsAdded = false, groupClickedOn = false;
 
@@ -296,6 +296,8 @@ function createChat(name) {
     // chatList.append('<button type="button" id="' + name + '_id" data-username="' + name + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
     addChatListToHtml(name)
     ipcRenderer.send('getImage', name)
+
+    socket.emit('create_dm', {friend: name, sender: username})
 
     fs.appendFile("friend-list", name + '\n', (err) => {
         if(err){
@@ -824,6 +826,76 @@ socket.on("image_sent", (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+})
+
+socket.on('dm_invite', (sender) => {
+    console.log("DM invite received from " + sender);
+    dialog.showMessageBox({
+        title: "Group Invite!", 
+        message: sender + " has invited you to his group: " + grpName,
+        buttons: ['Accept', 'Cancel']
+    }).then(res => {
+        let buttonIndex = res.response;
+        if (buttonIndex === 0) {
+            console.log("Accepted dm invite");
+            addChatListToHtml(sender)
+
+            ipcRenderer.send('getImage', sender)
+        
+            fs.appendFile("friend-list", sender + '\n', (err) => {
+                if (err) {
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })
+        
+            friendClickedOn = sender;
+            groupClickedOn = false;
+        
+            let nameWithoutSpace = sender.split(" ").join("")
+            pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
+        
+            userList.forEach(user => {
+                let nameWithoutSpaceInLoop = user.split(" ").join("")
+                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+                chatroom.hide()
+            });
+        
+            groups.forEach(group => {
+                let grpId = group['grpId']
+                grpChatroom = $('#' + grpId + 'GroupChatroom')
+                grpFeedback = $('#' + grpId + 'GroupFeedback')
+                grpChatroom.hide()
+            })
+        
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            feedback = $('#' + nameWithoutSpace + 'Feedback')
+            chatroom.show()
+            chatheading.html(name)
+        
+            fs.readFile('messages', (err, data) => {
+                if (data) {
+                    let dataObj = JSON.parse(data)
+                    messageArr = dataObj;
+                    messageArr.forEach(message => {
+                        let nameWithoutSpace = message.sender.split(" ").join("")
+                        console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                        if (message.to == name && message.sender == username) {
+                            chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                            console.log( message.sender + ": " + message.message);
+                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                        }
+                        else if (message.sender == name && message.to == username) {
+                            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                            console.log( message.sender + ": " + message.message);
+                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                        }
+                    });
+                }
+            })
+        }
+    })
 })
 
 socket.on('group_invite', (data) => {
