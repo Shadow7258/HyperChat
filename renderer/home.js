@@ -46,7 +46,7 @@ let message = {
     type: ""
 }
 
-let userList = [], messages = [], users = [], friendsInGroup = [], groups = [];
+let userList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = [];
 
 remote.getCurrentWindow().on('close', () => {
     socket.emit('logout', {username: username})
@@ -436,6 +436,21 @@ function sendGroupMessage() {
 
     socket.emit('send_group_message', message);
 
+    groupMessages.push(message)
+
+    if (groupMessages) {
+        let messagejson = JSON.stringify(groupMessages)
+
+        console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("group-messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
+
     messageField.val('');
 }
 
@@ -741,9 +756,7 @@ socket.on('get_status', (data) => {
         status = data.status;
         statusCol = true;
     }
-    let usernameidbtn = $('#' + nameWithoutSpace + '_id')
     let statusid = $('#' + nameWithoutSpace + '_statusid')
-    let statusSpan = usernameidbtn.find('span')
     if (statusCol == false) {
         statusid.removeClass("text-success")
         statusid.addClass("text-danger")
@@ -844,7 +857,7 @@ socket.on('group_invite', (data) => {
             grpChatroom = $('#' + grpName + 'GroupChatroom')
             grpFeedback = $('#' + grpName + 'GroupFeedback')
             grpChatroom.show()
-            
+
             socket.emit('accepted_group_invite', {username: username, grpName: grpName})
         }
         else {
@@ -862,6 +875,47 @@ socket.on('declined_invitation', (data) => {
         title: "Invitation Declined!",
         message: username + " has declined your invitation to join the group: " + grpName
     })
+})
+
+socket.on('group_message_sent', (data) => {
+    let message = data.message;
+    let sender = data.sender;
+    let grpId = data.grpId;
+    let to = data.to;
+
+    console.log("Received message: " + message + " from " + sender + " in group: " + grpId);
+
+    let chatroom = $('#' + grpId + 'GroupChatroom')
+    chatroom.append("<p class='message'>" + sender + ": " + message + "</p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    message = {
+        sender: sender,
+        message: message,
+        to: to,
+        time: time,
+        type: 'text'
+    }
+
+    groupMessages.push(message)
+
+    if (groupMessages) {
+        let messagejson = JSON.stringify(groupMessages)
+
+        console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("group-messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
 })
 
 //Listen on new_message
