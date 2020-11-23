@@ -22,8 +22,8 @@ firebase.initializeApp(firebaseConfig);
 let db = firebase.firestore()
 
 var socket, friendClickedOn, groupName;
-socket = io.connect('http://34.93.56.182:3000')
-// socket = io.connect('http://localhost:3000')
+// socket = io.connect('http://34.93.56.182:3000')
+socket = io.connect('http://localhost:3000')
 
 var userExists = false, friendsAdded = false, groupClickedOn = false;
 
@@ -502,12 +502,21 @@ function groupClicked(grpId) {
     groupName = grpId;
     groupClickedOn = true;
     console.log("Clicked on group: " + grpId);
+
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
         chatroom.hide()
     });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
@@ -517,12 +526,21 @@ function buttonClicked(name) {
     friendClickedOn = name;
     groupClickedOn = false;
     console.log("Clicked on " + name);
+
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
         chatroom.hide()
     });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+    
     let nameWithoutSpace = name.split(" ").join("")
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     feedback = $('#' + nameWithoutSpace + 'Feedback')
@@ -832,7 +850,7 @@ socket.on('dm_invite', (sender) => {
     console.log("DM invite received from " + sender);
     dialog.showMessageBox({
         title: "Group Invite!", 
-        message: sender + " has invited you to his group: " + grpName,
+        message: sender + " has invited you to his dm",
         buttons: ['Accept', 'Cancel']
     }).then(res => {
         let buttonIndex = res.response;
