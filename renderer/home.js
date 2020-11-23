@@ -291,10 +291,13 @@ function createGroup(friends) {
 
 function createChat(name) {
     console.log("Create chat button clicked.")
+
     userList.push(name)
-    socket.emit('get_status', {username: name})
-    // chatList.append('<button type="button" id="' + name + '_id" data-username="' + name + '" class="list-group-item list-group-item-action" onclick="buttonClicked(\'' + newUserName.val() + '\')">' + newUserName.val() + '</button>')
+
     addChatListToHtml(name)
+
+    socket.emit('get_status', {username: name})
+
     ipcRenderer.send('getImage', name)
 
     socket.emit('create_dm', {friend: name, sender: username})
@@ -503,6 +506,8 @@ function groupClicked(grpId) {
     groupClickedOn = true;
     console.log("Clicked on group: " + grpId);
 
+    var friends = [];
+
     userList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
@@ -512,6 +517,7 @@ function groupClicked(grpId) {
 
     groups.forEach(group => {
         let grpId = group['grpId']
+        friends = group['friends']
         grpChatroom = $('#' + grpId + 'GroupChatroom')
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
@@ -520,7 +526,12 @@ function groupClicked(grpId) {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
-    chatheading.html(grpId)
+
+    var friendsStr = friends[0];
+    for (let i = 1; i < friends.length; i++) {
+        friendsStr += ", " + friends[i];  
+    }
+    chatheading.html(friendsStr)
 }
 
 function buttonClicked(name) {
@@ -850,6 +861,7 @@ socket.on("image_sent", (data) => {
 socket.on('dm_invite', (sender) => {
     console.log("DM invite received from " + sender);
     dialog.showMessageBox({
+        type: "info",
         title: "Group Invite!", 
         message: sender + " has invited you to his dm",
         buttons: ['Accept', 'Cancel']
@@ -858,11 +870,11 @@ socket.on('dm_invite', (sender) => {
         if (buttonIndex === 0) {
             console.log("Accepted dm invite");
 
-            socket.emit('get_status', {username: sender})
-
             userList.push(sender);
 
             addChatListToHtml(sender)
+
+            socket.emit('get_status', {username: sender})
 
             ipcRenderer.send('getImage', sender)
         
@@ -928,6 +940,7 @@ socket.on('group_invite', (data) => {
     let friends = data.friends;
     console.log("Group: " + grpName + " invite received from " + sender);
     dialog.showMessageBox({
+        type: "info",
         title: "Group Invite!", 
         message: sender + " has invited you to his group: " + grpName,
         buttons: ['Accept', 'Cancel']
