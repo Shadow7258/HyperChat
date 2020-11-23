@@ -330,7 +330,7 @@ function createChat(name) {
     chatheading.html(name)
 
     fs.readFile('messages', (err, data) => {
-        if(data) {
+        if (data) {
             let dataObj = JSON.parse(data)
             messageArr = dataObj;
             messageArr.forEach(message => {
@@ -526,6 +526,23 @@ function buttonClicked(name) {
     feedback = $('#' + nameWithoutSpace + 'Feedback')
     chatroom.show()
     chatheading.html(name)
+}
+
+function addGroupMessages() {
+    if (fs.existsSync('group-messages')) {
+        let data = fs.readFileSync('group-messages')
+        if (data != '') {
+            dataObj = JSON.parse(data);
+            groupMessages = dataObj;
+            messageArr = dataObj;
+            messageArr.forEach(message => {
+                if (message.type == 'text') {
+                    grpChatroom = $('#' + message.grpId + 'GroupChatroom')
+                    grpChatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+            })
+        }
+    }
 }
 
 function addMessages() {
@@ -1040,6 +1057,7 @@ function getUsername() {
                 console.log("Friends add = " + friendsAdded);
                 if (friendsAdded) {
                     addMessages()
+                    addGroupMessages()
                 }
             }, 10)
         })
