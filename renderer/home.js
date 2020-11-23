@@ -404,8 +404,8 @@ function sendImage(imagePath) {
 
 function sendGroupMessage() {
     console.log("Sending message in group");
-    grpChatroom = $('#' + groupName + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    // grpChatroom = $('#' + groupName + 'GroupChatroom')
+    // grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
     let groupFile = fs.readFileSync('group-list');
     groupFile = JSON.parse(groupFile)
     var friends = [];
@@ -436,20 +436,20 @@ function sendGroupMessage() {
 
     socket.emit('send_group_message', message);
 
-    groupMessages.push(message)
+    // groupMessages.push(message)
 
-    if (groupMessages) {
-        let messagejson = JSON.stringify(groupMessages)
+    // if (groupMessages) {
+    //     let messagejson = JSON.stringify(groupMessages)
 
-        console.log("Messages2 is " + messagejson);
+    //     console.log("Messages2 is " + messagejson);
 
-        fs.writeFile("group-messages", messagejson, (err) => {
-            if(err) {
-                console.log("An error ocurred creating the file "+ err.message)
-            }
-            console.log("User file has succesfully been created.");
-        })
-    }
+    //     fs.writeFile("group-messages", messagejson, (err) => {
+    //         if(err) {
+    //             console.log("An error ocurred creating the file "+ err.message)
+    //         }
+    //         console.log("User file has succesfully been created.");
+    //     })
+    // }
 
     messageField.val('');
 }
@@ -913,6 +913,7 @@ socket.on('group_message_sent', (data) => {
 
     message = {
         sender: sender,
+        grpId: grpId,
         message: message,
         to: to,
         time: time,
