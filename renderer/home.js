@@ -814,6 +814,16 @@ socket.on('group_invite_accepted', (data) => {
     })
 })
 
+socket.on('dm_invite_declined', (name) => {
+    console.log(name + " has declined the dm invite");
+    
+    dialog.showMessageBox({
+        title: "Invitation declined",
+        message: name + " has declined the dm invite",
+        buttons: ['OK']
+    })
+})
+
 socket.on('dm_invite_accepted', (name) => {
     console.log(name + " has accepted the dm invite.");
 
@@ -963,6 +973,7 @@ socket.on('dm_invite', (data) => {
         }
         else {
             console.log("Declined DM invite");
+            socket.emit('dm_invite_declined', {username: username, recepient: sender})
         }
     })
 })
