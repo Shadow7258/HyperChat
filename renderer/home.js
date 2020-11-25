@@ -573,6 +573,8 @@ function addGroups() {
                     grpId: grpId,
                     icon: 'grp icon'
                 }
+
+                groupClicked(grpId)
             
                 groups.push(groupItem)
         
@@ -607,9 +609,20 @@ function addFriends() {
                 // chatList.append('<button style="padding-right: 5px; outline: none" type="button" onclick="buttonClicked(\'' + line + '\')" id="' + nameWithoutSpaceInLoop + '_id" data-username="'
                 //  + line + '" class="list-group-item list-group-item-action">' + line + '<span style="float: right; height: 21px;" id="' + nameWithoutSpaceInLoop + '_spanid" class="badge badge-success"></span></button>')
                 addChatListToHtml(line)
+
+                groupClickedOn = false;
+
                 chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
                 feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
                 chatroom.hide()
+            
+                groups.forEach(group => {
+                    let grpId = group['grpId']
+                    grpChatroom = $('#' + grpId + 'GroupChatroom')
+                    grpFeedback = $('#' + grpId + 'GroupFeedback')
+                    grpChatroom.hide()
+                })
+
                 let nameWithoutSpace = userList[0].split(" ").join("")
                 let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
                 firstChatroom.show()
@@ -994,6 +1007,8 @@ socket.on('group_invite', (data) => {
             console.log("Accepted group invite");
             addGroupToHtml(friends, grpName)
 
+            groupClicked(grpName)
+
             let group = {
                 friends: friends,
                 owner: sender,
@@ -1009,24 +1024,6 @@ socket.on('group_invite', (data) => {
             })
         
             pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpName + 'GroupChatroom"><section id="' + grpName + 'GroupFeedback"></section></section>')
-        
-            userList.forEach(user => {
-                let nameWithoutSpaceInLoop = user.split(" ").join("")
-                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-                chatroom.hide()
-            });
-        
-            groups.forEach(group => {
-                let grpId = group['grpId']
-                grpChatroom = $('#' + grpId + 'GroupChatroom')
-                grpFeedback = $('#' + grpId + 'GroupFeedback')
-                grpChatroom.hide()
-            })
-        
-            grpChatroom = $('#' + grpName + 'GroupChatroom')
-            grpFeedback = $('#' + grpName + 'GroupFeedback')
-            grpChatroom.show()
 
             socket.emit('accepted_group_invite', {username: username, grpName: grpName, owner: sender})
         }
