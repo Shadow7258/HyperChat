@@ -801,6 +801,19 @@ socket.on("image_sent", (data) => {
     }
 })
 
+socket.on('group_invite_accepted', (data) => {
+    let grpName = data.grpName;
+    let username = data.username;
+
+    console.log(username + " has accepted the group invite");
+
+    dialog.showMessageBoxSync({
+        title: "Invitation accepted",
+        message: username + " has accepted the group invite",
+        buttons: ['OK']
+    })
+})
+
 socket.on('dm_invite_accepted', (name) => {
     console.log(name + " has accepted the dm invite.");
 
@@ -872,17 +885,18 @@ socket.on('dm_invite_accepted', (name) => {
     })
 })
 
-socket.on('dm_invite', (sender) => {
+socket.on('dm_invite', (data) => {
+    let sender = data.sender;
     console.log("DM invite received from " + sender);
     dialog.showMessageBox({
         type: "info",
-        title: "Group Invite!", 
+        title: "DM Invite!", 
         message: sender + " has invited you to his dm",
         buttons: ['Accept', 'Cancel']
     }).then(res => {
         let buttonIndex = res.response;
         if (buttonIndex === 0) {
-            console.log("Accepted dm invite");
+            console.log("Accepted dm invite from " + sender);
 
             socket.emit('dm_invite_accepted', {username: username, recepient: sender})
 
@@ -1003,7 +1017,7 @@ socket.on('group_invite', (data) => {
             grpFeedback = $('#' + grpName + 'GroupFeedback')
             grpChatroom.show()
 
-            socket.emit('accepted_group_invite', {username: username, grpName: grpName})
+            socket.emit('accepted_group_invite', {username: username, grpName: grpName, owner: sender})
         }
         else {
             console.log("Declined group invite");
