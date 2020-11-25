@@ -88,24 +88,12 @@ $(document).ready(function() {
     newUserName.on("keyup", (e) => {
         if (e.key == 'Enter') {
             console.log("Enter clicked");
-            if (userList.includes(newUserName.val())) {
-                console.log("FRIEND ALREADY EXISTS");
-                dialog.showErrorBox("Error!", "Friend alrady exists!");
-                newUserName.val('')
-            }
-            else if (userExists == false) {
-                console.log("User doesn't exist");
-                dialog.showErrorBox("Error!", "User doesn't exist!");
-                newUserName.val('')
-            }
-            else {
                 console.log("User Exists");
                 let input = $('#addUserInput');
                 friendsInGroup.push(newUserName.val())
                 let nameWithoutSpace = newUserName.val().split(" ").join("");
                 input.append('<span class="input-group-text" style="height: 90%;">' + newUserName.val() +'<i onClick="removeButton(\'' + newUserName.val() + '\')" class="fa fa-times" id="' + nameWithoutSpace + '_crossButton" style="padding-left: 10px; margin-right: -5px;"></i></span>');
                 newUserName.val('');
-            }
         }
     });
 
@@ -158,12 +146,23 @@ $(document).ready(function() {
         console.log("FRIENDS IN GROUP IS " + friendsInGroup);
         if (friendsInGroup.length != 0) {
             if (friendsInGroup.length == 1) {
-                createChat(friendsInGroup[0])
+                if (userList.includes(newUserName.val())) {
+                    console.log("FRIEND ALREADY EXISTS");
+                    dialog.showErrorBox("Error!", "Friend alrady exists!");
+                    newUserName.val('')
+                }
+                if (userExists == false) {
+                    console.log("User doesn't exist");
+                    dialog.showErrorBox("Error!", "User doesn't exist!");
+                    newUserName.val('')
+                }
+                else {
+                    createChat(friendsInGroup[0])
+                }
             }
             else {
                 var friends = friendsInGroup;
-                friends.push(username)
-                createGroup(friends)
+                socket.emit("user_validation", (friends))
             }
             friendsInGroup = [];
         }
@@ -217,6 +216,19 @@ $(document).ready(function() {
         source: users
     });
 });
+
+socket.on('user_validation', (data) => {
+    let user = data.user;
+    let exists = data.exists;
+    let friends = data.friends;
+    if (exists == true) {
+        friends.push(username)
+        createGroup(friends)
+    }
+    else {
+        dialog.showErrorBox("Error!", "User: " + user + " doesn't exist!");
+    }
+})
 
 socket.on('checkUsers', (exists) => {
     if (exists == true && !userList.includes(newUserName.val()) && newUserName.val() != username) {
