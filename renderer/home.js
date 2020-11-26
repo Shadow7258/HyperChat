@@ -128,7 +128,12 @@ $(document).ready(function() {
     ipcRenderer.on('imagePathReceived', (e, args) => {
         let imagePath = args['filePaths']
         console.log("Image path is " + imagePath);
-        sendImage(imagePath)
+        if (groupClickedOn == false) {
+            sendImage(imagePath)
+        }
+        else {
+            sendGroupImage(imagePath)
+        }
     })
 
     // Save changes button clicked
@@ -374,6 +379,67 @@ function sendImage(imagePath) {
     })
 }
 
+function sendGroupImage(imagePath) {
+    let imagePathString = "" + imagePath;
+
+    console.log("Group name is " + groupName);
+    grpFeedback = $('#' + groupName + 'GroupFeedback')
+    grpFeedback.html('')
+    grpChatroom = $('#' + groupName + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + username + ": <img src='" + imagePath + "'> </p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    let groupFile = fs.readFileSync('group-list');
+    groupFile = JSON.parse(groupFile)
+
+    var friends = [];
+    var grpId;
+
+    groupFile.forEach(group => {
+        if (group['grpId'] = groupName) {
+            console.log("Group is " + JSON.stringify(group));
+            friends = group['friends']
+            grpId = group['grpId']
+        }
+    })
+
+    fs.readFile(imagePathString, 'base64', (err, data) => {
+        console.log("Image to be sent is " + data);
+
+        let messageData = {
+            sender: username,
+            grpId: grpId,
+            message: data,
+            friends: friends,
+            time: time,
+            type: 'image'
+        }
+
+        socket.emit('send_group_image', messageData)
+            
+        // messages.push(message)
+        // console.log("messages array is " + JSON.stringify(messages));
+
+        // if (messages) {
+        //     let messagejson = JSON.stringify(messages)
+
+        //     console.log("Messages2 is " + messagejson);
+
+        //     fs.writeFile("messages", messagejson, (err) => {
+        //         if(err) {
+        //             console.log("An error ocurred creating the file "+ err.message)
+        //         }
+        //         console.log("User file has succesfully been created.");
+        //     })
+        // }
+    })
+}
+
 function sendGroupMessage() {
     console.log("Sending message in group");
     // grpChatroom = $('#' + groupName + 'GroupChatroom')
@@ -397,7 +463,7 @@ function sendGroupMessage() {
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
+    let messageData = {
         sender: username,
         grpId: grpId,
         message: messageField.val(),
@@ -406,7 +472,7 @@ function sendGroupMessage() {
         type: 'text'
     }
 
-    socket.emit('send_group_message', message);
+    socket.emit('send_group_message', messageData);
 
     // groupMessages.push(message)
 
@@ -1100,6 +1166,52 @@ socket.on('group_message_sent', (data) => {
         let messagejson = JSON.stringify(groupMessages)
 
         console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("group-messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
+})
+
+socket.on('group_image_sent', (data) => {
+    let message = data.message;
+    let sender = data.sender;
+    let grpId = data.grpId;
+    let friends = data.friends;
+
+    let grpFeedback = $('#' + grpId + 'GroupFeedback')
+    grpFeedback.html('');
+
+    var base46Img = 'data:image/jpeg;base64,' + message
+    console.log("Received image from " + sender);
+
+    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    let messageData = {
+        sender: sender,
+        grpId: grpId,
+        message: message,
+        friends: friends,
+        time: time,
+        type: 'image'
+    }
+        
+    groupMessages.push(messageData)
+    console.log("messages array is " + JSON.stringify(groupMessages));
+
+    if (groupMessages) {
+        let messagejson = JSON.stringify(groupMessages)
 
         fs.writeFile("group-messages", messagejson, (err) => {
             if(err) {
