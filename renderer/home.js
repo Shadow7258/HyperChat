@@ -187,15 +187,27 @@ $(document).ready(function() {
     messageField.on('keyup', function () {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
-            console.log("Stopped typing");
-            socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+            if (groupClickedOn == true) {
+                console.log("Stopped typing");
+                socket.emit('stopped_typing', {username: username, to: friendClickedOn})
+            }
+            else {
+                console.log("Stopped typing in group: " + groupName);
+                socket.emit('stopped_typing_group', {username: username, grpId: groupName})
+            }
         }, 3000)
     });
 
     //on keydown, clear the countdown
     messageField.on('keydown', function () {
-        console.log("I: " + username + " am typing to " + friendClickedOn);
-        socket.emit('typing', {username: username, to: friendClickedOn})
+        if (groupClickedOn == false) {
+            console.log("I: " + username + " am typing to " + friendClickedOn);
+            socket.emit('typing', {username: username, to: friendClickedOn})
+        }
+        else {
+            console.log("I: " + username + " am typing in group: " + groupName);
+            socket.emit('typing_group', {username: username, grpId: groupName})
+        }
         clearTimeout(typingTimer);
     });
 
@@ -1143,9 +1155,21 @@ socket.on('receive_typing', (data) => {
     feedback.html("<p><i>" + data.username + " is typing a message..." + "</i></p>")
 })
 
+socket.on('typing_group', (data) => {
+    let sender = data.sender;
+    let grpName = data.grpName;
+    grpFeedback = $('#' + grpName + 'GroupFeedback')
+    grpFeedback.html("<p><i>" + sender + " is typing a message..." + "</i></p>")
+})
+
 //Listen on stopped typing
 socket.on('stopped_typing', () => {
     feedback.html('')
+})
+
+socket.on('stopped_typing_group', () => {
+    grpFeedback = $('#' + grpName + 'GroupFeedback')
+    grpFeedback.html('')
 })
 
 // Listen on change profiel pic
