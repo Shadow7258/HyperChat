@@ -187,7 +187,7 @@ $(document).ready(function() {
     messageField.on('keyup', function () {
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => {
-            if (groupClickedOn == true) {
+            if (groupClickedOn == false) {
                 console.log("Stopped typing");
                 socket.emit('stopped_typing', {username: username, to: friendClickedOn})
             }
@@ -1155,9 +1155,10 @@ socket.on('receive_typing', (data) => {
     feedback.html("<p><i>" + data.username + " is typing a message..." + "</i></p>")
 })
 
-socket.on('typing_group', (data) => {
+socket.on('typing_group_received', (data) => {
     let sender = data.sender;
     let grpName = data.grpName;
+    console.log(sender + " is typing a message. Feedback id is " + '#' + grpName + 'GroupFeedback');
     grpFeedback = $('#' + grpName + 'GroupFeedback')
     grpFeedback.html("<p><i>" + sender + " is typing a message..." + "</i></p>")
 })
@@ -1168,7 +1169,7 @@ socket.on('stopped_typing', () => {
 })
 
 socket.on('stopped_typing_group', () => {
-    grpFeedback = $('#' + grpName + 'GroupFeedback')
+    grpFeedback = $('#' + groupName + 'GroupFeedback')
     grpFeedback.html('')
 })
 
