@@ -385,8 +385,6 @@ function sendGroupImage(imagePath) {
     console.log("Group name is " + groupName);
     grpFeedback = $('#' + groupName + 'GroupFeedback')
     grpFeedback.html('')
-    grpChatroom = $('#' + groupName + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + username + ": <img src='" + imagePath + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -604,6 +602,11 @@ function addGroupMessages() {
                 if (message.type == 'text') {
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
                     grpChatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+                if (message.type == 'image') {
+                    var base46Img = 'data:image/jpeg;base64,' + message.message
+                    grpChatroom = $('#' + message.grpId + 'GroupChatroom')
+                    grpChatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'> </p>")
                 }
             })
         }
@@ -1188,9 +1191,8 @@ socket.on('group_image_sent', (data) => {
     var base46Img = 'data:image/jpeg;base64,' + message
     console.log("Received image from " + sender);
 
-    let nameWithoutSpace = friendClickedOn.split(" ").join("")
-    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
