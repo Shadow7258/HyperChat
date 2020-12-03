@@ -277,6 +277,9 @@ function createGroup(friends) {
     console.log("GROUP ID: " + grpId);
 
     addGroupToHtml(friends, grpId)
+    let grpDropdown = $("#groupDropdown")
+    grpDropdown.prepend('<a class="dropdown-item" id="delete' + grpId + 'Option" onClick="deleteGroup(\'' + grpId + '\')" href="#">Delete Group</a>');
+
 
     groupClickedOn = true;
     groupName = grpId;
@@ -677,6 +680,11 @@ function addGroups() {
                 grpChatroom = $('#' + grpId + 'GroupChatroom')
                 pageContainer.prepend('<section style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
                 addGroupToHtml(friends, grpId)
+                let owner = group['owner']
+                if (owner == username) {
+                    let grpDropdown = $("#groupDropdown")
+                    grpDropdown.prepend('<a class="dropdown-item" id="delete' + grpId + 'Option" onClick="deleteGroup(\'' + grpId + '\')" href="#">Delete Group</a>');
+                }
             })
         }
     }
@@ -768,11 +776,10 @@ function addGroupToHtml(friends, grpId) {
             '</div>' +
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
-                '<div class="dropdown-menu" id="userDropdown">' +
-                '<a class="dropdown-item" id="remove' + grpId + 'Option" href="#">Remove Friend</a>' +
-                '<a class="dropdown-item" href="#">Another action</a>' +
-                '<a class="dropdown-item" href="#">Something else here</a>' +
-            '</div>' +
+                '<div class="dropdown-menu" id="groupDropdown">' +
+                    '<a class="dropdown-item" href="#">Another action</a>' +
+                    '<a class="dropdown-item" href="#">Something else here</a>' +
+                '</div>' +
             '</div>' +
         '</div>' +
     '</div>')
@@ -829,6 +836,46 @@ function removeFriend(name) {
     setTimeout(() => {
         buttonClicked(nextFriend)
     }, 100)
+}
+
+function deleteGroup(grpId) {
+    var friends;
+    var owner;
+    var tempGroups = [];
+
+    if (fs.existsSync('group-list')) {
+        let groupFile = fs.readFileSync('group-list')
+        let groupsArr = JSON.parse(groupFile)
+        groupsjson = JSON.stringify(groupsArr)
+        console.log("Groups are " + groupsjson);
+        groupsArr.forEach(group => {
+            if (group['grpId'] == grpId) {
+                friends = group['friends']
+                owner = group['owner']
+            }
+            else {
+                tempGroups.push(group)
+            }
+        })
+    }
+
+    console.log("Deleting group with id: " + grpId + ", friends: " + friends + ", owner: " + owner);
+
+    console.log("Temps array is " + JSON.stringify(tempGroups));
+
+    let group = $('#' + grpId + '_id')
+    group.remove();
+
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpChatroom.remove();
+
+    groups = tempGroups;
+
+    console.log("Groups array is " + JSON.stringify(groups));
+
+    fs.writeFileSync('group-list', (tempGroups))
+
+    socket.emit('delete_group', {grpId: grpId, owner: owner})
 }
 
 //Listen on other user status change
@@ -1259,6 +1306,45 @@ socket.on("message_sent", (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+})
+
+socket.on('delete_group', (data) => {
+    let grpId = data.grpId;
+    let owner = data.owner;
+
+    var friends;
+    var tempGroups = [];
+
+    if (fs.existsSync('group-list')) {
+        let groupFile = fs.readFileSync('group-list')
+        let groupsArr = JSON.parse(groupFile)
+        groupsjson = JSON.stringify(groupsArr)
+        console.log("Groups are " + groupsjson);
+        groupsArr.forEach(group => {
+            if (group['grpId'] == grpId) {
+                friends = group['friends']
+            }
+            else {
+                tempGroups.push(group)
+            }
+        })
+    }
+
+    console.log("Deleting group with id: " + grpId + ", friends: " + friends + ", owner: " + owner);
+
+    console.log("Temps array is " + JSON.stringify(tempGroups));
+
+    let group = $('#' + grpId + '_id')
+    group.remove();
+
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpChatroom.remove();
+
+    groups = tempGroups;
+
+    console.log("Groups array is " + JSON.stringify(groups));
+
+    fs.writeFileSync('group-list', (tempGroups))
 })
 
 //Listen on typing
