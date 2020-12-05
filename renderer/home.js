@@ -777,7 +777,7 @@ function addGroupToHtml(friends, grpId) {
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="groupDropdown">' +
-                    '<a class="dropdown-item" href="#">Another action</a>' +
+                    '<a class="dropdown-item" href="#" onClick="leaveGroup(\'' + grpId + '\')">Leave Group</a>' +
                     '<a class="dropdown-item" href="#">Something else here</a>' +
                 '</div>' +
             '</div>' +
@@ -792,6 +792,60 @@ function addGroupToHtml(friends, grpId) {
     console.log("Friends str is " + friendsStr);
     friendsGrp.html(friendsStr)
     chatheading.html(friendsStr)
+}
+
+function leaveGroup(grpId) {
+    dialog.showMessageBox({
+        title: "Leave Group",
+        message: "Are you sure you want to leave this group. You will no longer be able to rejoin unless you are re-invited.",
+        buttons: ['Cancel', 'Leave Group']
+    }).then((res) => {
+        let buttonIndex = res.response;
+        if (buttonIndex === 1) {
+            var friends;
+            var owner;
+            var tempGroups = [];
+        
+            console.log(username + " has left group: " + grpId);
+
+            if (fs.existsSync('group-list')) {
+                let groupFile = fs.readFileSync('group-list')
+                let groupsArr = JSON.parse(groupFile)
+                groupsjson = JSON.stringify(groupsArr)
+                console.log("Groups are " + groupsjson);
+                groupsArr.forEach(group => {
+                    if (group['grpId'] == grpId) {
+                        friends = group['friends']
+                        owner = group['owner']
+                    }
+                    else {
+                        tempGroups.push(group)
+                    }
+                })
+            }
+
+            console.log("Deleting group with id: " + grpId + ", friends: " + friends + ", owner: " + owner);
+
+            console.log("Temps array is " + JSON.stringify(tempGroups));
+        
+            let group = $('#' + grpId + '_id')
+            group.remove();
+        
+            grpChatroom = $('#' + grpId + 'GroupChatroom')
+            grpChatroom.remove();
+        
+            groups = tempGroups;
+        
+            console.log("Groups array is " + JSON.stringify(groups));
+        
+            fs.writeFileSync('group-list', (tempGroups))
+        
+            socket.emit('leave_group', {grpId: grpId, username: username, owner: owner, friends: friends})
+        }
+        else {
+            console.log(username + " has NOT left group: " + grpId);
+        }
+    })
 }
 
 function removeFriend(name) {
@@ -875,7 +929,7 @@ function deleteGroup(grpId) {
 
     fs.writeFileSync('group-list', (tempGroups))
 
-    socket.emit('delete_group', {grpId: grpId, owner: owner})
+    socket.emit('delete_group', {grpId: grpId, owner: owner, friends: friends})
 }
 
 //Listen on other user status change
@@ -1192,8 +1246,8 @@ socket.on('group_message_sent', (data) => {
 
     console.log("Received message: " + message + " from " + sender + " in group: " + grpId);
 
-    let chatroom = $('#' + grpId + 'GroupChatroom')
-    chatroom.append("<p class='message'>" + sender + ": " + message + "</p>")
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + sender + ": " + message + "</p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -1345,6 +1399,46 @@ socket.on('delete_group', (data) => {
     console.log("Groups array is " + JSON.stringify(groups));
 
     fs.writeFileSync('group-list', (tempGroups))
+})
+
+socket.on('leave_group', (data) => {
+    let sender = data.username;
+    let owner = data.owner;
+    let friends = data.friends;
+    let grpId = data.grpId;
+    let message = sender + " has left the group."
+
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + message + "</p>")
+
+    var currentdate = new Date();
+    var time = currentdate.getDate() + "/"
+                + currentdate.getHours() + ":"
+                + currentdate.getMinutes() + ":"
+                + currentdate.getSeconds();
+
+    message = {
+        grpId: grpId,
+        message: message,
+        to: friends,
+        time: time,
+        type: 'info'
+    }
+
+    groupMessages.push(message)
+
+    if (groupMessages) {
+        let messagejson = JSON.stringify(groupMessages)
+
+        console.log("Messages2 is " + messagejson);
+
+        fs.writeFile("group-messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
 })
 
 //Listen on typing
