@@ -1412,13 +1412,21 @@ socket.on('leave_group', (data) => {
     let grpId = data.grpId;
     let message = sender + " has left the group."
 
+    console.log("grpId: " + grpId + "\nowner: " + owner + "\nmessage: " + message + "\nsender: " + sender + "\nfriends: " + friends);
+
     grpChatroom = $('#' + grpId + 'GroupChatroom')
-    grpChatroom.append("<p class='message' style='font-style: italic;>" + message + "</p>")
+    grpChatroom.append("<p class='message' style='font-style: italic;'>" + message + "</p>")
+
 
     let friendsGrp = $('#' + grpId + 'friends')
-    var friendsStr = friends[0];
-    for (let i = 1; i < friends.length; i++) {
-        friendsStr += ", " + friends[i];  
+    let friendsArr = friends;
+    const index = friendsArr.indexOf(sender);
+    if (index > -1) {
+        friendsArr.splice(index, 1);
+    }
+    var friendsStr = friendsArr[0];
+    for (let i = 1; i < friendsArr.length; i++) {
+        friendsStr += ", " + friendsArr[i];  
     }
     console.log("Friends str is " + friendsStr);
     friendsGrp.html(friendsStr)
