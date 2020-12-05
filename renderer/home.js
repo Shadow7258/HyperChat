@@ -611,6 +611,10 @@ function addGroupMessages() {
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
                     grpChatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'> </p>")
                 }
+                if (message.type == 'info') {
+                    grpChatroom = $('#' + message.grpId + 'GroupChatroom')
+                    grpChatroom.append("<p class='message' style='font-style: italic;'>" + message.message + "</p>")
+                }
             })
         }
     }
@@ -1409,7 +1413,16 @@ socket.on('leave_group', (data) => {
     let message = sender + " has left the group."
 
     grpChatroom = $('#' + grpId + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + message + "</p>")
+    grpChatroom.append("<p class='message' style='font-style: italic;>" + message + "</p>")
+
+    let friendsGrp = $('#' + grpId + 'friends')
+    var friendsStr = friends[0];
+    for (let i = 1; i < friends.length; i++) {
+        friendsStr += ", " + friends[i];  
+    }
+    console.log("Friends str is " + friendsStr);
+    friendsGrp.html(friendsStr)
+    chatheading.html(friendsStr)
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
