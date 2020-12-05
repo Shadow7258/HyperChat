@@ -827,6 +827,12 @@ function leaveGroup(grpId) {
                     }
                 })
             }
+    
+            let groupjson = JSON.stringify(groupArr)
+    
+            console.log("Group array is " + groupjson);
+    
+            fs.writeFileSync('group-list', groupjson)
 
             console.log("Deleting group with id: " + grpId + ", friends: " + friends + ", owner: " + owner);
 
@@ -1431,6 +1437,41 @@ socket.on('leave_group', (data) => {
     console.log("Friends str is " + friendsStr);
     friendsGrp.html(friendsStr)
     chatheading.html(friendsStr)
+
+    let groupArr = [];
+    let groupData;
+
+    if (fs.existsSync('group-list')) {
+        let groupList = fs.readFileSync('group-list')
+        groupList = JSON.parse(groupList)
+        groupList.forEach(group => {
+            if (group['grpId'] == grpId) {
+                let friendsArr = group['friends']
+                let ownerData = group['owner']
+                var index = friendsArr.indexOf(username);
+                friendsArr.splice(index, 1);
+                if (username == owner) {
+                    ownerData = friendsArr[0];
+                }
+                groupData = {
+                    friends: friendsArr,
+                    owner: ownerData, 
+                    grpId: grpId, 
+                    icon: "grp icon"
+                }
+                groupArr.push(groupData)
+            }
+            else { 
+                groupArr.push(group)
+            }
+        })
+    }
+
+    let groupjson = JSON.stringify(groupArr)
+
+    console.log("Group array is " + groupjson);
+
+    fs.writeFileSync('group-list', groupjson)
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
