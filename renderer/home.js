@@ -453,7 +453,69 @@ function createGroup(friends) {
 
 function createChat(name) {
     console.log("Create chat button clicked.")
-    socket.emit('create_dm', {friend: name, sender: username})
+
+    userList.push(name);
+
+    addChatListToHtml(name)
+
+    socket.emit('get_status', {username: name})
+
+    ipcRenderer.send('getImage', name)
+
+    fs.appendFile("friend-list", name + '\n', (err) => {
+        if (err) {
+            console.log("An error ocurred creating the file "+ err.message)
+        }
+        console.log("User file has succesfully been created.");
+    })
+
+    friendClickedOn = name;
+    groupClickedOn = false;
+
+    let nameWithoutSpace = name.split(" ").join("")
+    pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
+
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
+    friendsChatroom.hide()
+
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    feedback = $('#' + nameWithoutSpace + 'Feedback')
+    chatroom.show()
+    chatheading.html(name)
+
+    fs.readFile('messages', (err, data) => {
+        if (data) {
+            let dataObj = JSON.parse(data)
+            messageArr = dataObj;
+            messageArr.forEach(message => {
+                let nameWithoutSpace = message.sender.split(" ").join("")
+                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
+                if (message.to == name && message.sender == username) {
+                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+                else if (message.sender == name && message.to == username) {
+                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                    console.log( message.sender + ": " + message.message);
+                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                }
+            });
+        }
+    })
 }
 
 function removeButton(name) {
@@ -1092,7 +1154,7 @@ socket.on('friend_invite', (data) => {
 
 function acceptInvite(friend) {
     console.log(username + " has accepted " + friend + "'s friend invitation");
-    socket.emit('accept_friend_invite', {sender: username, friend: friend})
+    socket.emit('create_dm', {sender: username, friend: friend})
     // remove from array 
     let index = friendInvites.indexOf(friend)
     friendInvites.splice(index, 1)
@@ -1116,6 +1178,10 @@ function declineInvite(friend) {
     let content = $('#' + name + '_inviteList')
     content.remove()
 }
+
+socket.on('create_dm', (sender) => {
+    createChat(sender)
+})
 
 //Listen on other user status change
 socket.on('status_changed', (data) => {
@@ -1217,74 +1283,6 @@ socket.on('group_invite_accepted', (data) => {
         title: "Invitation accepted",
         message: username + " has accepted the group invite",
         buttons: ['OK']
-    })
-})
-
-socket.on('dm_invite', (data) => {
-    let sender = data.sender;
-    console.log("DM invite received from " + sender);
-
-    userList.push(sender);
-
-    addChatListToHtml(sender)
-
-    socket.emit('get_status', {username: sender})
-
-    ipcRenderer.send('getImage', sender)
-
-    fs.appendFile("friend-list", sender + '\n', (err) => {
-        if (err) {
-            console.log("An error ocurred creating the file "+ err.message)
-        }
-        console.log("User file has succesfully been created.");
-    })
-
-    friendClickedOn = sender;
-    groupClickedOn = false;
-
-    let nameWithoutSpace = sender.split(" ").join("")
-    pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
-
-    userList.forEach(user => {
-        let nameWithoutSpaceInLoop = user.split(" ").join("")
-        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-        chatroom.hide()
-    });
-
-    groups.forEach(group => {
-        let grpId = group['grpId']
-        grpChatroom = $('#' + grpId + 'GroupChatroom')
-        grpFeedback = $('#' + grpId + 'GroupFeedback')
-        grpChatroom.hide()
-    })
-
-    friendsChatroom.hide()
-
-    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    feedback = $('#' + nameWithoutSpace + 'Feedback')
-    chatroom.show()
-    chatheading.html(name)
-
-    fs.readFile('messages', (err, data) => {
-        if (data) {
-            let dataObj = JSON.parse(data)
-            messageArr = dataObj;
-            messageArr.forEach(message => {
-                let nameWithoutSpace = message.sender.split(" ").join("")
-                console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
-                if (message.to == name && message.sender == username) {
-                    chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
-                    console.log( message.sender + ": " + message.message);
-                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                }
-                else if (message.sender == name && message.to == username) {
-                    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-                    console.log( message.sender + ": " + message.message);
-                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                }
-            });
-        }
     })
 })
 
