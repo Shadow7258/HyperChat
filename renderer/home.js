@@ -181,7 +181,7 @@ $(document).ready(function() {
 
     pendingFriendsBtn.on("click", () => {
         console.log("Pending invites are " + pendingInvites);
-        console.log("Friend inites are " + friendInites);
+        console.log("Friend inites are " + friendInvites);
         friendInvitesDiv.show()
         blockedFriendsDiv.hide()
         pendingFriendsDiv.show()
@@ -1053,6 +1053,7 @@ socket.on('friend_invite', (data) => {
     console.log(friend + " has invite " + username + " to be friends!");
     friendInvites.push(friend);
     friendInvites.forEach((friend) => {
+        let name = friend.split(' ').join('');
         pendingFriendsDiv.append(
             '<li class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
@@ -1065,17 +1066,35 @@ socket.on('friend_invite', (data) => {
                     '</div>' + 
                 '</div>' + 
                 '<div class="btn-group" role="group" style="float: right">' + 
-                    '<button style="width: max-content;" class="btn btn-outline-success">Accept <i class="fa fa-check"></i></button>' + 
-                    '<button style="width: max-content;" class="btn btn-outline-danger">Decline <i class="fa fa-times"></i></button>' + 
+                    '<button onClick="acceptInvite(\'' + friend + '\')" id="' + name + '_accept" style="width: max-content;" class="btn btn-outline-success">Accept <i class="fa fa-check"></i></button>' + 
+                    '<button onClick="declineInvite(\'' + friend + '\')" id="' + name + '_decline" style="width: max-content;" class="btn btn-outline-danger">Decline <i class="fa fa-times"></i></button>' + 
                 '</div>' +
             '</li>');
     })
 })
 
+function acceptInvite(friend) {
+    console.log(username + " has accepted " + friend + "'s friend invitation");
+    socket.emit('accept_friend_invite', {sender: username, friend: friend})
+}
+
+function declineInvite(friend) {
+    console.log(username + " has declined " + friend + "'s friend invitation");
+    socket.emit('decline_friend_invite', {sender: username, friend: friend})
+}
+
 //Listen on other user status change
 socket.on('status_changed', (data) => {
     console.log("Getting status for " + data.username);
     socket.emit('get_status', {username: data.username})
+})
+
+socket.on('invite_accepted', (sender) => {
+    console.log("Friend invite to " + sender + " has been accepted");
+})
+
+socket.on('invite_declined', (sender) => {
+    console.log("Friend invite to " + sender + " has been declined");
 })
 
 //Listen on user status
