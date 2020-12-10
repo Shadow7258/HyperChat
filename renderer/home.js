@@ -144,6 +144,7 @@ $(document).ready(function() {
     pendingFriendsDiv.hide()
     allFriendsDiv.hide()
     onlineFriendsDiv.hide()
+    friendsChatroom.hide()
 
     const button = document.querySelector('#emoji-button');
 
@@ -332,7 +333,24 @@ $(document).ready(function() {
 function friendsClicked() {
     console.log("Clicked on friends button");
     chatheading.html('Friends')
-    
+
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        friends = group['friends']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
+    friendsChatroom.show()
+
     // Display online friends
     onlineFriendsDiv.show();
 }
@@ -436,11 +454,6 @@ function createGroup(friends) {
 function createChat(name) {
     console.log("Create chat button clicked.")
     socket.emit('create_dm', {friend: name, sender: username})
-    dialog.showMessageBox({
-        title: 'Awaiting response',
-        message: "Awaiting " + name + "'s response...",
-        buttons: ['OK']
-    })
 }
 
 function removeButton(name) {
@@ -669,6 +682,8 @@ function groupClicked(grpId) {
         grpChatroom.hide()
     })
 
+    friendsChatroom.hide()
+
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
@@ -698,6 +713,8 @@ function buttonClicked(name) {
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
     })
+
+    friendsChatroom.hide()
 
     let nameWithoutSpace = name.split(" ").join("")
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
@@ -1203,44 +1220,29 @@ socket.on('group_invite_accepted', (data) => {
     })
 })
 
-socket.on('dm_invite_declined', (name) => {
-    console.log(name + " has declined the dm invite");
-    
-    dialog.showMessageBox({
-        title: "Invitation declined",
-        message: name + " has declined the dm invite",
-        buttons: ['OK']
-    })
-})
+socket.on('dm_invite', (data) => {
+    let sender = data.sender;
+    console.log("DM invite received from " + sender);
 
-socket.on('dm_invite_accepted', (name) => {
-    console.log(name + " has accepted the dm invite.");
+    userList.push(sender);
 
-    dialog.showMessageBoxSync({
-        title: "Invitation accepted",
-        message: name + " has accepted the dm invite",
-        buttons: ['OK']
-    })
+    addChatListToHtml(sender)
 
-    userList.push(name)
+    socket.emit('get_status', {username: sender})
 
-    addChatListToHtml(name)
+    ipcRenderer.send('getImage', sender)
 
-    socket.emit('get_status', {username: name})
-
-    ipcRenderer.send('getImage', name)
-
-    fs.appendFile("friend-list", name + '\n', (err) => {
-        if(err){
+    fs.appendFile("friend-list", sender + '\n', (err) => {
+        if (err) {
             console.log("An error ocurred creating the file "+ err.message)
         }
         console.log("User file has succesfully been created.");
     })
 
-    friendClickedOn = name;
+    friendClickedOn = sender;
     groupClickedOn = false;
 
-    let nameWithoutSpace = name.split(" ").join("")
+    let nameWithoutSpace = sender.split(" ").join("")
     pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
 
     userList.forEach(user => {
@@ -1256,6 +1258,8 @@ socket.on('dm_invite_accepted', (name) => {
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
     })
+
+    friendsChatroom.hide()
 
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     feedback = $('#' + nameWithoutSpace + 'Feedback')
@@ -1280,89 +1284,6 @@ socket.on('dm_invite_accepted', (name) => {
                     chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
                 }
             });
-        }
-    })
-})
-
-socket.on('dm_invite', (data) => {
-    let sender = data.sender;
-    console.log("DM invite received from " + sender);
-    dialog.showMessageBox({
-        type: "info",
-        title: "DM Invite!", 
-        message: sender + " has invited you to his dm",
-        buttons: ['Accept', 'Cancel']
-    }).then(res => {
-        let buttonIndex = res.response;
-        if (buttonIndex === 0) {
-            console.log("Accepted dm invite from " + sender);
-
-            socket.emit('dm_invite_accepted', {username: username, recepient: sender})
-
-            userList.push(sender);
-
-            addChatListToHtml(sender)
-
-            socket.emit('get_status', {username: sender})
-
-            ipcRenderer.send('getImage', sender)
-        
-            fs.appendFile("friend-list", sender + '\n', (err) => {
-                if (err) {
-                    console.log("An error ocurred creating the file "+ err.message)
-                }
-                console.log("User file has succesfully been created.");
-            })
-        
-            friendClickedOn = sender;
-            groupClickedOn = false;
-        
-            let nameWithoutSpace = sender.split(" ").join("")
-            pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
-        
-            userList.forEach(user => {
-                let nameWithoutSpaceInLoop = user.split(" ").join("")
-                chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
-                feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
-                chatroom.hide()
-            });
-        
-            groups.forEach(group => {
-                let grpId = group['grpId']
-                grpChatroom = $('#' + grpId + 'GroupChatroom')
-                grpFeedback = $('#' + grpId + 'GroupFeedback')
-                grpChatroom.hide()
-            })
-        
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            feedback = $('#' + nameWithoutSpace + 'Feedback')
-            chatroom.show()
-            chatheading.html(name)
-        
-            fs.readFile('messages', (err, data) => {
-                if (data) {
-                    let dataObj = JSON.parse(data)
-                    messageArr = dataObj;
-                    messageArr.forEach(message => {
-                        let nameWithoutSpace = message.sender.split(" ").join("")
-                        console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
-                        if (message.to == name && message.sender == username) {
-                            chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
-                            console.log( message.sender + ": " + message.message);
-                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                        }
-                        else if (message.sender == name && message.to == username) {
-                            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-                            console.log( message.sender + ": " + message.message);
-                            chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
-                        }
-                    });
-                }
-            })
-        }
-        else {
-            console.log("Declined DM invite");
-            socket.emit('dm_invite_declined', {username: username, recepient: sender})
         }
     })
 })
