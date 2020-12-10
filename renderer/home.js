@@ -1055,7 +1055,7 @@ socket.on('friend_invite', (data) => {
     friendInvites.forEach((friend) => {
         let name = friend.split(' ').join('');
         pendingFriendsDiv.append(
-            '<li class="list-group-item" aria-current="true">' + 
+            '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
                     '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col">' + 
@@ -1076,11 +1076,28 @@ socket.on('friend_invite', (data) => {
 function acceptInvite(friend) {
     console.log(username + " has accepted " + friend + "'s friend invitation");
     socket.emit('accept_friend_invite', {sender: username, friend: friend})
+    // remove from array 
+    let index = friendInvites.indexOf(friend)
+    friendInvites.splice(index, 1)
+
+    // remove html from friends div
+    let name = friend.split(' ').join('')
+    let content = $('#' + name + '_inviteList')
+    content.remove()
+    
+    // add user to dmlist and create chatroom
+    createChat(friend)
 }
 
 function declineInvite(friend) {
     console.log(username + " has declined " + friend + "'s friend invitation");
     socket.emit('decline_friend_invite', {sender: username, friend: friend})
+    // remove from array and html code
+    let index = friendInvites.indexOf(friend)
+    friendInvites.splice(index, 1)
+    let name = friend.split(' ').join('')
+    let content = $('#' + name + '_inviteList')
+    content.remove()
 }
 
 //Listen on other user status change
@@ -1091,10 +1108,16 @@ socket.on('status_changed', (data) => {
 
 socket.on('invite_accepted', (sender) => {
     console.log("Friend invite to " + sender + " has been accepted");
+    // remove from array
+    let index = pendingInvites.indexOf(sender)
+    pendingInvites.splice(index, 1)
 })
 
 socket.on('invite_declined', (sender) => {
     console.log("Friend invite to " + sender + " has been declined");
+    // remove from array
+    let index = friendInvites.indexOf(sender)
+    friendInvites.splice(index, 1)
 })
 
 //Listen on user status
