@@ -37,6 +37,18 @@ let chatroom, feedback, grpChatroom, grpFeedback
 let chatheading = $('#chat-heading')
 let saveChangesBtn = $('#saveChangesBtn')
 let username, email
+let friendsChatroom = $('#friendsChatroom');
+let addFriendBtn = $('#addFriendBtn')
+let newFriend = $('#newFriend')
+let onlineFriendsBtn = $('#onlineFriendsBtn')
+let allFriendsBtn = $('#allFriendsBtn')
+let pendingFriendsBtn = $('#pendingFriendsBtn')
+let blockedFriendsBtn = $('#blockedFriendsBtn')
+let friendInvitesDiv = $('#friendInvites')
+let onlineFriendsDiv = $('#onlineFriends')
+let allFriendsDiv = $('#allFriends')
+let pendingFriendsDiv = $('#pendingFriends')
+let blockedFriendsDiv = $('#blockedFriends')
 
 let message = {
     sender: "",
@@ -46,7 +58,8 @@ let message = {
     type: ""
 }
 
-let userList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = [];
+let userList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = []
+let friends = [], pendingInvites = [], friendInvites = [], friendsBlocked = [], friendsOnline = [];
 
 remote.getCurrentWindow().on('close', () => {
     socket.emit('logout', {username: username})
@@ -80,10 +93,27 @@ $(document).ready(function() {
     pageContainer = $('#page-container')
     chatheading = $('#chat-heading')
     saveChangesBtn = $('#saveChangesBtn')
+    friendsChatroom = $('#friendsChatroom');
+    addFriendBtn = $('#addFriendBtn')
+    newFriend = $('#newFriend')
+    onlineFriendsBtn = $('#onlineFriendsBtn')
+    allFriendsBtn = $('#allFriendsBtn')
+    pendingFriendsBtn = $('#pendingFriendsBtn')
+    blockedFriendsBtn = $('#blockedFriendsBtn')
+    onlineFriendsDiv = $('#onlineFriends')
+    allFriendsDiv = $('#allFriends')
+    pendingFriendsDiv = $('#pendingFriends')
+    blockedFriendsDiv = $('#blockedFriends')
+    friendInvitesDiv = $('#friendInvites')
 
     getUsers()
 
     getUsername()
+
+    setTimeout(() => {
+        console.log("Users online are " + users);
+        console.log("Friends are " + userList);
+    }, 2000)
 
     newUserName.on("keyup", (e) => {
         if (e.key == 'Enter') {
@@ -109,6 +139,12 @@ $(document).ready(function() {
         }
     });
 
+    friendInvitesDiv.hide()
+    blockedFriendsDiv.hide()
+    pendingFriendsDiv.hide()
+    allFriendsDiv.hide()
+    onlineFriendsDiv.hide()
+
     const button = document.querySelector('#emoji-button');
 
     const picker = new EmojiButton();
@@ -123,6 +159,43 @@ $(document).ready(function() {
     sendImageButton.on("click", () => {
         console.log("Sending Image");
         ipcRenderer.send('sendImage')
+    })
+
+    allFriendsBtn.on("click", () => {
+        console.log("All friends are " + friends);
+        friendInvitesDiv.hide()
+        blockedFriendsDiv.hide()
+        pendingFriendsDiv.hide()
+        allFriendsDiv.show()
+        onlineFriendsDiv.hide()
+    })
+
+    onlineFriendsBtn.on("click", () => {
+        console.log("Online friends are " + friendsOnline);
+        friendInvitesDiv.hide()
+        blockedFriendsDiv.hide()
+        pendingFriendsDiv.hide()
+        allFriendsDiv.hide()
+        onlineFriendsDiv.show()
+    })
+
+    pendingFriendsBtn.on("click", () => {
+        console.log("Pending invites are " + pendingInvites);
+        console.log("Friend inites are " + friendInites);
+        friendInvitesDiv.show()
+        blockedFriendsDiv.hide()
+        pendingFriendsDiv.show()
+        allFriendsDiv.hide()
+        onlineFriendsDiv.hide()
+    })
+
+    blockedFriendsBtn.on("click", () => {
+        console.log("Blocked friends are " + friendsBlocked);
+        friendInvitesDiv.hide()
+        blockedFriendsDiv.show()
+        pendingFriendsDiv.hide()
+        allFriendsDiv.hide()
+        onlineFriendsDiv.hide()
     })
 
     ipcRenderer.on('imagePathReceived', (e, args) => {
@@ -144,6 +217,28 @@ $(document).ready(function() {
         let status = optionClicked.val().toLowerCase()
         console.log("Option clicked is " + status);
         socket.emit('change_status', {username: username, status: status})
+    })
+
+    addFriendBtn.on('click', () => {
+        let friend = newFriend.val()
+        console.log("Addding friend " + friend);
+        console.log("Users array is " + users);
+        if (friend == username) {
+            console.log("You cannot create friends with yourself.");
+            dialog.showErrorBox("Error!", "You cannot create friends with yourself.");
+        }
+        else if (friend == '' || friend === undefined || friend === null) {
+            console.log("Please type a valid username.");
+            dialog.showErrorBox("Error!", "Please type a valid username.")
+        }
+        else if (!users.includes(friend)) {
+            console.log("User doesn't exist");
+            dialog.showErrorBox("Error!", "User (" + friend + ") doesn't exist!")
+        }
+        else {
+            console.log("User exists");
+            addFriend(friend)
+        }
     })
 
     // Create Chat button clicked
@@ -234,6 +329,14 @@ $(document).ready(function() {
     });
 });
 
+function friendsClicked() {
+    console.log("Clicked on friends button");
+    chatheading.html('Friends')
+    
+    // Display online friends
+    onlineFriendsDiv.show();
+}
+
 socket.on('user_validation', (data) => {
     let user = data.user;
     let exists = data.exists;
@@ -263,6 +366,15 @@ socket.on('checkUsers', (exists) => {
         userExists = false;
     }
 })
+
+function addFriend(friend) {
+    socket.emit('add_friend', {friend: friend, sender: username});
+    dialog.showMessageBox({
+        title: 'Friend Invite',
+        message: 'A friend invite has been sent to ' + friend + '. You will be notified on his response.',
+        buttons: ['OK']
+    })
+}
 
 function createGroup(friends) {
     console.log("Creating group with friends: " + friends);
@@ -935,6 +1047,30 @@ function deleteGroup(grpId) {
 
     socket.emit('delete_group', {grpId: grpId, owner: owner, friends: friends})
 }
+
+socket.on('friend_invite', (data) => {
+    let friend = data.sender;
+    console.log(friend + " has invite " + username + " to be friends!");
+    friendInvites.push(friend);
+    friendInvites.forEach((friend) => {
+        pendingFriendsDiv.append(
+            '<li class="list-group-item" aria-current="true">' + 
+                '<div class="btn-group" role="group" style="float: left">' + 
+                    '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<div class="col">' + 
+                        '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
+                        '<div class="row"> ' + 
+                            '<small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>' + 
+                        '</div>' + 
+                    '</div>' + 
+                '</div>' + 
+                '<div class="btn-group" role="group" style="float: right">' + 
+                    '<button style="width: max-content;" class="btn btn-outline-success">Accept <i class="fa fa-check"></i></button>' + 
+                    '<button style="width: max-content;" class="btn btn-outline-danger">Decline <i class="fa fa-times"></i></button>' + 
+                '</div>' +
+            '</li>');
+    })
+})
 
 //Listen on other user status change
 socket.on('status_changed', (data) => {

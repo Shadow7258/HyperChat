@@ -49,6 +49,9 @@
                 </div>
 
                 <div id="chat-list" class="dropdown list-group list-group-flush">
+                    <button class="btn btn-outline-primary" style="margin: 5px" onClick="friendsClicked()">
+                        Friends
+                    </button>
                     <!-- <div style="padding-right: 5px; outline: none; cursor: move;" type="button" onclick="buttonClicked('User 1')" class="list-group-item list-group-item-action">
                         <div class="row">
                             <div class="col-4">
@@ -103,9 +106,48 @@
                     <label id="chat-heading" for="chatheading">Chat</label>
                 </nav>
 
-                <div id="page-container" class="container-fluid">
-  
+                <div class="container-fluid">
+                    <section class="chatroom" style="height: 83vh; overflow-y: auto;" id="friendsChatroom">
+                        <div class="btn-group" role="group" aria-label="Basic outlined example">
+                            <a type="button" id="onlineFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Online</a>
+                            <a type="button" id="allFriendsBtn" class="btn btn-link" style="padding-top: 15px;">All</a>
+                            <a type="button" id="pendingFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Pending</a>
+                            <a type="button" id="blockedFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Blocked</a>
+                            <button data-toggle="modal" data-target="#addFriendModal" type="button" class="btn btn-primary" style="margin: 10px; border-radius: 5px;">Add Friend</button>
+                        </div>
+                        <hr style="margin-top: 0px">
+                        <section class="friendsSection">
+                            <ul id="pendingFriends" class="list-group"></ul>
+                            <ul id="friendInvites" class="list-group"></ul>
+                            <ul id="onlineFriends" class="list-group">
+                                <!-- <li class="list-group-item" aria-current="true">
+                                    <div class="btn-group" role="group" style="float: left">
+                                        <img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">
+                                        <div class="col">
+                                            <div style="margin-top: 2px;;" class="row">
+                                                Friend 1
+                                            </div>
+                                            <div class="row"> 
+                                                <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group" role="group" style="float: right">
+                                        <button style="width: max-content;" class="btn btn-outline-success">Accept <i class="fa fa-check"></i></button>
+                                        <button style="width: max-content;" class="btn btn-outline-danger">Decline <i class="fa fa-times"></i></button>
+                                    </div>
+                                </li> -->
+                            </ul>
+                            <ul id="allFriends" class="list-group"></ul>
+                            <ul id="blockedFriends" class="list-group"></ul>
+                        </section>
+                    </section>
                 </div>
+
+                <div id="page-container" class="container-fluid">
+
+                </div>
+
                 <div class="input-group mb-3 d-flex align-items-end">
                     <input id="message-field" type="text" class="form-control" placeholder="Enter message" style="border-color: #17a2b8;">
                     <div class="input-group-append">
@@ -138,6 +180,26 @@
                                 <p style="text-align:center;"><a href="#" onclick="logout()">Logout</a></p>
                                 <div style="text-align: center">
                                     <button id="saveChangesBtn" class="btn btn-info" data-dismiss="modal">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="addFriendModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-body ui-front">
+                                <h5 class="card-title">Add Friend</h5><br>
+                                <div class="input-group mb-3">
+                                    <input type="text" id="newFriend" class="form-control" placeholder="Enter the name of the user">
+                                </div>
+                                <div style="text-align: center">
+                                    <button id="addFriendBtn" class="btn btn-info" data-dismiss="modal">Add Friend!</button>
                                 </div>
                             </div>
                         </div>
