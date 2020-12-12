@@ -110,6 +110,14 @@ $(document).ready(function() {
 
     getUsername()
 
+    let friendsDict = fs.readFileSync('friends')
+    friendsDict = JSON.parse(friendsDict)
+    console.log(JSON.stringify(friendsDict));
+    friends = friendsDict['friends']
+    friendInvites = friendsDict['friendInvites']
+    pendingFriends = friendsDict['pendingFriends']
+    friendsBlocked = friendsDict['friendsBlocked']
+
     setTimeout(() => {
         console.log("Users online are " + users);
         console.log("Friends are " + userList);
@@ -167,8 +175,14 @@ $(document).ready(function() {
         friendInvitesDiv.hide()
         blockedFriendsDiv.hide()
         pendingFriendsDiv.hide()
-        allFriendsDiv.show()
         onlineFriendsDiv.hide()
+
+        friends.forEach(friend => {
+            console.log("Friend: " + friend);
+            socket.emit('get_friend_status', (friend))
+        })
+
+        allFriendsDiv.show()
     })
 
     onlineFriendsBtn.on("click", () => {
@@ -177,17 +191,25 @@ $(document).ready(function() {
         blockedFriendsDiv.hide()
         pendingFriendsDiv.hide()
         allFriendsDiv.hide()
+
+        // Get online friends
+        friends.forEach(friend => {
+            console.log("Friend: " + friend);
+            socket.emit('get_friends_online', (friend))
+        })
+
+        // Display online friends
         onlineFriendsDiv.show()
     })
 
     pendingFriendsBtn.on("click", () => {
         console.log("Pending invites are " + pendingInvites);
         console.log("Friend inites are " + friendInvites);
-        friendInvitesDiv.show()
         blockedFriendsDiv.hide()
         pendingFriendsDiv.show()
         allFriendsDiv.hide()
         onlineFriendsDiv.hide()
+        friendInvitesDiv.show()
     })
 
     blockedFriendsBtn.on("click", () => {
@@ -351,8 +373,14 @@ function friendsClicked() {
 
     friendsChatroom.show()
 
+    // Get online friends
+    friends.forEach(friend => {
+        console.log("Friend: " + friend);
+        socket.emit('get_friends_online', (friend))
+    })
+
     // Display online friends
-    onlineFriendsDiv.show();
+    onlineFriendsDiv.show()
 }
 
 socket.on('user_validation', (data) => {
@@ -386,6 +414,7 @@ socket.on('checkUsers', (exists) => {
 })
 
 function addFriend(friend) {
+    pendingInvites.push(friend)
     socket.emit('add_friend', {friend: friend, sender: username});
     dialog.showMessageBox({
         title: 'Friend Invite',
@@ -1137,11 +1166,8 @@ socket.on('friend_invite', (data) => {
             '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
                     '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
-                    '<div class="col">' + 
-                        '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
-                        '<div class="row"> ' + 
-                            '<small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>' + 
-                        '</div>' + 
+                    '<div class="col" style="padding: 0px">' + 
+                        '<div style="margin-top: 10px;">' + friend + '</div>' + 
                     '</div>' + 
                 '</div>' + 
                 '<div class="btn-group" role="group" style="float: right">' + 
@@ -1166,6 +1192,20 @@ function acceptInvite(friend) {
     
     // add user to dmlist and create chatroom
     createChat(friend)
+
+    // Add friend to array of friends
+    friends.push(friend)
+
+    // Add to file
+    let dataObj = {
+        friends: friends,
+        friendsOnline: friendsOnline,
+        friendInvites: friendInvites,
+        pendingInvites: pendingInvites,
+        friendsBlocked: friendsBlocked
+    }
+
+    fs.writeFileSync('friends', (dataObj))
 }
 
 function declineInvite(friend) {
@@ -1180,7 +1220,23 @@ function declineInvite(friend) {
 }
 
 socket.on('create_dm', (sender) => {
+    let index = pendingInvites.indexOf(friend)
+    pendingInvites.splice(index, 1)
+
     createChat(sender)
+
+    friends.push(friend)
+
+    // Add to file
+    let dataObj = {
+        friends: friends,
+        friendsOnline: friendsOnline,
+        friendInvites: friendInvites,
+        pendingInvites: pendingInvites,
+        friendsBlocked: friendsBlocked
+    }
+
+    fs.writeFileSync('friends', (dataObj))
 })
 
 //Listen on other user status change
@@ -1194,6 +1250,20 @@ socket.on('invite_accepted', (sender) => {
     // remove from array
     let index = pendingInvites.indexOf(sender)
     pendingInvites.splice(index, 1)
+
+    // Add to array 
+    friends.push(sender);
+
+    // Add to file
+    let dataObj = {
+        friends: friends,
+        friendsOnline: friendsOnline,
+        friendInvites: friendInvites,
+        pendingInvites: pendingInvites,
+        friendsBlocked: friendsBlocked
+    }
+
+    fs.writeFileSync('friends', (dataObj))
 })
 
 socket.on('invite_declined', (sender) => {
@@ -1203,6 +1273,74 @@ socket.on('invite_declined', (sender) => {
     friendInvites.splice(index, 1)
 })
 
+socket.on('friend_online', (friend) => {
+    console.log(friend + " is online");
+    console.log('ONLINE: ' + JSON.stringify(friendsOnline));
+
+    // Add to array
+    if (!friendsOnline.includes(friend)) {
+        friendsOnline.push(friend)
+    }
+
+    onlineFriendsDiv.empty()
+
+    // Append to div
+    friendsOnline.forEach(friend => {
+        let name = friend.split(' ').join('')
+        onlineFriendsDiv.append(
+            '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
+                '<div class="btn-group" role="group" style="float: left">' + 
+                    '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<div class="col">' + 
+                        '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
+                        '<div class="row"> ' + 
+                            '<small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>' + 
+                        '</div>' + 
+                    '</div>' + 
+                '</div>' + 
+            '</li>');
+    })
+
+    onlineFriendsDiv.show();
+
+})
+
+socket.on('friend_status', (data) => {
+    let friend = data.friend;
+    var status, statusCol;
+
+    let name = friend.split(' ').join('')
+    if (data.status === undefined) {
+        status = "offline"
+        statusCol = "text-danger";
+    }
+    else if(data.status == "invisible" || data.status == "offline") {
+        status = "offline"
+        statusCol = "text-danger";
+    }
+    else {
+        status = data.status;
+        statusCol = "text-success";
+    }
+
+    allFriendsDiv.empty()
+
+    // Append to div
+    allFriendsDiv.append(
+        '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
+            '<div class="btn-group" role="group" style="float: left">' + 
+                '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                '<div class="col">' + 
+                    '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
+                    '<div class="row"> ' + 
+                        '<small class="' + statusCol + '" style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">' + status + '</small>' + 
+                    '</div>' + 
+                '</div>' + 
+            '</div>' + 
+        '</li>');
+
+    allFriendsDiv.show();
+})
 //Listen on user status
 socket.on('get_status', (data) => {
     var status, statusCol;

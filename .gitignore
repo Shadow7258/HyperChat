@@ -17,6 +17,7 @@ dist/
 dev-app-update.yml
 group-list
 group-messages
+friends
 
 # Firebase cache
 .firebase/
