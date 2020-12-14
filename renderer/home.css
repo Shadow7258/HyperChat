@@ -9,6 +9,12 @@
     overflow-y: hidden;
 }
 
+#friendsListGroup {
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .container-after-titlebar {
   overflow: hidden!important;
 }

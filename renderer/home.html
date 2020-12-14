@@ -108,36 +108,20 @@
 
                 <div class="container-fluid">
                     <section class="chatroom" style="height: 83vh; overflow-y: auto;" id="friendsChatroom">
-                        <div class="btn-group" role="group" aria-label="Basic outlined example">
-                            <a type="button" id="onlineFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Online</a>
-                            <a type="button" id="allFriendsBtn" class="btn btn-link" style="padding-top: 15px;">All</a>
-                            <a type="button" id="pendingFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Pending</a>
-                            <a type="button" id="blockedFriendsBtn" class="btn btn-link" style="padding-top: 15px;">Blocked</a>
-                            <button data-toggle="modal" data-target="#addFriendModal" type="button" class="btn btn-primary" style="margin: 10px; border-radius: 5px;">Add Friend</button>
-                        </div>
+                        <nav class="nav nav-pills flex-column flex-sm-row">
+                            <a id="onlineFriendsBtn" class="flex-sm-fill text-sm-center nav-link" href="#">Online</a>
+                            <a id="allFriendsBtn" class="flex-sm-fill text-sm-center nav-link" href="#">All</a>
+                            <a id="pendingFriendsBtn" class="flex-sm-fill text-sm-center nav-link" href="#">Pending</a>
+                            <a id="blockedFriendsBtn" class="flex-sm-fill text-sm-center nav-link" href="#">Blocked</a>
+                            <a data-toggle="modal" id="addFriendButton" data-target="#addFriendModal" class="flex-sm-fill text-sm-center nav-link" aria-current="page" href="#">Add Friend</a>
+                        </nav>
+                        
                         <hr style="margin-top: 0px">
+
                         <section class="friendsSection">
                             <ul id="pendingFriends" class="list-group"></ul>
                             <ul id="friendInvites" class="list-group"></ul>
-                            <ul id="onlineFriends" class="list-group">
-                                <!-- <li class="list-group-item" aria-current="true">
-                                    <div class="btn-group" role="group" style="float: left">
-                                        <img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">
-                                        <div class="col">
-                                            <div style="margin-top: 2px;;" class="row">
-                                                Friend 1
-                                            </div>
-                                            <div class="row"> 
-                                                <small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group" role="group" style="float: right">
-                                        <button style="width: max-content;" class="btn btn-outline-success">Accept <i class="fa fa-check"></i></button>
-                                        <button style="width: max-content;" class="btn btn-outline-danger">Decline <i class="fa fa-times"></i></button>
-                                    </div>
-                                </li> -->
-                            </ul>
+                            <ul id="onlineFriends" class="list-group"></ul>
                             <ul id="allFriends" class="list-group"></ul>
                             <ul id="blockedFriends" class="list-group"></ul>
                         </section>
@@ -216,16 +200,22 @@
                             <div class="card-body ui-front">
                                 <h5 class="card-title">Add Users</h5><br>
                                 <div class="input-group mb-3">
-                                    <div class="input-group-prepend" id="addUserInput">
-                                      <!-- <span class="input-group-text" style="height: 90%;">Pranav<i onClick="removeButton" class="fa fa-times" id="crossButton" style="padding-left: 10px; margin-right: -5px;"></i></span> -->
-                                    </div>
+                                    <div class="input-group-prepend" id="addUserInput"></div>
                                     <input type="text" id="newUserName" class="form-control" placeholder="Enter the name of the new user">
                                 </div>
-                                <!-- <input id="newUserName" class="card-subtitle" type="text" placeholder="Enter the name of the user" style="outline: none; width:100%; margin-bottom: 20px; border-radius: 4px; padding-left: 5px;"></input> -->
-                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                <div style="text-align: center">
-                                    <button id="createChatBtn" class="btn btn-info" data-dismiss="modal">Create Chat!</button>
+                                <div id="friendsListGroup" class="list-group">
+                                    <!-- <label style="margin: 0px" class="list-group-item">
+                                        <div class="row">
+                                            <div class="col-11">
+                                                Cras justo odio
+                                            </div>
+                                            <div class="col-1">
+                                                <input class="form-check-input" style="float: right" type="checkbox" value="">
+                                            </div>
+                                        </div>
+                                    </label> -->
                                 </div>
+                                <button style="margin-top: 15px" id="createChatBtn" class="btn btn-info" data-dismiss="modal">Create Chat!</button>
                             </div>
                         </div>
                     </div>

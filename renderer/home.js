@@ -49,6 +49,8 @@ let onlineFriendsDiv = $('#onlineFriends')
 let allFriendsDiv = $('#allFriends')
 let pendingFriendsDiv = $('#pendingFriends')
 let blockedFriendsDiv = $('#blockedFriends')
+let addUserButton = $('#addUserButton')
+let friendsListGroup = $('#friendsListGroup')
 
 let message = {
     sender: "",
@@ -105,18 +107,22 @@ $(document).ready(function() {
     pendingFriendsDiv = $('#pendingFriends')
     blockedFriendsDiv = $('#blockedFriends')
     friendInvitesDiv = $('#friendInvites')
+    addUserButton = $('#addUserButton')
+    friendsListGroup = $('#friendsListGroup')
 
     getUsers()
 
     getUsername()
 
-    let friendsDict = fs.readFileSync('friends')
-    friendsDict = JSON.parse(friendsDict)
-    console.log(JSON.stringify(friendsDict));
-    friends = friendsDict['friends']
-    friendInvites = friendsDict['friendInvites']
-    pendingFriends = friendsDict['pendingFriends']
-    friendsBlocked = friendsDict['friendsBlocked']
+    if (fs.existsSync('friends')) {
+        let friendsDict = fs.readFileSync('friends')
+        friendsDict = JSON.parse(friendsDict)
+        console.log(JSON.stringify(friendsDict['friends']));
+        friends = friendsDict['friends']
+        friendInvites = friendsDict['friendInvites']
+        pendingFriends = friendsDict['pendingFriends']
+        friendsBlocked = friendsDict['friendsBlocked']
+    }
 
     setTimeout(() => {
         console.log("Users online are " + users);
@@ -125,13 +131,19 @@ $(document).ready(function() {
 
     newUserName.on("keyup", (e) => {
         if (e.key == 'Enter') {
-            console.log("Enter clicked");
+            if (userExists == false) {
+                console.log("User doesn't exist");
+                dialog.showErrorBox("Error!", "This user is not in your friends list.");
+                newUserName.val('')
+            }
+            else {
                 console.log("User Exists");
                 let input = $('#addUserInput');
                 friendsInGroup.push(newUserName.val())
                 let nameWithoutSpace = newUserName.val().split(" ").join("");
                 input.append('<span class="input-group-text" style="height: 90%;">' + newUserName.val() +'<i onClick="removeButton(\'' + newUserName.val() + '\')" class="fa fa-times" id="' + nameWithoutSpace + '_crossButton" style="padding-left: 10px; margin-right: -5px;"></i></span>');
                 newUserName.val('');
+            }
         }
     });
 
@@ -153,6 +165,23 @@ $(document).ready(function() {
     allFriendsDiv.hide()
     onlineFriendsDiv.hide()
     friendsChatroom.hide()
+
+    addUserButton.on('click', () => {
+        console.log("Showing friend list"); 
+        friendsListGroup.empty()
+        friendsInGroup = []
+        $('#addUserInput').empty()
+        friends.forEach((friend) => {
+            friendsListGroup.append('<label style="margin: 0px" id="' + friend + '_item" class="list-group-item">' + 
+            '<div class="row">' + 
+                '<div class="col-11">' + friend + '</div>' +
+                '<div class="col-1">' +   
+                    '<input class="form-check-input" style="float: right" id="checkbox" type="checkbox" onClick="friendListClicked(\'' + friend + '\');" value="">' + 
+                '</div>' + 
+            '</div>' + 
+        '</label>')
+        })
+    })
 
     const button = document.querySelector('#emoji-button');
 
@@ -182,6 +211,12 @@ $(document).ready(function() {
             socket.emit('get_friend_status', (friend))
         })
 
+        onlineFriendsBtn.removeClass('active')
+        blockedFriendsBtn.removeClass('active')
+        pendingFriendsBtn.removeClass('active')
+        $('#addFriendButton').removeClass('active')
+        allFriendsBtn.addClass('active')
+
         allFriendsDiv.show()
     })
 
@@ -199,6 +234,12 @@ $(document).ready(function() {
         })
 
         // Display online friends
+        allFriendsBtn.removeClass('active')
+        blockedFriendsBtn.removeClass('active')
+        pendingFriendsBtn.removeClass('active')
+        $('#addFriendButton').removeClass('active')
+        onlineFriendsBtn.addClass('active')
+        
         onlineFriendsDiv.show()
     })
 
@@ -210,6 +251,12 @@ $(document).ready(function() {
         allFriendsDiv.hide()
         onlineFriendsDiv.hide()
         friendInvitesDiv.show()
+
+        onlineFriendsBtn.removeClass('active')
+        blockedFriendsBtn.removeClass('active')
+        allFriendsBtn.removeClass('active')
+        $('#addFriendButton').removeClass('active')
+        pendingFriendsBtn.addClass('active')
     })
 
     blockedFriendsBtn.on("click", () => {
@@ -219,6 +266,12 @@ $(document).ready(function() {
         pendingFriendsDiv.hide()
         allFriendsDiv.hide()
         onlineFriendsDiv.hide()
+
+        onlineFriendsBtn.removeClass('active')
+        pendingFriendsBtn.removeClass('active')
+        allFriendsBtn.removeClass('active')
+        $('#addFriendButton').removeClass('active')
+        blockedFriendsBtn.addClass('active')
     })
 
     ipcRenderer.on('imagePathReceived', (e, args) => {
@@ -230,6 +283,14 @@ $(document).ready(function() {
         else {
             sendGroupImage(imagePath)
         }
+    })
+
+    $('#addFriendButton').on('click', () => {
+        onlineFriendsBtn.removeClass('active')
+        pendingFriendsBtn.removeClass('active')
+        allFriendsBtn.removeClass('active')
+        blockedFriendsBtn.removeClass('active')
+        $('#addFriendButton').addClass('active')
     })
 
     // Save changes button clicked
@@ -266,17 +327,35 @@ $(document).ready(function() {
 
     // Create Chat button clicked
     createChatBtn.on('click', () => {
-        console.log("FRIENDS IN GROUP IS " + friendsInGroup);
-        if (friendsInGroup.length != 0) {
-            if (friendsInGroup.length == 1) {
-                if (userList.includes(newUserName.val())) {
-                    console.log("FRIEND ALREADY EXISTS");
-                    dialog.showErrorBox("Error!", "Friend alrady exists!");
-                    newUserName.val('')
+        let user = newUserName.val()
+        if (user != "") {
+            if (friends.includes(user)) {
+                console.log("Another user to account for: " + user);
+                friendsInGroup.push(user);
+                console.log("FRIENDS IN GROUP IS " + friendsInGroup);
+                if (friendsInGroup.length == 1) {
+                    if (userList.includes(user)) {
+                        dialog.showErrorBox("Error!", "Friend already exists!");
+                        newUserName.val('')
+                    }
+                    else {
+                        createChat(friendsInGroup[0])
+                    }
                 }
-                if (userExists == false) {
-                    console.log("User doesn't exist");
-                    dialog.showErrorBox("Error!", "User doesn't exist!");
+                else {
+                    createGroup(friendsInGroup)
+                }
+                friendsInGroup = [];
+            }
+            else {
+                dialog.showErrorBox("Error!", "User: " + user + " doesn't exist!");
+            }
+        }
+        else {
+            console.log("FRIENDS IN GROUP IS " + friendsInGroup);
+            if (friendsInGroup.length == 1) {
+                if (userList.includes(user)) {
+                    dialog.showErrorBox("Error!", "Friend already exists!");
                     newUserName.val('')
                 }
                 else {
@@ -284,23 +363,9 @@ $(document).ready(function() {
                 }
             }
             else {
-                var friends = friendsInGroup;
-                socket.emit("user_validation", (friends))
+                createGroup(friendsInGroup)
             }
             friendsInGroup = [];
-        }
-        else if (userList.includes(newUserName.val())) {
-            console.log("FRIEND ALREADY EXISTS");
-            dialog.showErrorBox("Error!", "Friend alrady exists!");
-            newUserName.val('')
-        }
-        else if (userExists == false) {
-            console.log("User doesn't exist");
-            dialog.showErrorBox("Error!", "User doesn't exist!");
-            newUserName.val('')
-        }
-        else {
-            createChat(newUserName.val())
         }
     })
 
@@ -339,8 +404,26 @@ $(document).ready(function() {
     });
 
     newUserName.on('keyup', function() {
-        // console.log("New user name value is now " + newUserName.val());
-        socket.emit('checkUsers', newUserName.val())
+        let user = newUserName.val();
+        if (friends.includes(user)) {
+            newUserName.css('border', '2px solid green')
+            newUserName.removeClass('text-danger')
+            newUserName.addClass('text-success')
+            userExists = true;
+        }
+        else if (user == '') {
+            newUserName.css('border', '2px solid green')
+            newUserName.removeClass('text-danger')
+            newUserName.addClass('text-success')
+            userExists = false;
+        }
+        else {
+            console.log("User doesn't exist");
+            newUserName.css('border', '2px solid red')
+            newUserName.addClass('text-danger')
+            newUserName.removeClass('text-success')
+            userExists = false;
+        }
     });
 
     let imagePath;
@@ -348,9 +431,25 @@ $(document).ready(function() {
     $('#profile-pic').attr('src', imagePath)
 
     newUserName.autocomplete({
-        source: users
+        source: friends
     });
 });
+
+function friendListClicked(friend) {
+    if (document.getElementById("checkbox").checked == true) {
+        console.log(friend + " had been checked");
+        let input = $('#addUserInput');
+        friendsInGroup.push(friend)
+        let nameWithoutSpace = friend.split(" ").join("");
+        input.append('<span class="input-group-text" style="height: 90%;">' + friend +'<i onClick="removeButton(\'' + friend + '\')" class="fa fa-times" id="' + nameWithoutSpace + '_crossButton" style="padding-left: 10px; margin-right: -5px;"></i></span>');
+        newUserName.val('');    
+    }
+    else {
+        console.log(friend + " has been unchecked!");
+        removeButton(friend)
+    }
+
+}
 
 function friendsClicked() {
     console.log("Clicked on friends button");
@@ -380,38 +479,9 @@ function friendsClicked() {
     })
 
     // Display online friends
+    onlineFriendsBtn.addClass('active')
     onlineFriendsDiv.show()
 }
-
-socket.on('user_validation', (data) => {
-    let user = data.user;
-    let exists = data.exists;
-    let friends = data.friends;
-    if (exists == true) {
-        friends.push(username)
-        createGroup(friends)
-    }
-    else {
-        dialog.showErrorBox("Error!", "User: " + user + " doesn't exist!");
-    }
-})
-
-socket.on('checkUsers', (exists) => {
-    if (exists == true && !userList.includes(newUserName.val()) && newUserName.val() != username) {
-        console.log("User exits");
-        newUserName.css('border', '2px solid green')
-        newUserName.removeClass('text-danger')
-        newUserName.addClass('text-success')
-        userExists = true;
-    }
-    else {
-        console.log("User doesn't exist");
-        newUserName.css('border', '2px solid red')
-        newUserName.addClass('text-danger')
-        newUserName.removeClass('text-success')
-        userExists = false;
-    }
-})
 
 function addFriend(friend) {
     pendingInvites.push(friend)
@@ -474,6 +544,8 @@ function createGroup(friends) {
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
     })
+
+    friendsChatroom.hide()
 
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
@@ -552,6 +624,9 @@ function removeButton(name) {
     let nameWithoutSpace = name.split(" ").join("");
     let crossBtn = $('#' + nameWithoutSpace + '_crossButton');
     crossBtn.parent().remove()
+    
+    let i = friendsInGroup.indexOf(name);
+    friendsInGroup.splice(i, 1);
 }
 
 function sendImage(imagePath) {
@@ -979,9 +1054,9 @@ function addChatListToHtml(name) {
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="userDropdown">' +
+                '<a class="dropdown-item" href="#">Close DM</a>' +
+                '<a class="dropdown-item" href="#">Block User</a>' +
                 '<a class="dropdown-item" id="remove' + nameWithoutSpace + 'Option" onClick="removeFriend(\'' + name + '\')" href="#">Remove Friend</a>' +
-                '<a class="dropdown-item" href="#">Another action</a>' +
-                '<a class="dropdown-item" href="#">Something else here</a>' +
             '</div>' +
             '</div>' +
         '</div>' +
@@ -1095,6 +1170,29 @@ function removeFriend(name) {
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     chatroom.remove()
 
+    // remove from friends array
+    if (friends.includes(name)) {
+        let index = friends.indexOf(name)
+        friends.splice(index, 1)
+    }
+
+    // remove from friends file
+    let dataObj = {
+        friends: friends,
+        friendsOnline: friendsOnline,
+        friendInvites: friendInvites,
+        pendingInvites: pendingInvites,
+        friendsBlocked: friendsBlocked
+    }
+
+    dataObj = JSON.stringify(dataObj)
+
+    fs.writeFile("friends", (dataObj), (err) => {
+        if(err) {
+            console.log("An error ocurred removing the file "+ err.message)
+        }
+        console.log("User file has succesfully been removed.");
+    })
     fs.writeFile("friend-list", "", (err) => {
         if(err) {
             console.log("An error ocurred removing the file "+ err.message)
@@ -1205,6 +1303,8 @@ function acceptInvite(friend) {
         friendsBlocked: friendsBlocked
     }
 
+    dataObj = JSON.stringify(dataObj)
+
     fs.writeFileSync('friends', (dataObj))
 }
 
@@ -1219,11 +1319,11 @@ function declineInvite(friend) {
     content.remove()
 }
 
-socket.on('create_dm', (sender) => {
+socket.on('create_dm', (friend) => {
     let index = pendingInvites.indexOf(friend)
     pendingInvites.splice(index, 1)
 
-    createChat(sender)
+    createChat(friend)
 
     friends.push(friend)
 
@@ -1235,6 +1335,8 @@ socket.on('create_dm', (sender) => {
         pendingInvites: pendingInvites,
         friendsBlocked: friendsBlocked
     }
+
+    dataObj = JSON.stringify(dataObj)
 
     fs.writeFileSync('friends', (dataObj))
 })
@@ -1422,6 +1524,53 @@ socket.on('group_invite_accepted', (data) => {
         message: username + " has accepted the group invite",
         buttons: ['OK']
     })
+})
+
+socket.on('create_group', (data) => {
+    let grpId = data.grpName;
+    let sender = data.sender;
+    let friends = data.friends;
+
+    addGroupToHtml(friends, grpId)
+
+    groupClickedOn = true;
+    groupName = grpId;
+
+    let group = {
+        friends: friends,
+        owner: username,
+        grpId: grpId,
+        icon: 'grp icon'
+    }
+    
+    groups.push(group)
+
+    let groupjson = JSON.stringify(groups)
+    fs.writeFile("group-list", groupjson, (err) => {
+        console.log("Group file created");
+    })
+
+    pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
+
+    userList.forEach(user => {
+        let nameWithoutSpaceInLoop = user.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
+        feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
+        chatroom.hide()
+    });
+
+    groups.forEach(group => {
+        let grpId = group['grpId']
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+        grpFeedback = $('#' + grpId + 'GroupFeedback')
+        grpChatroom.hide()
+    })
+
+    friendsChatroom.hide()
+
+    grpChatroom = $('#' + grpId + 'GroupChatroom')
+    grpFeedback = $('#' + grpId + 'GroupFeedback')
+    grpChatroom.show()
 })
 
 socket.on('group_invite', (data) => {
