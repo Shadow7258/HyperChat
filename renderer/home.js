@@ -343,6 +343,7 @@ $(document).ready(function() {
                     }
                 }
                 else {
+                    friendsInGroup.push(username)
                     createGroup(friendsInGroup)
                 }
                 friendsInGroup = [];
@@ -363,6 +364,7 @@ $(document).ready(function() {
                 }
             }
             else {
+                friendsInGroup.push(username)
                 createGroup(friendsInGroup)
             }
             friendsInGroup = [];
@@ -1263,7 +1265,7 @@ socket.on('friend_invite', (data) => {
         pendingFriendsDiv.append(
             '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
-                    '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col" style="padding: 0px">' + 
                         '<div style="margin-top: 10px;">' + friend + '</div>' + 
                     '</div>' + 
@@ -1345,6 +1347,9 @@ socket.on('create_dm', (friend) => {
 socket.on('status_changed', (data) => {
     console.log("Getting status for " + data.username);
     socket.emit('get_status', {username: data.username})
+    let i = friendsOnline.indexOf(data.username)
+    friendsOnline.splice(i, 1)
+    
 })
 
 socket.on('invite_accepted', (sender) => {
@@ -1392,7 +1397,7 @@ socket.on('friend_online', (friend) => {
         onlineFriendsDiv.append(
             '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
-                    '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col">' + 
                         '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
                         '<div class="row"> ' + 
@@ -1410,6 +1415,8 @@ socket.on('friend_online', (friend) => {
 socket.on('friend_status', (data) => {
     let friend = data.friend;
     var status, statusCol;
+
+    console.log("Fetching friend: " + friend);
 
     let name = friend.split(' ').join('')
     if (data.status === undefined) {
@@ -1431,7 +1438,7 @@ socket.on('friend_status', (data) => {
     allFriendsDiv.append(
         '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
             '<div class="btn-group" role="group" style="float: left">' + 
-                '<img id="profile-pic-test" style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
                 '<div class="col">' + 
                     '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
                     '<div class="row"> ' + 
@@ -1447,7 +1454,7 @@ socket.on('friend_status', (data) => {
 socket.on('get_status', (data) => {
     var status, statusCol;
     let nameWithoutSpace = data.username.split(" ").join("")
-    console.log("Received status from username: " + nameWithoutSpace);
+    console.log("Received status from username: " + data.username);
     if (data.status === undefined) {
         status = "offline"
         statusCol = false;
@@ -1464,6 +1471,8 @@ socket.on('get_status', (data) => {
     if (statusCol == false) {
         statusid.removeClass("text-success")
         statusid.addClass("text-danger")
+        let i = friendsOnline.indexOf(data.username)
+        friendsOnline.splice(i, 1)
     }
     else {
         statusid.removeClass("text-danger")
@@ -1542,7 +1551,7 @@ socket.on('create_group', (data) => {
         grpId: grpId,
         icon: 'grp icon'
     }
-    
+
     groups.push(group)
 
     let groupjson = JSON.stringify(groups)
