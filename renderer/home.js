@@ -736,8 +736,8 @@ function sendGroupImage(imagePath) {
 
 function sendGroupMessage() {
     console.log("Sending message in group");
-    // grpChatroom = $('#' + groupName + 'GroupChatroom')
-    // grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    grpChatroom = $('#' + groupName + 'GroupChatroom')
+    grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
     let groupFile = fs.readFileSync('group-list');
     groupFile = JSON.parse(groupFile)
     var friends = [];
@@ -768,20 +768,20 @@ function sendGroupMessage() {
 
     socket.emit('send_group_message', messageData);
 
-    // groupMessages.push(message)
+    groupMessages.push(messageData)
 
-    // if (groupMessages) {
-    //     let messagejson = JSON.stringify(groupMessages)
+    if (groupMessages) {
+        let messagejson = JSON.stringify(groupMessages)
 
-    //     console.log("Messages2 is " + messagejson);
+        console.log("Messages is " + JSON.stringify(messageData));
 
-    //     fs.writeFile("group-messages", messagejson, (err) => {
-    //         if(err) {
-    //             console.log("An error ocurred creating the file "+ err.message)
-    //         }
-    //         console.log("User file has succesfully been created.");
-    //     })
-    // }
+        fs.writeFile("group-messages", messagejson, (err) => {
+            if(err) {
+                console.log("An error ocurred creating the file "+ err.message)
+            }
+            console.log("User file has succesfully been created.");
+        })
+    }
 
     messageField.val('');
 }
@@ -1540,6 +1540,8 @@ socket.on('create_group', (data) => {
     let sender = data.sender;
     let friends = data.friends;
 
+    socket.emit('add_to_grp', (grpId))
+
     addGroupToHtml(friends, grpId)
 
     groupClickedOn = true;
@@ -1547,7 +1549,7 @@ socket.on('create_group', (data) => {
 
     let group = {
         friends: friends,
-        owner: username,
+        owner: sender,
         grpId: grpId,
         icon: 'grp icon'
     }
