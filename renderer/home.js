@@ -736,8 +736,12 @@ function sendGroupImage(imagePath) {
 
 function sendGroupMessage() {
     console.log("Sending message in group");
+
+    grpFeedback = $('#' + groupName + 'GroupFeedback')
+    grpFeedback.html('')
     grpChatroom = $('#' + groupName + 'GroupChatroom')
     grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    
     let groupFile = fs.readFileSync('group-list');
     groupFile = JSON.parse(groupFile)
     var friends = [];
@@ -1540,7 +1544,7 @@ socket.on('create_group', (data) => {
     let sender = data.sender;
     let friends = data.friends;
 
-    socket.emit('add_to_grp', (grpId))
+    socket.emit('add_to_grp', {grpId: grpId, username: username})
 
     addGroupToHtml(friends, grpId)
 
