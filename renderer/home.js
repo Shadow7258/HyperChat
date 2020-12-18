@@ -1224,6 +1224,7 @@ function deleteGroup(grpId) {
     var friends;
     var owner;
     var tempGroups = [];
+    var tempGroupMessages = [];
 
     if (fs.existsSync('group-list')) {
         let groupFile = fs.readFileSync('group-list')
@@ -1241,6 +1242,17 @@ function deleteGroup(grpId) {
         })
     }
 
+    if (fs.existsSync('group-messages')) {
+      let groupFile = fs.readFileSync('group-messages')
+      let groupsArr = JSON.parse(groupFile)
+      groupsjson = JSON.stringify(groupsArr)
+      groupsArr.forEach(message => {
+          if (message['grpId'] != grpId) {
+              tempGroupMessages.push(group)
+          }
+      })
+    }
+
     console.log("Deleting group with id: " + grpId + ", friends: " + friends + ", owner: " + owner);
 
     console.log("Temps array is " + JSON.stringify(tempGroups));
@@ -1255,7 +1267,19 @@ function deleteGroup(grpId) {
 
     console.log("Groups array is " + JSON.stringify(groups));
 
-    fs.writeFileSync('group-list', (tempGroups))
+    if (tempGroups.length === 0) {
+      fs.unlinkSync('group-list')
+    }
+    else {
+      fs.writeFileSync('group-list', (tempGroups))
+    }
+
+    if (tempGroupMessages.length === 0) {
+      fs.unlinkSync('group-messages')
+    }
+    else {
+      fs.writeFileSync('group-messages', (tempGroupMessages))
+    }
 
     socket.emit('delete_group', {grpId: grpId, owner: owner, friends: friends})
 }
@@ -1732,7 +1756,7 @@ socket.on('group_image_sent', (data) => {
 socket.on("message_sent", (data) => {
     console.log("Received message from " + data.sender);
     feedback.html('');
-    let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    let nameWithoutSpace = data.sender.split(" ").join("")
     let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     chatroom.append("<p class='message'>" + data.sender + ": " + data.message + "</p>")
     var currentdate = new Date();
@@ -1771,6 +1795,18 @@ socket.on('delete_group', (data) => {
 
     var friends;
     var tempGroups = [];
+    var tempGroupMessages = [];
+
+    if (fs.existsSync('group-messages')) {
+      let groupFile = fs.readFileSync('group-messages')
+      let groupsArr = JSON.parse(groupFile)
+      groupsjson = JSON.stringify(groupsArr)
+      groupsArr.forEach(message => {
+          if (message['grpId'] != grpId) {
+              tempGroupMessages.push(group)
+          }
+      })
+    }
 
     if (fs.existsSync('group-list')) {
         let groupFile = fs.readFileSync('group-list')
@@ -1801,7 +1837,19 @@ socket.on('delete_group', (data) => {
 
     console.log("Groups array is " + JSON.stringify(groups));
 
-    fs.writeFileSync('group-list', (tempGroups))
+    if (tempGroups.length === 0) {
+      fs.unlinkSync('group-list')
+    }
+    else {
+      fs.writeFileSync('group-list', (tempGroups))
+    }
+
+    if (tempGroupMessages.length === 0) {
+      fs.unlinkSync('group-messages')
+    }
+    else {
+      fs.writeFileSync('group-messages', (tempGroupMessages))
+    }
 })
 
 socket.on('leave_group', (data) => {
@@ -1810,6 +1858,11 @@ socket.on('leave_group', (data) => {
     let friends = data.friends;
     let grpId = data.grpId;
     let message = sender + " has left the group."
+
+    if (friends.length === 2) {
+        console.log("Deleting group");
+        deleteGroup(grpId)
+    }
 
     console.log("grpId: " + grpId + "\nowner: " + owner + "\nmessage: " + message + "\nsender: " + sender + "\nfriends: " + friends);
 
@@ -1922,7 +1975,6 @@ socket.on('stopped_typing_group', () => {
     grpFeedback.html('')
 })
 
-// Listen on change profiel pic
 socket.on('set_profile_pic', (data) => {
     let username = data;
     ipcRenderer.send('getImage', username)
