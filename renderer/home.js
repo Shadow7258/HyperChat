@@ -205,6 +205,7 @@ $(document).ready(function() {
         blockedFriendsDiv.hide()
         pendingFriendsDiv.hide()
         onlineFriendsDiv.hide()
+        allFriendsDiv.empty()
 
         friends.forEach(friend => {
             console.log("Friend: " + friend);
@@ -226,6 +227,7 @@ $(document).ready(function() {
         blockedFriendsDiv.hide()
         pendingFriendsDiv.hide()
         allFriendsDiv.hide()
+        onlineFriendsDiv.empty()
 
         // Get online friends
         friends.forEach(friend => {
@@ -1498,8 +1500,6 @@ socket.on('friend_online', (friend) => {
         friendsOnline.push(friend)
     }
 
-    onlineFriendsDiv.empty()
-
     // Append to div
     friendsOnline.forEach(friend => {
         let name = friend.split(' ').join('')
@@ -1540,8 +1540,6 @@ socket.on('friend_status', (data) => {
         status = data.status;
         statusCol = "text-success";
     }
-
-    allFriendsDiv.empty()
 
     // Append to div
     allFriendsDiv.append(
