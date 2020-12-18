@@ -60,7 +60,7 @@ let message = {
     type: ""
 }
 
-let userList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = []
+let dmList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = []
 let friends = [], pendingInvites = [], friendInvites = [], friendsBlocked = [], friendsOnline = [];
 
 remote.getCurrentWindow().on('close', () => {
@@ -126,7 +126,7 @@ $(document).ready(function() {
 
     setTimeout(() => {
         console.log("Users online are " + users);
-        console.log("Friends are " + userList);
+        console.log("Friends are " + dmList);
     }, 2000)
 
     newUserName.on("keyup", (e) => {
@@ -334,12 +334,13 @@ $(document).ready(function() {
                 friendsInGroup.push(user);
                 console.log("FRIENDS IN GROUP IS " + friendsInGroup);
                 if (friendsInGroup.length == 1) {
-                    if (userList.includes(user)) {
+                    if (dmList.includes(user)) {
                         dialog.showErrorBox("Error!", "Friend already exists!");
                         newUserName.val('')
                     }
                     else {
                         createChat(friendsInGroup[0])
+                        socket.emit('create_dm', {sender: username, friend: friendsInGroup[0]})
                     }
                 }
                 else {
@@ -355,12 +356,13 @@ $(document).ready(function() {
         else {
             console.log("FRIENDS IN GROUP IS " + friendsInGroup);
             if (friendsInGroup.length == 1) {
-                if (userList.includes(user)) {
+                if (dmList.includes(user)) {
                     dialog.showErrorBox("Error!", "Friend already exists!");
                     newUserName.val('')
                 }
                 else {
                     createChat(friendsInGroup[0])
+                    socket.emit('create_dm', {sender: username, friend: friendsInGroup[0]})
                 }
             }
             else {
@@ -457,7 +459,7 @@ function friendsClicked() {
     console.log("Clicked on friends button");
     chatheading.html('Friends')
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
@@ -533,7 +535,7 @@ function createGroup(friends) {
 
     pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
@@ -557,7 +559,7 @@ function createGroup(friends) {
 function createChat(name) {
     console.log("Create chat button clicked.")
 
-    userList.push(name);
+    dmList.push(name);
 
     addChatListToHtml(name)
 
@@ -565,7 +567,7 @@ function createChat(name) {
 
     ipcRenderer.send('getImage', name)
 
-    fs.appendFile("friend-list", name + '\n', (err) => {
+    fs.appendFile("dm-list", name + '\n', (err) => {
         if (err) {
             console.log("An error ocurred creating the file "+ err.message)
         }
@@ -578,7 +580,7 @@ function createChat(name) {
     let nameWithoutSpace = name.split(" ").join("")
     pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
@@ -839,7 +841,7 @@ function groupClicked(grpId) {
 
     var friends = [];
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
@@ -872,7 +874,7 @@ function buttonClicked(name) {
     groupClickedOn = false;
     console.log("Clicked on " + name);
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')
@@ -997,9 +999,9 @@ function addGroups() {
 
 function addFriends() {
     friendsAdded = false
-    if (fs.existsSync('friend-list')) {
+    if (fs.existsSync('dm-list')) {
         const file = readline.createInterface({
-            input: fs.createReadStream('friend-list'),
+            input: fs.createReadStream('dm-list'),
             output: process.stdout,
             terminal: false
         });
@@ -1007,7 +1009,7 @@ function addFriends() {
         file.on('line', (line) => {
             if (line != "") {
                 socket.emit('get_status', {username: line})
-                userList.push(line)
+                dmList.push(line)
                 ipcRenderer.send('getImage', line)
                 let nameWithoutSpaceInLoop = line.split(" ").join("")
                 console.log("Adding chat list to username: " + nameWithoutSpaceInLoop);
@@ -1029,11 +1031,11 @@ function addFriends() {
                     grpChatroom.hide()
                 })
 
-                let nameWithoutSpace = userList[0].split(" ").join("")
+                let nameWithoutSpace = dmList[0].split(" ").join("")
                 let firstChatroom = $('#' + nameWithoutSpace + 'Chatroom')
                 firstChatroom.show()
-                chatheading.html(userList[0])
-                friendClickedOn = userList[0];
+                chatheading.html(dmList[0])
+                friendClickedOn = dmList[0];
             }
         });
         friendsAdded = true;
@@ -1060,7 +1062,7 @@ function addChatListToHtml(name) {
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: black" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="userDropdown">' +
-                '<a class="dropdown-item" href="#">Close DM</a>' +
+                '<a class="dropdown-item" href="#" onClick="closeDM(\'' + name + '\')">Close DM</a>' +
                 '<a class="dropdown-item" href="#">Block User</a>' +
                 '<a class="dropdown-item" id="remove' + nameWithoutSpace + 'Option" onClick="removeFriend(\'' + name + '\')" href="#">Remove Friend</a>' +
             '</div>' +
@@ -1097,6 +1099,28 @@ function addGroupToHtml(friends, grpId) {
     console.log("Friends str is " + friendsStr);
     friendsGrp.html(friendsStr)
     chatheading.html(friendsStr)
+}
+
+function closeDM(friend) {
+  let i = dmList.indexOf(friend)
+  dmList.splice(i, 1);
+
+  fs.writeFileSync("dm-list", "")
+
+  dmList.forEach(user => {
+    fs.appendFile("dm-list", user + '\n', (err) => {
+        if(err){
+            console.log("An error ocurred creating the file "+ err.message)
+        }
+        console.log("User file has succesfully been created.");
+    })
+  })
+
+  let nameWithoutSpace = friend.split(' ').join('')
+  $("#" + nameWithoutSpace + "_id").remove()
+
+  chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+  chatroom.remove()
 }
 
 function leaveGroup(grpId) {
@@ -1158,21 +1182,29 @@ function removeFriend(name) {
     let nameWithoutSpace = name.split(" ").join("")
     let user = $('#' + nameWithoutSpace + '_id')
     user.remove()
-    var i = userList.indexOf(name);
-    userList.splice(i, 1);
+    var i = dmList.indexOf(name);
+    dmList.splice(i, 1);
     var nextFriend
 
-    var userListTmp = fs.readFileSync('friend-list').toString().split("\n");
+    var dmListTmp = fs.readFileSync('dm-list').toString().split("\n");
+    console.log("Array Before is " + dmListTmp)
+    var usernameIndex = dmListTmp.indexOf(name);
+    console.log("Next friend is " + dmListTmp[usernameIndex + 1]);
+    nextFriend = dmListTmp[usernameIndex + 1]
+    dmListTmp.splice(usernameIndex, 1);
+    console.log("Array After is " + dmListTmp)
+  
+    fs.writeFileSync("dm-list", "")
+  
+    dmList.forEach(user => {
+      fs.appendFile("dm-list", user + '\n', (err) => {
+          if(err){
+              console.log("An error ocurred creating the file "+ err.message)
+          }
+          console.log("User file has succesfully been created.");
+      })
+    })
 
-    console.log("Array Before is " + userListTmp)
-
-    var usernameIndex = userListTmp.indexOf(name);
-    console.log("Next friend is " + userListTmp[usernameIndex + 1]);
-    nextFriend = userListTmp[usernameIndex + 1]
-    userListTmp.splice(usernameIndex, 1);
-    console.log("Array After is " + userListTmp)
-
-    console.log("Friend to remove is " + name);
     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     chatroom.remove()
 
@@ -1199,26 +1231,75 @@ function removeFriend(name) {
         }
         console.log("User file has succesfully been removed.");
     })
-    fs.writeFile("friend-list", "", (err) => {
+
+    socket.emit('remove_friend', {sender: username, friend: name})
+
+    setTimeout(() => {
+        buttonClicked(nextFriend)
+    }, 100)
+}
+
+socket.on('remove_friend', (name) => {
+    console.log("Removing friend " + name);
+    let nameWithoutSpace = name.split(" ").join("")
+    let user = $('#' + nameWithoutSpace + '_id')
+    user.remove()
+    var i = dmList.indexOf(name);
+    dmList.splice(i, 1);
+    var nextFriend
+
+    var dmListTmp = fs.readFileSync('dm-list').toString().split("\n");
+    console.log("Array Before is " + dmListTmp)
+    var usernameIndex = dmListTmp.indexOf(name);
+    console.log("Next friend is " + dmListTmp[usernameIndex + 1]);
+    nextFriend = dmListTmp[usernameIndex + 1]
+    dmListTmp.splice(usernameIndex, 1);
+    console.log("Array After is " + dmListTmp)
+  
+    fs.writeFileSync("dm-list", "")
+  
+    dmList.forEach(user => {
+      fs.appendFile("dm-list", user + '\n', (err) => {
+          if(err){
+              console.log("An error ocurred creating the file "+ err.message)
+          }
+          console.log("User file has succesfully been created.");
+      })
+    })
+
+    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    chatroom.remove()
+
+    // remove from friends array
+    if (friends.includes(name)) {
+        let index = friends.indexOf(name)
+        friends.splice(index, 1)
+    }
+
+    // remove from friends file
+    let dataObj = {
+        friends: friends,
+        friendsOnline: friendsOnline,
+        friendInvites: friendInvites,
+        pendingInvites: pendingInvites,
+        friendsBlocked: friendsBlocked
+    }
+
+    dataObj = JSON.stringify(dataObj)
+
+    fs.writeFile("friends", (dataObj), (err) => {
         if(err) {
             console.log("An error ocurred removing the file "+ err.message)
         }
         console.log("User file has succesfully been removed.");
     })
 
-    userListTmp.forEach(user => {
-        fs.appendFile("friend-list", user + '\n', (err) => {
-            if(err){
-                console.log("An error ocurred creating the file "+ err.message)
-            }
-            console.log("User file has succesfully been created.");
-        })
-    })
+    socket.emit('remove_friend', {sender: username, friend: name})
 
     setTimeout(() => {
         buttonClicked(nextFriend)
     }, 100)
-}
+})
 
 function deleteGroup(grpId) {
     var friends;
@@ -1591,7 +1672,7 @@ socket.on('create_group', (data) => {
 
     pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + grpId + 'GroupChatroom"><section id="' + grpId + 'GroupFeedback"></section></section>')
 
-    userList.forEach(user => {
+    dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
         chatroom = $('#' + nameWithoutSpaceInLoop + 'Chatroom')
         feedback = $('#' + nameWithoutSpaceInLoop + 'Feedback')

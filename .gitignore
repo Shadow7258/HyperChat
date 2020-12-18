@@ -10,7 +10,7 @@ firebase-debug.*.log*
 # Data files
 logged-in
 messages
-friend-list
+dm-list
 profile-pic
 private/
 dist/
