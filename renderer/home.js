@@ -693,7 +693,12 @@ function sendImage(imagePath) {
             else {
                 let nameWithoutSpace = friendClickedOn.split(" ").join("")
                 chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + imagePath + "'></p>")
+                if (oldMessage["type"] == "image") {
+                    chatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + imagePath + "'></p>")
+                }
+                else {
+                    chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + imagePath + "'></p>")
+                }
             }
         }
 
@@ -1055,7 +1060,12 @@ function addMessages() {
                                 '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
                         }
                         else {
-                            chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+                            if (oldMessage["type"] == "image") {
+                                chatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+                            }
+                            else {
+                                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+                            }
                         }
                     }
                     // console.log( message.sender + ": " + message.message);
@@ -1526,6 +1536,8 @@ function acceptInvite(friend) {
     dataObj = JSON.stringify(dataObj)
 
     fs.writeFileSync('friends', (dataObj))
+
+    friendClickedOn = friend;
 }
 
 function declineInvite(friend) {
@@ -1559,6 +1571,8 @@ socket.on('create_dm', (friend) => {
     dataObj = JSON.stringify(dataObj)
 
     fs.writeFileSync('friends', (dataObj))
+
+    friendClickedOn = friend;
 })
 
 //Listen on other user status change
@@ -1751,7 +1765,12 @@ socket.on("image_sent", (data) => {
         else {
             let nameWithoutSpace = sender.split(" ").join("")
             chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+            if (oldMessage["type"] == "image") {
+                chatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+            }
+            else {
+                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+            }
         }
     }
 
@@ -1971,7 +1990,6 @@ socket.on('group_image_sent', (data) => {
     }
 })
 
-//Listen on new_message
 socket.on("message_sent", (data) => {
     let sender = data.sender;
     let message = data.message;
@@ -2249,6 +2267,10 @@ ipcRenderer.on('imageReceived', (e, data) => {
     var base46Img = 'data:image/jpeg;base64,' + image
     profilePic.attr('src', base46Img)
 
+    if (!fs.existsSync('./profile-pics')) {
+      fs.mkdirSync('./profile-pics')  
+    }
+
     let filename = './profile-pics/' + username.split(' ').join('')
     fs.writeFileSync(filename, base46Img)
 })
@@ -2310,7 +2332,12 @@ function addImage() {
             socket.emit('set_profile_pic', username)
         })
         var base46Img = 'data:image/jpeg;base64,' + data
-        let filename = './profile-pics/' + username
+
+        if (!fs.existsSync('./profile-pics')) {
+            fs.mkdirSync('./profile-pics')  
+        }
+
+        let filename = './profile-pics/' + username.split(' ').join('')
         fs.writeFileSync(filename, base46Img)
     })
 }
