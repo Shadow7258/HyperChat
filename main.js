@@ -123,6 +123,48 @@ ipcMain.on('getImage', (e, data) => {
   });
 })
 
+ipcMain.on('getImageForNotification', (e, data) => {
+  let username = data;
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { username: username };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let image = obj['image'];
+      // console.log("Image is " + image);
+      // console.log("RESULT is " + JSON.stringify(result));
+      console.log("Username is " + username);
+      if (image !== undefined) {
+        e.reply('imageForNotification', {image: image, username: username})
+      }
+    });
+  });
+})
+
+ipcMain.on('getImageForMessage', (e, data) => {
+  let username = data.username;
+  let message = data.message;
+  
+  client.connect((err, db) => {
+    if (err) throw err;
+    const collection = client.db("HyperChat").collection("Users");
+    var query = { username: username };
+    collection.find(query).toArray(function(err, result) {
+      if (err) throw err;
+      let obj = result[0];
+      let image = obj['image'];
+      // console.log("Image is " + image);
+      // console.log("RESULT is " + JSON.stringify(result));
+      console.log("Username is " + username);
+      if (image !== undefined) {
+        e.reply('imageForMessage', {image: image, username: username, message: message});
+      }
+    });
+  });
+})
+
 ipcMain.on('uploadImage', (e, data) => {
   console.log("Uploading image");
   console.log("Email is " + data.email + " and image is " + data.image);

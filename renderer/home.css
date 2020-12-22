@@ -115,3 +115,7 @@
     margin-left: -15rem;
   }
 }
+
+p {
+  margin-bottom: 0px;
+}

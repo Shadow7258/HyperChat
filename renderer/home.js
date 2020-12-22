@@ -25,7 +25,7 @@ var socket, friendClickedOn, groupName;
 // socket = io.connect('http://34.93.56.182:3000')
 socket = io.connect('http://localhost:3000')
 
-var userExists = false, friendsAdded = false, groupClickedOn = false;
+var userExists = false, friendsAdded = false, groupClickedOn = false, friendTabClickedOn = false;
 
 let messageField = $('#message-field')
 let sendImageButton = $('#send-image-button')
@@ -125,8 +125,8 @@ $(document).ready(function() {
     }
 
     setTimeout(() => {
-        console.log("Users online are " + users);
-        console.log("Friends are " + dmList);
+        console.log("Users are " + users);
+        console.log("Friends are " + friends);
     }, 2000)
 
     newUserName.on("keyup", (e) => {
@@ -458,7 +458,6 @@ function friendListClicked(friend) {
 }
 
 function friendsClicked() {
-    console.log("Clicked on friends button");
     chatheading.html('Friends')
 
     dmList.forEach(user => {
@@ -470,23 +469,26 @@ function friendsClicked() {
 
     groups.forEach(group => {
         let grpId = group['grpId']
-        friends = group['friends']
         grpChatroom = $('#' + grpId + 'GroupChatroom')
         grpFeedback = $('#' + grpId + 'GroupFeedback')
         grpChatroom.hide()
     })
 
     friendsChatroom.show()
+    friendInvitesDiv.hide()
+    blockedFriendsDiv.hide()
+    pendingFriendsDiv.hide()
+    allFriendsDiv.hide()
+    onlineFriendsDiv.empty()
+    onlineFriendsBtn.addClass('active')
+
+    friendTabClickedOn = true;
 
     // Get online friends
     friends.forEach(friend => {
         console.log("Friend: " + friend);
         socket.emit('get_friends_online', (friend))
     })
-
-    // Display online friends
-    onlineFriendsBtn.addClass('active')
-    onlineFriendsDiv.show()
 }
 
 function addFriend(friend) {
@@ -639,9 +641,9 @@ function sendImage(imagePath) {
     feedback.html('');
     let imagePathString = "" + imagePath;
 
-    let nameWithoutSpace = friendClickedOn.split(" ").join("")
-    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + username + ": <img src='" + imagePath + "'> </p>")
+    // let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    // chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    // chatroom.append("<p class='message'>" + username + ": <img src='" + imagePath + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -651,7 +653,8 @@ function sendImage(imagePath) {
 
     fs.readFile(imagePathString, 'base64', (err, data) => {
         console.log("Image to be sent is " + data);
-        message = {
+
+        let messageData = {
             sender: username,
             message: data,
             to: friendClickedOn,
@@ -659,10 +662,40 @@ function sendImage(imagePath) {
             type: 'image'
         }
 
-        socket.emit('send_image', message)
+        socket.emit('send_image', messageData)
             
-        messages.push(message)
-        console.log("messages array is " + JSON.stringify(messages));
+        messages.push(messageData)
+        // console.log("messages array is " + JSON.stringify(messages));
+
+        let i = messages.indexOf(messageData)
+        let oldMessage = messages[i-1]
+        console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+    
+        if (oldMessage === undefined) {
+            let nameWithoutSpace = friendClickedOn.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            let filename = './profile-pics/' + username.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + username + '</b></div><div class="row"><img src="' + imagePath + '"></div></div></div>');
+        }
+        else {
+            if (oldMessage["sender"] != username) {
+                let nameWithoutSpace = friendClickedOn.split(" ").join("")
+                chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                let filename = './profile-pics/' + username.split(' ').join('')
+                var base46Img = fs.readFileSync(filename)
+                chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                    '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                    '<div class="row"><b>' + username + '</b></div><div class="row"><img src="' + imagePath + '"></div></div></div>');
+            }
+            else {
+                let nameWithoutSpace = friendClickedOn.split(" ").join("")
+                chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + imagePath + "'></p>")
+            }
+        }
 
         if (messages) {
             let messagejson = JSON.stringify(messages)
@@ -797,17 +830,14 @@ function sendGroupMessage() {
 function sendMessage() {
     console.log("Send button clicked.");
     feedback.html('');
-    // socket.emit('new_message', {message : messageField.val()})
-    let nameWithoutSpace = friendClickedOn.split(" ").join("")
-    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
                 + currentdate.getHours() + ":"
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
+    let messageData = {
         sender: username,
         message: messageField.val(),
         to: friendClickedOn,
@@ -815,15 +845,44 @@ function sendMessage() {
         type: 'text'
     }
 
-    socket.emit('send_message', message);
+    socket.emit('send_message', messageData);
 
-    messages.push(message)
-    console.log("messages array is " + JSON.stringify(messages));
+    messages.push(messageData)
+    // console.log("messages array is " + JSON.stringify(messages));
+
+    let i = messages.indexOf(messageData)
+    let oldMessage = messages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let nameWithoutSpace = friendClickedOn.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        let filename = './profile-pics/' + username.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');    }
+    else {
+        if (oldMessage["sender"] != username) {
+            let nameWithoutSpace = friendClickedOn.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            let filename = './profile-pics/' + username.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');
+        }
+        else {
+            let nameWithoutSpace = friendClickedOn.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            chatroom.append("<p style='margin-left: 55px;' class='message'>" + messageField.val() + "</p>")
+        }
+    }
 
     if (messages) {
         let messagejson = JSON.stringify(messages)
 
-        console.log("Messages2 is " + messagejson);
+        // console.log("Messages2 is " + messagejson);
 
         fs.writeFile("messages", messagejson, (err) => {
             if(err) {
@@ -839,6 +898,7 @@ function sendMessage() {
 function groupClicked(grpId) {
     groupName = grpId;
     groupClickedOn = true;
+    friendTabClickedOn = false;
     console.log("Clicked on group: " + grpId);
 
     var friends = [];
@@ -874,6 +934,7 @@ function groupClicked(grpId) {
 function buttonClicked(name) {
     friendClickedOn = name;
     groupClickedOn = false;
+    friendTabClickedOn = false;
     console.log("Clicked on " + name);
 
     dmList.forEach(user => {
@@ -933,7 +994,8 @@ function addMessages() {
             messages = dataObj;
             console.log("Data is " + JSON.stringify(dataObj));
             messageArr = dataObj;
-            messageArr.forEach(message => {
+            for (let i = 0; i < messageArr.length; i++) {
+                const message = messageArr[i];
                 let nameWithoutSpace = message.sender.split(" ").join("")
                 if (message.type == 'text') {
                     console.log("Recepient is " + message.to + " and sender is " + message.sender + " and chatroom id is " + '#' + message.to.split(" ").join("") + 'Chatroom');
@@ -944,20 +1006,62 @@ function addMessages() {
                         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
                     }
                     console.log( message.sender + ": " + message.message);
-                    chatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                    let oldMessage = messageArr[i-1];
+                    console.log('PREVIOUS MESSAGE IS ' + JSON.stringify(oldMessage));
+                    if (oldMessage === undefined) {
+                        let nameWithoutSpace = message.sender.split(" ").join("")
+                        let filename = './profile-pics/' + nameWithoutSpace
+                        var base46Img = fs.readFileSync(filename)
+                        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                            '<div class="row"><b>' + message.sender + '</b></div><div class="row">' + message.message + '</div></div></div>');
+                    }
+                    else {
+                        if (oldMessage["sender"] != message.sender) {
+                            let nameWithoutSpace = message.sender.split(" ").join("")
+                            let filename = './profile-pics/' + nameWithoutSpace
+                            var base46Img = fs.readFileSync(filename)
+                            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                                '<div class="row"><b>' + message.sender + '</b></div><div class="row">' + message.message + '</div></div></div>');                                console.log("sender: ");
+                        }
+                        else {
+                            chatroom.append("<p style='margin-left: 55px;' class='message'>" + message.message + "</p>")
+                        }
+                    }
                 }
-                else if(message.type == 'image') {
+                else if (message.type == 'image') {
                     if (message.sender == username) {
                         chatroom = $('#' + message.to.split(" ").join("") + 'Chatroom')
                     }
                     else {
                         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
                     }
+                    var base46Message = 'data:image/jpeg;base64,' + message.message
+                    let oldMessage = messageArr[i-1];
+                    if (oldMessage === undefined) {
+                        let filename = './profile-pics/' + message.sender.split(' ').join('')
+                        var base46Img = fs.readFileSync(filename)
+                        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                            '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+                    }
+                    else {
+                        if (oldMessage["sender"] != message.sender) {
+                            let filename = './profile-pics/' + message.sender.split(' ').join('')
+                            var base46Img = fs.readFileSync(filename)
+                            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                                '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+                        }
+                        else {
+                            chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+                        }
+                    }
                     // console.log( message.sender + ": " + message.message);
-                    var base46Img = 'data:image/jpeg;base64,' + message.message
-                    chatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'></p>")
+                    // chatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'></p>")
                 }
-            });
+            }
         }
     }
     socket.emit('user_online', {username : username})
@@ -1369,6 +1473,9 @@ function deleteGroup(grpId) {
 
 socket.on('friend_invite', (data) => {
     let friend = data.sender;
+    const myNotification = new Notification('Friend Invite', {
+        body: friend + " has invited you to be friends!"
+    })
     console.log(friend + " has invite " + username + " to be friends!");
     friendInvites.push(friend);
     friendInvites.forEach((friend) => {
@@ -1590,13 +1697,17 @@ socket.on('get_status', (data) => {
 })
 
 socket.on("image_sent", (data) => {
-    var base46Img = 'data:image/jpeg;base64,' + data.message
-    console.log("Received image from " + data.sender);
+    let message = data.message;
+    let sender = data.sender;
+    let recepeint = data.to;
+
+    var base46Message = 'data:image/jpeg;base64,' + message
+    console.log("Received image from " + sender);
     feedback.html('');
 
-    let nameWithoutSpace = friendClickedOn.split(" ").join("")
-    chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
+    // let nameWithoutSpace = friendClickedOn.split(" ").join("")
+    // chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    // chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -1604,16 +1715,45 @@ socket.on("image_sent", (data) => {
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
-        sender: data.sender,
-        message: data.message,
-        to: data.to,
+    messageData = {
+        sender: sender,
+        message: message,
+        to: recepeint,
         time: time,
         type: 'image'
     }
         
-    messages.push(message)
-    console.log("messages array is " + JSON.stringify(messages));
+    messages.push(messageData)
+    
+    let i = messages.indexOf(messageData)
+    let oldMessage = messages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let nameWithoutSpace = sender.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    }
+    else {
+        if (oldMessage["sender"] != sender) {
+            let nameWithoutSpace = sender.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            let filename = './profile-pics/' + sender.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+        }
+        else {
+            let nameWithoutSpace = sender.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+        }
+    }
 
     if (messages) {
         let messagejson = JSON.stringify(messages)
@@ -1833,26 +1973,67 @@ socket.on('group_image_sent', (data) => {
 
 //Listen on new_message
 socket.on("message_sent", (data) => {
-    console.log("Received message from " + data.sender);
+    let sender = data.sender;
+    let message = data.message;
+    let to = data.to;
+
+    if (friendClickedOn != sender || groupClickedOn == true || friendTabClickedOn == true) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        const messageNotification = new Notification(sender, {
+            body: message,
+            icon: base46Img
+        })    
+    }
+
+    console.log("Received message from " + sender);
     feedback.html('');
-    let nameWithoutSpace = data.sender.split(" ").join("")
-    let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    chatroom.append("<p class='message'>" + data.sender + ": " + data.message + "</p>")
+
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
                 + currentdate.getHours() + ":"
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
-        sender: data.sender,
-        message: data.message,
-        to: data.to,
+    let messageData = {
+        sender: sender,
+        message: message,
+        to: to,
         time: time,
         type: 'text'
     }
 
-    messages.push(message)
+    messages.push(messageData)
+
+    let i = messages.indexOf(messageData)
+    let oldMessage = messages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let nameWithoutSpace = sender.split(" ").join("")
+        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    }
+    else {
+        if (oldMessage["sender"] != sender) {
+            let nameWithoutSpace = sender.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            let filename = './profile-pics/' + sender.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+        }
+        else {
+            let nameWithoutSpace = sender.split(" ").join("")
+            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+            chatroom.append("<p style='margin-left: 55px;' class='message'>" + message + "</p>")
+        }
+    }
 
     if (messages) {
         let messagejson = JSON.stringify(messages)
@@ -2067,6 +2248,31 @@ ipcRenderer.on('imageReceived', (e, data) => {
     let profilePic = $('#' + nameWithoutSpace + '_pic')
     var base46Img = 'data:image/jpeg;base64,' + image
     profilePic.attr('src', base46Img)
+
+    let filename = './profile-pics/' + username.split(' ').join('')
+    fs.writeFileSync(filename, base46Img)
+})
+
+ipcRenderer.on('imageForNotification', (e, data) => {
+    let image = data.image;
+    let username = data.username;
+    var base46Img = 'data:image/jpeg;base64,' + image
+    const messageNotification = new Notification(username, {
+        body: message,
+        icon: base46Img
+    })
+})
+
+ipcRenderer.on('imageForMessage', (e, data) => {
+    let image = data.image;
+    let username = data.username;
+    let message = data.message;
+    console.log("MESSAGE is " + message);
+    var base46Img = 'data:image/jpeg;base64,' + image
+    chatroom.append('<div class="row"><div class="col" style="flex-grow: 0">' + 
+        '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+        '<div class="row"><b>' + username + '</b></div><div class="row">' + message + '</div></div></div>');
+    messageField.val('');
 })
 
 function logout() {
@@ -2103,6 +2309,9 @@ function addImage() {
         ipcRenderer.on('imageUpdated', () => {
             socket.emit('set_profile_pic', username)
         })
+        var base46Img = 'data:image/jpeg;base64,' + data
+        let filename = './profile-pics/' + username
+        fs.writeFileSync(filename, base46Img)
     })
 }
 
