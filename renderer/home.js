@@ -723,7 +723,7 @@ function sendImage(imagePath) {
         }
     })
 
-    chatroom.scrollTop(chatroom.height()); 
+    chatroom.scrollTop(chatroom.prop("scrollHeight")); 
 }
 
 function sendGroupImage(imagePath) {
@@ -846,7 +846,7 @@ function sendGroupMessage() {
     }
 
     messageField.val('');
-    grpChatroom.scrollTop(grpChatroom.height()); 
+    grpChatroom.scrollTop(grpChatroom.prop("scrollHeight")); 
 }
 
 function sendMessage() {
@@ -916,7 +916,7 @@ function sendMessage() {
     }
 
     messageField.val('');
-    chatroom.scrollTop(chatroom.height()); 
+    chatroom.scrollTop(chatroom.prop("scrollHeight")); 
 }
 
 function groupClicked(grpId) {
@@ -947,7 +947,8 @@ function groupClicked(grpId) {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
-    grpChatroom.scrollTop(grpChatroom.height()); 
+    grpChatroom.scrollTop(grpChatroom.height());
+    grpChatroom.scrollTop(grpChatroom.prop("scrollHeight")); 
 
     var friendsStr = friends[0];
     for (let i = 1; i < friends.length; i++) {
@@ -984,7 +985,7 @@ function buttonClicked(name) {
     chatroom.show()
     chatheading.html(name)
 
-    chatroom.scrollTop(chatroom.height()); 
+    chatroom.scrollTop(chatroom.prop("scrollHeight")); 
 }
 
 function addGroupMessages() {
@@ -1875,7 +1876,7 @@ socket.on("image_sent", (data) => {
         })
     }
 
-    chatroom.scrollTop(chatroom.height()); 
+    chatroom.scrollTop(chatroom.prop("scrollHeight")); 
 })
 
 socket.on('group_invite_accepted', (data) => {
@@ -2076,7 +2077,7 @@ socket.on('group_message_sent', (data) => {
         })
     }
 
-    grpChatroom.scrollTop(grpChatroom.height()); 
+    grpChatroom.scrollTop(grpChatroom.prop("scrollHeight")); 
 })
 
 socket.on('group_image_sent', (data) => {
@@ -2161,7 +2162,7 @@ socket.on('group_image_sent', (data) => {
         })
     }
 
-    grpChatroom.scrollTop(grpChatroom.height()); 
+    grpChatroom.scrollTop(grpChatroom.prop("scrollHeight")); 
 })
 
 socket.on("message_sent", (data) => {
@@ -2240,7 +2241,7 @@ socket.on("message_sent", (data) => {
         })
     }
 
-    chatroom.scrollTop(chatroom.height()); 
+    chatroom.scrollTop(chatroom.prop("scrollHeight")); 
 })
 
 socket.on('delete_group', (data) => {
