@@ -277,13 +277,16 @@ $(document).ready(function() {
     })
 
     ipcRenderer.on('imagePathReceived', (e, args) => {
+        let canceled = args["canceled"]
         let imagePath = args['filePaths']
         console.log("Image path is " + imagePath);
-        if (groupClickedOn == false) {
-            sendImage(imagePath)
-        }
-        else {
-            sendGroupImage(imagePath)
+        if (canceled == false) {
+            if (groupClickedOn == false) {
+                sendImage(imagePath)
+            }
+            else {
+                sendGroupImage(imagePath)
+            }
         }
     })
 
@@ -582,6 +585,7 @@ function createChat(name) {
 
     friendClickedOn = name;
     groupClickedOn = false;
+    buttonClicked(name)
 
     let nameWithoutSpace = name.split(" ").join("")
     pageContainer.prepend('<section class="chatroom" style="height: 83vh; overflow-y: auto;" id="' + nameWithoutSpace + 'Chatroom"><section id="' + nameWithoutSpace + 'Feedback"></section></section>')
@@ -718,6 +722,8 @@ function sendImage(imagePath) {
             })
         }
     })
+
+    chatroom.scrollTop(chatroom.height()); 
 }
 
 function sendGroupImage(imagePath) {
@@ -760,22 +766,6 @@ function sendGroupImage(imagePath) {
         }
 
         socket.emit('send_group_image', messageData)
-            
-        // messages.push(message)
-        // console.log("messages array is " + JSON.stringify(messages));
-
-        // if (messages) {
-        //     let messagejson = JSON.stringify(messages)
-
-        //     console.log("Messages2 is " + messagejson);
-
-        //     fs.writeFile("messages", messagejson, (err) => {
-        //         if(err) {
-        //             console.log("An error ocurred creating the file "+ err.message)
-        //         }
-        //         console.log("User file has succesfully been created.");
-        //     })
-        // }
     })
 }
 
@@ -856,6 +846,7 @@ function sendGroupMessage() {
     }
 
     messageField.val('');
+    grpChatroom.scrollTop(grpChatroom.height()); 
 }
 
 function sendMessage() {
@@ -925,6 +916,7 @@ function sendMessage() {
     }
 
     messageField.val('');
+    chatroom.scrollTop(chatroom.height()); 
 }
 
 function groupClicked(grpId) {
@@ -1031,15 +1023,17 @@ function addGroupMessages() {
                     // grpChatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
                 }
                 if (message.type == 'image') {
+                    console.log("ADDING GROUP MESSAGES");
                     var base46Img = 'data:image/jpeg;base64,' + messageGrp
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
                     var base46Message = 'data:image/jpeg;base64,' + messageGrp
                     let i = messageArr.indexOf(message)
                     let oldMessage = messageArr[i-1]    
                     if (oldMessage === undefined) {
+                        console.log("FIRST MESSAGE");
                         let filename = './profile-pics/' + message.sender.split(' ').join('')
                         var base46Img = fs.readFileSync(filename)
-                        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                        grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
                             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
                             '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
                     }
@@ -1047,16 +1041,16 @@ function addGroupMessages() {
                         if (oldMessage["sender"] != message.sender) {
                             let filename = './profile-pics/' + message.sender.split(' ').join('')
                             var base46Img = fs.readFileSync(filename)
-                            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                            grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
                                 '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
                                 '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
                         }
                         else {
                             if (oldMessage["type"] == "image") {
-                                chatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+                                grpChatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
                             }
                             else {
-                                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+                                grpChatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
                             }
                         }
                     }
@@ -1619,6 +1613,8 @@ function acceptInvite(friend) {
     fs.writeFileSync('friends', (dataObj))
 
     friendClickedOn = friend;
+
+    buttonClicked(friend)
 }
 
 function declineInvite(friend) {
@@ -1654,6 +1650,8 @@ socket.on('create_dm', (friend) => {
     fs.writeFileSync('friends', (dataObj))
 
     friendClickedOn = friend;
+
+    buttonClicked(friend)
 })
 
 //Listen on other user status change
@@ -1800,6 +1798,15 @@ socket.on("image_sent", (data) => {
     console.log("Received image from " + sender);
     feedback.html('');
 
+    if (friendClickedOn != sender || groupClickedOn == true || friendTabClickedOn == true) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        const messageNotification = new Notification(sender, {
+            body: 'Uploaded an image ...',
+            icon: base46Img
+        })    
+    }
+
     // let nameWithoutSpace = friendClickedOn.split(" ").join("")
     // chatroom = $('#' + nameWithoutSpace + 'Chatroom')
     // chatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
@@ -1867,6 +1874,8 @@ socket.on("image_sent", (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+
+    chatroom.scrollTop(chatroom.height()); 
 })
 
 socket.on('group_invite_accepted', (data) => {
@@ -2019,7 +2028,7 @@ socket.on('group_message_sent', (data) => {
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
+    messageData = {
         sender: sender,
         grpId: grpId,
         message: message,
@@ -2028,7 +2037,7 @@ socket.on('group_message_sent', (data) => {
         type: 'text'
     }
 
-    groupMessages.push(message)
+    groupMessages.push(messageData)
 
     let i = groupMessages.indexOf(messageData)
     let oldMessage = groupMessages[i-1]
@@ -2066,6 +2075,8 @@ socket.on('group_message_sent', (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+
+    grpChatroom.scrollTop(grpChatroom.height()); 
 })
 
 socket.on('group_image_sent', (data) => {
@@ -2079,6 +2090,15 @@ socket.on('group_image_sent', (data) => {
 
     var base46Message = 'data:image/jpeg;base64,' + message
     console.log("Received image from " + sender);
+
+    if (groupName != grpId || groupClickedOn == false || friendTabClickedOn == true) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        const messageNotification = new Notification(sender, {
+            body: 'Uploaded an image ...',
+            icon: base46Img
+        })    
+    }
 
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     // grpChatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
@@ -2140,6 +2160,8 @@ socket.on('group_image_sent', (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+
+    grpChatroom.scrollTop(grpChatroom.height()); 
 })
 
 socket.on("message_sent", (data) => {
@@ -2217,6 +2239,8 @@ socket.on("message_sent", (data) => {
             console.log("User file has succesfully been created.");
         })
     }
+
+    chatroom.scrollTop(chatroom.height()); 
 })
 
 socket.on('delete_group', (data) => {
