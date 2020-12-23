@@ -558,6 +558,8 @@ function createGroup(friends) {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
+
+    grpChatroom.scrollTop(grpChatroom.height()); 
 }
 
 function createChat(name) {
@@ -604,6 +606,7 @@ function createChat(name) {
     feedback = $('#' + nameWithoutSpace + 'Feedback')
     chatroom.show()
     chatheading.html(name)
+    chatroom.scrollTop(chatroom.height()); 
 
     fs.readFile('messages', (err, data) => {
         if (data) {
@@ -782,7 +785,7 @@ function sendGroupMessage() {
     grpFeedback = $('#' + groupName + 'GroupFeedback')
     grpFeedback.html('')
     grpChatroom = $('#' + groupName + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
+    // grpChatroom.append("<p class='message'>" + username + ": " + messageField.val() + "</p>")
     
     let groupFile = fs.readFileSync('group-list');
     groupFile = JSON.parse(groupFile)
@@ -815,6 +818,29 @@ function sendGroupMessage() {
     socket.emit('send_group_message', messageData);
 
     groupMessages.push(messageData)
+
+    let i = groupMessages.indexOf(messageData)
+    let oldMessage = groupMessages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let filename = './profile-pics/' + username.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');    }
+    else {
+        if (oldMessage["sender"] != username) {
+            let filename = './profile-pics/' + username.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');
+        }
+        else {
+            grpChatroom.append("<p style='margin-left: 55px;' class='message'>" + messageField.val() + "</p>")
+        }
+    }
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
@@ -866,7 +892,8 @@ function sendMessage() {
         var base46Img = fs.readFileSync(filename)
         chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-            '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');    }
+            '<div class="row"><b>' + username + '</b></div><div class="row">' + messageField.val() + '</div></div></div>');    
+    }
     else {
         if (oldMessage["sender"] != username) {
             let nameWithoutSpace = friendClickedOn.split(" ").join("")
@@ -928,6 +955,7 @@ function groupClicked(grpId) {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
+    grpChatroom.scrollTop(grpChatroom.height()); 
 
     var friendsStr = friends[0];
     for (let i = 1; i < friends.length; i++) {
@@ -963,6 +991,8 @@ function buttonClicked(name) {
     feedback = $('#' + nameWithoutSpace + 'Feedback')
     chatroom.show()
     chatheading.html(name)
+
+    chatroom.scrollTop(chatroom.height()); 
 }
 
 function addGroupMessages() {
@@ -973,18 +1003,68 @@ function addGroupMessages() {
             groupMessages = dataObj;
             messageArr = dataObj;
             messageArr.forEach(message => {
+                let messageGrp = message.message
+                let sender = message.sender
                 if (message.type == 'text') {
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
-                    grpChatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
+                    let i = messageArr.indexOf(message)
+                    let oldMessage = messageArr[i-1]                
+                    if (oldMessage === undefined) {
+                        let filename = './profile-pics/' + sender.split(' ').join('')
+                        var base46Img = fs.readFileSync(filename)
+                        grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                            '<div class="row"><b>' + sender + '</b></div><div class="row">' + messageGrp + '</div></div></div>');
+                    }
+                    else {
+                        if (oldMessage["sender"] != sender) {
+                            let filename = './profile-pics/' + sender.split(' ').join('')
+                            var base46Img = fs.readFileSync(filename)
+                            grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                                '<div class="row"><b>' + sender + '</b></div><div class="row">' + messageGrp + '</div></div></div>');
+                        }
+                        else {
+                            grpChatroom.append("<p style='margin-left: 55px;' class='message'>" + messageGrp + "</p>")
+                        }
+                    }
+                    // grpChatroom.append("<p class='message'>" + message.sender + ": " + message.message + "</p>")
                 }
                 if (message.type == 'image') {
-                    var base46Img = 'data:image/jpeg;base64,' + message.message
+                    var base46Img = 'data:image/jpeg;base64,' + messageGrp
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
-                    grpChatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'> </p>")
+                    var base46Message = 'data:image/jpeg;base64,' + messageGrp
+                    let i = messageArr.indexOf(message)
+                    let oldMessage = messageArr[i-1]    
+                    if (oldMessage === undefined) {
+                        let filename = './profile-pics/' + message.sender.split(' ').join('')
+                        var base46Img = fs.readFileSync(filename)
+                        chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                            '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+                    }
+                    else {
+                        if (oldMessage["sender"] != message.sender) {
+                            let filename = './profile-pics/' + message.sender.split(' ').join('')
+                            var base46Img = fs.readFileSync(filename)
+                            chatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                                '<div class="row"><b>' + message.sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+                        }
+                        else {
+                            if (oldMessage["type"] == "image") {
+                                chatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+                            }
+                            else {
+                                chatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+                            }
+                        }
+                    }
+                    // grpChatroom.append("<p class='message'>" + message.sender + ": <img src='" + base46Img + "'> </p>")
                 }
                 if (message.type == 'info') {
                     grpChatroom = $('#' + message.grpId + 'GroupChatroom')
-                    grpChatroom.append("<p class='message' style='font-style: italic;'>" + message.message + "</p>")
+                    grpChatroom.append("<p class='message' style='font-style: italic;'>" + messageGrp + "</p>")
                 }
             })
         }
@@ -1152,6 +1232,7 @@ function addFriends() {
                 firstChatroom.show()
                 chatheading.html(dmList[0])
                 friendClickedOn = dmList[0];
+                firstChatroom.scrollTop(firstChatroom.height()); 
             }
         });
         friendsAdded = true;
@@ -1804,17 +1885,25 @@ socket.on('group_invite_accepted', (data) => {
 socket.on('create_group', (data) => {
     let grpId = data.grpName;
     let sender = data.sender;
-    let friends = data.friends;
+    let friendsGrp = data.friends;
+
+    // Get profile pic of all users in group.
+    friendsGrp.forEach(friend => {
+        if (!friends.includes(friend)) {
+            console.log(friend);
+            ipcRenderer.send('getImage', friend)
+        }
+    })
 
     socket.emit('add_to_grp', {grpId: grpId, username: username})
 
-    addGroupToHtml(friends, grpId)
+    addGroupToHtml(friendsGrp, grpId)
 
     groupClickedOn = true;
     groupName = grpId;
 
     let group = {
-        friends: friends,
+        friends: friendsGrp,
         owner: sender,
         grpId: grpId,
         icon: 'grp icon'
@@ -1848,6 +1937,7 @@ socket.on('create_group', (data) => {
     grpChatroom = $('#' + grpId + 'GroupChatroom')
     grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpChatroom.show()
+    grpChatroom.scrollTop(grpChatroom.height()); 
 })
 
 socket.on('group_invite', (data) => {
@@ -1911,8 +2001,17 @@ socket.on('group_message_sent', (data) => {
 
     console.log("Received message: " + message + " from " + sender + " in group: " + grpId);
 
+    if (groupName != grpId || groupClickedOn == false || friendTabClickedOn == true) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        const messageNotification = new Notification(sender, {
+            body: message,
+            icon: base46Img
+        })    
+    }
+
     grpChatroom = $('#' + grpId + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + sender + ": " + message + "</p>")
+    // grpChatroom.append("<p class='message'>" + sender + ": " + message + "</p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -1930,6 +2029,30 @@ socket.on('group_message_sent', (data) => {
     }
 
     groupMessages.push(message)
+
+    let i = groupMessages.indexOf(messageData)
+    let oldMessage = groupMessages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    }
+    else {
+        if (oldMessage["sender"] != sender) {
+            let filename = './profile-pics/' + sender.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+        }
+        else {
+            grpChatroom.append("<p style='margin-left: 55px;' class='message'>" + message + "</p>")
+        }
+    }
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
@@ -1954,11 +2077,11 @@ socket.on('group_image_sent', (data) => {
     let grpFeedback = $('#' + grpId + 'GroupFeedback')
     grpFeedback.html('');
 
-    var base46Img = 'data:image/jpeg;base64,' + message
+    var base46Message = 'data:image/jpeg;base64,' + message
     console.log("Received image from " + sender);
 
     grpChatroom = $('#' + grpId + 'GroupChatroom')
-    grpChatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
+    // grpChatroom.append("<p class='message'>" + data.sender + ": <img src='" + base46Img + "'> </p>")
 
     var currentdate = new Date();
     var time = currentdate.getDate() + "/"
@@ -1977,6 +2100,35 @@ socket.on('group_image_sent', (data) => {
         
     groupMessages.push(messageData)
     console.log("messages array is " + JSON.stringify(groupMessages));
+
+    let i = groupMessages.indexOf(messageData)
+    let oldMessage = groupMessages[i-1]
+    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    if (oldMessage === undefined) {
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+        grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+            '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    }
+    else {
+        if (oldMessage["sender"] != sender) {
+            let filename = './profile-pics/' + sender.split(' ').join('')
+            var base46Img = fs.readFileSync(filename)
+            grpChatroom.append('<div style="margin-top: 15px" class="row"><div class="col" style="flex-grow: 0">' + 
+                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+                '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+        }
+        else {
+            if (oldMessage["type"] == "image") {
+                grpChatroom.append("<p style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+            }
+            else {
+                grpChatroom.append("<p style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+            }
+        }
+    }
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
@@ -2203,7 +2355,7 @@ socket.on('leave_group', (data) => {
                 + currentdate.getMinutes() + ":"
                 + currentdate.getSeconds();
 
-    message = {
+    let messageData = {
         grpId: grpId,
         message: message,
         to: friends,
@@ -2211,7 +2363,7 @@ socket.on('leave_group', (data) => {
         type: 'info'
     }
 
-    groupMessages.push(message)
+    groupMessages.push(messageData)
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
