@@ -119,3 +119,27 @@
 p {
   margin-bottom: 0px;
 }
+
+#emoji-button {
+  padding-left: 10px;
+  height: 33px;
+  padding-right: 10px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  width: 43px;
+  border-radius: 0px 7px 7px 0px;
+  margin-right: 10px;
+}
+
+#message-field {
+  height: 33px;
+  border-color: #17a2b8;
+  border-radius: 7px 0px 0px 7px;
+  margin-left: 10px;
+  padding-left: 5px;
+}
+
+#input-field {
+  position: absolute;
+  bottom: 40px;
+}

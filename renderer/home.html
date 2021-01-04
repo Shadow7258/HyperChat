@@ -101,7 +101,7 @@
 
             <!-- Page Content -->
                     
-            <div id="page-content-wrapper">
+            <div id="page-content-wrapper" style="position: relative;">
                 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                     <label id="chat-heading" for="chatheading">Chat</label>
                 </nav>
@@ -143,10 +143,10 @@
                           <div class="row"></div><div class="row"></div></div></div> -->
                 </div>
 
-                <div class="input-group mb-3 d-flex align-items-end">
-                    <input id="message-field" type="text" class="form-control" placeholder="Enter message" style="border-color: #17a2b8;">
+                <div class="input-group" id="input-field">
+                    <input id="message-field" type="text" class="form-control" placeholder="Enter message">
                     <div class="input-group-append">
-                        <button class="btn btn-info" type="button" id="send-image-button"><i class="fa fa-image"></i></button>
+                        <button class="btn btn-info" style="height: 33px;" type="button" id="send-image-button"><i class="fa fa-image"></i></button>
                     </div>
                     <button class="btn btn-info" type="button" id="emoji-button"><p style="margin: 0px;">&#128512;</p></button>
                 </div>
