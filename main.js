@@ -328,7 +328,7 @@ function createLoginWindow()
   mainWindow.setSize(600, 420);
   mainWindow.resizable = false;
 
-  mainWindow.loadFile('renderer/login_register/login.html')
+  mainWindow.loadFile('renderer/auth/login.html')
 
   // Open DevTools - Remove for PRODUCTION!
   // mainWindow.webContents.openDevTools();

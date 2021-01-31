@@ -34,7 +34,7 @@
 #addUserButton {
     border: none;
     background-color: transparent;
-    color: black;
+    color: white;
     font-size: 25px;
     margin-top: -10px;
 }
@@ -58,11 +58,12 @@
 }
 
 #sidebar-wrapper .list-group {
+  background-color: #353641;
   margin-top: 10px;
   width: 15rem;
   flex-grow: 1;
   flex: 1 1 500px;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -121,8 +122,9 @@ p {
 }
 
 #emoji-button {
+  background-color: #6272a4;
   padding-left: 10px;
-  height: 33px;
+  height: 35px;
   padding-right: 10px;
   padding-top: 0px;
   padding-bottom: 0px;
@@ -132,7 +134,7 @@ p {
 }
 
 #message-field {
-  height: 33px;
+  height: 35px;
   border-color: #17a2b8;
   border-radius: 7px 0px 0px 7px;
   margin-left: 10px;
@@ -141,5 +143,54 @@ p {
 
 #input-field {
   position: absolute;
-  bottom: 40px;
+  bottom: 50px;
+}
+
+#page-container {
+  background-color: #44475a;
+  position: absolute;
+  bottom: 95px;
+  top: 0;
+}
+
+#chat-heading {
+  padding-top: 5px;
+  color: white;
+}
+
+#message-color {
+  color: white;
+}
+
+.chatroom {
+  /* height: 83vh;  */
+  height: 100%;
+  overflow-y: auto;
+}
+
+.chatroom::-webkit-scrollbar {
+  display: none !important;
+}
+
+#navbar {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  right: 0;
+  height: 54px;
+}
+
+#chat-content {
+  background-color: #44475a;
+  position: absolute;
+  top: 54;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+}
+
+#friendsButton {
+  margin: 5px;
+  background-color: #6272a4;
+  color: white;
 }
