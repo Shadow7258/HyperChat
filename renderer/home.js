@@ -1600,41 +1600,43 @@ socket.on("image_sent", (data) => {
     }
         
     messages.push(messageData)
-    
-    let i = messages.indexOf(messageData)
-    let oldMessage = messages[i-1]
-    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
 
-    if (oldMessage === undefined) {
-        let nameWithoutSpace = sender.split(" ").join("")
-        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-        let filename = './profile-pics/' + sender.split(' ').join('')
-        var base46Img = fs.readFileSync(filename)
-        chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-            '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-    }
-    else {
-        if (oldMessage["sender"] != sender) {
-            let nameWithoutSpace = sender.split(" ").join("")
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            let filename = './profile-pics/' + sender.split(' ').join('')
-            var base46Img = fs.readFileSync(filename)
-            chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-                '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-        }
-        else {
-            let nameWithoutSpace = sender.split(" ").join("")
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            if (oldMessage["type"] == "image") {
-                chatroom.append("<p  id='message-color' style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
-            }
-            else {
-                chatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
-            }
-        }
-    }
+    messageLogic.receiveImage(messages, messageData, sender, base46Message);
+    
+    // let i = messages.indexOf(messageData)
+    // let oldMessage = messages[i-1]
+    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    // if (oldMessage === undefined) {
+    //     let nameWithoutSpace = sender.split(" ").join("")
+    //     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //     let filename = './profile-pics/' + sender.split(' ').join('')
+    //     var base46Img = fs.readFileSync(filename)
+    //     chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //         '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    // }
+    // else {
+    //     if (oldMessage["sender"] != sender) {
+    //         let nameWithoutSpace = sender.split(" ").join("")
+    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //         let filename = './profile-pics/' + sender.split(' ').join('')
+    //         var base46Img = fs.readFileSync(filename)
+    //         chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //             '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    //     }
+    //     else {
+    //         let nameWithoutSpace = sender.split(" ").join("")
+    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //         if (oldMessage["type"] == "image") {
+    //             chatroom.append("<p  id='message-color' style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+    //         }
+    //         else {
+    //             chatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+    //         }
+    //     }
+    // }
 
     if (messages) {
         let messagejson = JSON.stringify(messages)
@@ -1813,29 +1815,31 @@ socket.on('group_message_sent', (data) => {
 
     groupMessages.push(messageData)
 
-    let i = groupMessages.indexOf(messageData)
-    let oldMessage = groupMessages[i-1]
-    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+    // let i = groupMessages.indexOf(messageData)
+    // let oldMessage = groupMessages[i-1]
+    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
 
-    if (oldMessage === undefined) {
-        let filename = './profile-pics/' + sender.split(' ').join('')
-        var base46Img = fs.readFileSync(filename)
-        grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-            '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-    }
-    else {
-        if (oldMessage["sender"] != sender) {
-            let filename = './profile-pics/' + sender.split(' ').join('')
-            var base46Img = fs.readFileSync(filename)
-            grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-                '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-        }
-        else {
-            grpChatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'>" + message + "</p>")
-        }
-    }
+    // if (oldMessage === undefined) {
+    //     let filename = './profile-pics/' + sender.split(' ').join('')
+    //     var base46Img = fs.readFileSync(filename)
+    //     grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //         '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    // }
+    // else {
+    //     if (oldMessage["sender"] != sender) {
+    //         let filename = './profile-pics/' + sender.split(' ').join('')
+    //         var base46Img = fs.readFileSync(filename)
+    //         grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //             '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    //     }
+    //     else {
+    //         grpChatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'>" + message + "</p>")
+    //     }
+    // }
+
+    messageLogic.receiveGroupMessage(groupMessages, messageData, sender, grpId, message);
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
@@ -1895,34 +1899,36 @@ socket.on('group_image_sent', (data) => {
     groupMessages.push(messageData)
     console.log("messages array is " + JSON.stringify(groupMessages));
 
-    let i = groupMessages.indexOf(messageData)
-    let oldMessage = groupMessages[i-1]
-    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+    messageLogic.receiveGroupImage(groupMessages, messageData, sender, grpId, base46Message);
 
-    if (oldMessage === undefined) {
-        let filename = './profile-pics/' + sender.split(' ').join('')
-        var base46Img = fs.readFileSync(filename)
-        grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-            '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-    }
-    else {
-        if (oldMessage["sender"] != sender) {
-            let filename = './profile-pics/' + sender.split(' ').join('')
-            var base46Img = fs.readFileSync(filename)
-            grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-                '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-        }
-        else {
-            if (oldMessage["type"] == "image") {
-                grpChatroom.append("<p  id='message-color' style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
-            }
-            else {
-                grpChatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
-            }
-        }
-    }
+    // let i = groupMessages.indexOf(messageData)
+    // let oldMessage = groupMessages[i-1]
+    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+
+    // if (oldMessage === undefined) {
+    //     let filename = './profile-pics/' + sender.split(' ').join('')
+    //     var base46Img = fs.readFileSync(filename)
+    //     grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //         '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    // }
+    // else {
+    //     if (oldMessage["sender"] != sender) {
+    //         let filename = './profile-pics/' + sender.split(' ').join('')
+    //         var base46Img = fs.readFileSync(filename)
+    //         grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //             '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
+    //     }
+    //     else {
+    //         if (oldMessage["type"] == "image") {
+    //             grpChatroom.append("<p  id='message-color' style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
+    //         }
+    //         else {
+    //             grpChatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
+    //         }
+    //     }
+    // }
 
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
@@ -1971,35 +1977,37 @@ socket.on("message_sent", (data) => {
 
     messages.push(messageData)
 
-    let i = messages.indexOf(messageData)
-    let oldMessage = messages[i-1]
-    console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
+    // let i = messages.indexOf(messageData)
+    // let oldMessage = messages[i-1]
+    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
 
-    if (oldMessage === undefined) {
-        let nameWithoutSpace = sender.split(" ").join("")
-        chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-        let filename = './profile-pics/' + sender.split(' ').join('')
-        var base46Img = fs.readFileSync(filename)
-        chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-            '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-            '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-    }
-    else {
-        if (oldMessage["sender"] != sender) {
-            let nameWithoutSpace = sender.split(" ").join("")
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            let filename = './profile-pics/' + sender.split(' ').join('')
-            var base46Img = fs.readFileSync(filename)
-            chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-                '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-                '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-        }
-        else {
-            let nameWithoutSpace = sender.split(" ").join("")
-            chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-            chatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'>" + message + "</p>")
-        }
-    }
+    // if (oldMessage === undefined) {
+    //     let nameWithoutSpace = sender.split(" ").join("")
+    //     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //     let filename = './profile-pics/' + sender.split(' ').join('')
+    //     var base46Img = fs.readFileSync(filename)
+    //     chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //         '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    // }
+    // else {
+    //     if (oldMessage["sender"] != sender) {
+    //         let nameWithoutSpace = sender.split(" ").join("")
+    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //         let filename = './profile-pics/' + sender.split(' ').join('')
+    //         var base46Img = fs.readFileSync(filename)
+    //         chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
+    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
+    //             '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
+    //     }
+    //     else {
+    //         let nameWithoutSpace = sender.split(" ").join("")
+    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+    //         chatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'>" + message + "</p>")
+    //     }
+    // }
+
+    messageDisplay.receiveMessage(messages, messageData, message, sender);
 
     if (messages) {
         let messagejson = JSON.stringify(messages)

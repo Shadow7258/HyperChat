@@ -222,6 +222,106 @@ class MessageLogic {
             }
         }
     }
+
+    receiveMessage(messages, messageData, message, sender) {
+        let i = messages.indexOf(messageData)
+        let oldMessage = messages[i-1]
+
+        let nameWithoutSpace = sender.split(" ").join("")
+        let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+
+        if (oldMessage === undefined) {
+            messageDisplay.displayNewMessage(chatroom, sender, message, base46Img);
+        }
+        else {
+            if (oldMessage["sender"] != sender) {
+                messageDisplay.displayNewMessage(chatroom, sender, message, base46Img);
+            }
+            else {
+                messageDisplay.displayMessage(chatroom, message);
+            }
+        }
+    }
+
+    receiveGroupMessage(groupMessages, messageData, sender, grpId, message) {
+        let i = groupMessages.indexOf(messageData)
+        let oldMessage = groupMessages[i-1]
+
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+
+        if (oldMessage === undefined) {
+            messageDisplay.displayNewMessage(grpChatroom, sender, message, base46Img);
+        }
+        else {
+            if (oldMessage["sender"] != sender) {
+                messageDisplay.displayNewMessage(grpChatroom, sender, message, base46Img);
+            }
+            else {
+                messageDisplay.displayMessage(grpChatroom, message);
+            }
+        }
+    }
+
+    receiveGroupImage(groupMessages, messageData, sender, grpId, image) {
+        let i = groupMessages.indexOf(messageData)
+        let oldMessage = groupMessages[i-1]
+
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+
+        grpChatroom = $('#' + grpId + 'GroupChatroom')
+
+        if (oldMessage === undefined) {
+            messageDisplay.displayNewImage(grpChatroom, sender, image, base46Img);
+        }
+        else {
+            if (oldMessage["sender"] != sender) {
+                messageDisplay.displayNewImage(grpChatroom, sender, image, base46Img);
+            }
+            else {
+                if (oldMessage['type' == 'image']) {
+                    messageDisplay.displayImage(grpChatroom, image, true);
+                }
+                else {
+                    messageDisplay.displayImage(grpChatroom, image, false);
+                }
+            }
+        }
+    }
+
+    receiveImage(messages, messageData, sender, image) {
+        let i = messages.indexOf(messageData)
+        let oldMessage = messages[i-1]
+
+        let nameWithoutSpace = sender.split(" ").join("")
+        let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
+
+        let filename = './profile-pics/' + sender.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+    
+        if (oldMessage === undefined) {
+            messageDisplay.displayNewImage(chatroom, sender, image, base46Img);
+        }
+        else {
+            if (oldMessage["sender"] != sender) {
+                messageDisplay.displayNewImage(chatroom, sender, image, base46Img);
+            }
+            else {
+                if (oldMessage["type"] == "image") {
+                    messageDisplay.displayImage(chatroom, image, true);
+                }
+                else {
+                    messageDisplay.displayImage(chatroom, image, false);
+                }
+            }
+        }
+    }
 }
 
 exports.MessageLogic = MessageLogic;
