@@ -9,6 +9,11 @@
     overflow-y: hidden;
 }
 
+a {
+  color: white !important;
+  background-color: #6272a4;
+}
+
 #friendsListGroup {
   max-height: 150px;
   overflow-y: auto;
@@ -194,3 +199,44 @@ p {
   background-color: #6272a4;
   color: white;
 }
+
+.container, .container-fluid, .container-lg, .container-md, .container-sm, .container-xl {
+  width: auto;
+  padding: 0px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.friendsActionButton {
+  border-right-color: #282a36;
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-bottom-color: #282a36;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+
+a:active {
+  color: #6078c4;
+}
+
+#addFriendButton {
+  background-color: #007bff;
+  border-right-color: #282a36;
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-bottom-color: #282a36;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+

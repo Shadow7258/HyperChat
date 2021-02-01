@@ -22,8 +22,8 @@ firebase.initializeApp(firebaseConfig);
 let messageLogic = new MessageLogic();
 
 var socket, friendClickedOn, groupName;
-// socket = io.connect('http://34.93.56.182:3000')
-socket = io.connect('http://localhost:3000')
+socket = io.connect('http://34.93.56.182:3000')
+// socket = io.connect('http://localhost:3000')
 
 var userExists = false, friendsAdded = false, groupClickedOn = false, friendTabClickedOn = false;
 
@@ -462,6 +462,7 @@ function friendListClicked(friend) {
 
 function friendsClicked() {
     chatheading.html('Friends')
+    console.log("Showing friends tab");
 
     dmList.forEach(user => {
         let nameWithoutSpaceInLoop = user.split(" ").join("")
@@ -1016,7 +1017,7 @@ function addChatListToHtml(name) {
     '<div style="background-color: #353641; padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action chat-item' + nameWithoutSpace + '_nameclass" onclick="buttonClicked(\'' + name + '\')" id="' + nameWithoutSpace + '_id" data-username="' + name + '">' +
         '<div class="row ' + nameWithoutSpace + '_nameclass">' +
             '<div class="col-4 ' + nameWithoutSpace + '_nameclass">' +
-                '<img class="' + nameWithoutSpace + '_nameclass" id="' + nameWithoutSpace + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
+                '<img class="' + nameWithoutSpace + '_nameclass" id="' + nameWithoutSpace + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../assets/images/avatar.jpg" alt="Avatar">' +
             '</div>' +
             '<div class="col-6 ' + nameWithoutSpace + '_nameclass" style="padding-left: 5px;">' +
                 '<div style="color: white;" class="row ' + nameWithoutSpace + '_nameclass">' + name + '</div>' +
@@ -1041,7 +1042,7 @@ function addGroupToHtml(friends, grpId) {
     '<div style="background-color: #353641; padding-right: 5px; outline: none;" type="button" class="list-group-item list-group-item-action ' + grpId + '_nameclass" id="' + grpId + '_id" onClick="groupClicked(\'' + grpId + '\')">' +
         '<div class="row ' + grpId + '_nameclass">' +
             '<div class="col-4 ' + grpId + '_nameclass">' +
-                '<img class="' + grpId + '_nameclass" id="' + grpId + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../images/avatar.jpg" alt="Avatar">' +
+                '<img class="' + grpId + '_nameclass" id="' + grpId + '_pic" style="border-radius: 50%; width: 40px; height: 40px;" src="../assets/images/avatar.jpg" alt="Avatar">' +
             '</div>' +
             '<div class="col-6 ' + grpId + '_nameclass" style="padding-left: 5px;">' +
                 '<div style="padding-top: 6px; padding-bottom: 10px; color: white;" id="' + grpId + 'friends" class="row ' + grpId + '_nameclass"></div>' +
@@ -1342,7 +1343,7 @@ socket.on('friend_invite', (data) => {
         pendingFriendsDiv.append(
             '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
-                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col" style="padding: 0px">' + 
                         '<div style="margin-top: 10px;">' + friend + '</div>' + 
                     '</div>' + 
@@ -1480,7 +1481,7 @@ socket.on('friend_online', (friend) => {
         onlineFriendsDiv.append(
             '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
-                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col">' + 
                         '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
                         '<div class="row"> ' + 
@@ -1519,7 +1520,7 @@ socket.on('friend_status', (data) => {
     allFriendsDiv.append(
         '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
             '<div class="btn-group" role="group" style="float: left">' + 
-                '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../images/avatar.jpg" alt="Avatar">' + 
+                '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                 '<div class="col">' + 
                     '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
                     '<div class="row"> ' + 
