@@ -248,7 +248,7 @@ function createHomeWindow()
 
   mainWindow.loadFile('renderer/home.html');
 
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 }
 
 

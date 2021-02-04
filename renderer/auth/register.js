@@ -115,7 +115,7 @@ function saveUserData(username, email)
   ipcRenderer.send('saveUserData', {username: username, email: email});
 
   ipcRenderer.on('savedUserData', () => {
-    saveProfilePic(path)
+    saveProfilePic(path);
     console.log("Finished saving data");
     ipcRenderer.send('homePageFromRegister', email);
   })

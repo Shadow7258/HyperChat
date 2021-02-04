@@ -808,7 +808,7 @@ function sendMessage() {
         to: friendClickedOn,
         time: time,
         type: 'text'
-    }
+    }    
 
     socket.emit('send_message', messageData);
 
@@ -2008,7 +2008,7 @@ socket.on("message_sent", (data) => {
     //     }
     // }
 
-    messageDisplay.receiveMessage(messages, messageData, message, sender);
+    messageLogic.receiveMessage(messages, messageData, message, sender);
 
     if (messages) {
         let messagejson = JSON.stringify(messages)

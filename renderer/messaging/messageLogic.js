@@ -11,7 +11,7 @@ class MessageLogic {
             let sender = messageData.sender
             let messageType = messageData.type
             let chatroom = $('#' + messageData.grpId + 'GroupChatroom')
-            let filename = '../../profile-pics/' + sender.split(' ').join('')
+            let filename = './profile-pics/' + sender.split(' ').join('')
             var base46Img = fs.readFileSync(filename)
             let i = messageArr.indexOf(messageData)
             let oldMessage = messageArr[i-1]  
@@ -69,7 +69,7 @@ class MessageLogic {
             let recepient = messageData.to
             let messageType = messageData.type
             let nameWithoutSpace = sender.split(" ").join("")
-            let filename = '../../profile-pics/' + sender.split(' ').join('')
+            let filename = './profile-pics/' + sender.split(' ').join('')
             var base46Img = fs.readFileSync(filename)
             let i = messageArr.indexOf(messageData)
             let oldMessage = messageArr[i-1]  
@@ -130,7 +130,7 @@ class MessageLogic {
     sendGroupMessage(groupMessages, messageData, username, grpId, message) {
         var chatroom = $('#' + grpId + 'GroupChatroom');
 
-        let filename = '../../profile-pics/' + username.split(' ').join('')
+        let filename = './profile-pics/' + username.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
 
         let i = groupMessages.indexOf(messageData)
@@ -156,17 +156,22 @@ class MessageLogic {
         var chatroom;
         var oldMessage;
 
-        for (let i = 1; i < messages.length; i++) {
-            let message = messages[i];
-            if (message['to'] == messageData['to'] || (message['to'] == username && message['sender'] == username)) { // Either I sent a message to him or he sent a message to me
-                oldMessage = JSON.stringify(message)   
-            }
-        }
+        // for (let i = 1; i < messages.length; i++) {
+        //     let message = messages[i];
+        //     if (message['to'] == messageData['to'] || (message['to'] == username && message['sender'] == username)) { // Either I sent a message to him or he sent a message to me
+        //         oldMessage = JSON.stringify(message)   
+        //     }
+        // }
+
+        var i = messages.indexOf(messageData);
+        oldMessage = messages[i-1];
+
+        console.log("Old message is " + JSON.stringify(oldMessage) + "\nNew message is " + JSON.stringify(messageData));
                 
         let nameWithoutSpace = friendClickedOn.split(" ").join("")
         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
         
-        let filename = '../../profile-pics/' + username.split(' ').join('')
+        let filename = './profile-pics/' + username.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
         
         if (oldMessage === undefined) { // This is the first message
@@ -196,7 +201,7 @@ class MessageLogic {
         let nameWithoutSpace = friendClickedOn.split(" ").join("")
         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
         
-        let filename = '../../profile-pics/' + username.split(' ').join('')
+        let filename = './profile-pics/' + username.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
         
         if (oldMessage === undefined) { // This is the first message
@@ -230,7 +235,7 @@ class MessageLogic {
         let nameWithoutSpace = sender.split(" ").join("")
         let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
 
-        let filename = '../../profile-pics/' + sender.split(' ').join('')
+        let filename = './profile-pics/' + sender.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
 
         if (oldMessage === undefined) {
@@ -250,7 +255,7 @@ class MessageLogic {
         let i = groupMessages.indexOf(messageData)
         let oldMessage = groupMessages[i-1]
 
-        let filename = '../../profile-pics/' + sender.split(' ').join('')
+        let filename = './profile-pics/' + sender.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
 
         grpChatroom = $('#' + grpId + 'GroupChatroom')
@@ -272,7 +277,7 @@ class MessageLogic {
         let i = groupMessages.indexOf(messageData)
         let oldMessage = groupMessages[i-1]
 
-        let filename = '../../profile-pics/' + sender.split(' ').join('')
+        let filename = './profile-pics/' + sender.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
 
         grpChatroom = $('#' + grpId + 'GroupChatroom')
@@ -302,7 +307,7 @@ class MessageLogic {
         let nameWithoutSpace = sender.split(" ").join("")
         let chatroom = $('#' + nameWithoutSpace + 'Chatroom')
 
-        let filename = '../../profile-pics/' + sender.split(' ').join('')
+        let filename = './profile-pics/' + sender.split(' ').join('')
         var base46Img = fs.readFileSync(filename)
     
         if (oldMessage === undefined) {
