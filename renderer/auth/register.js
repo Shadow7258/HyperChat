@@ -45,6 +45,18 @@ function saveProfilePic(path) {
   fs.writeFileSync('profile-pic', path)
   console.log("Profile pic file has succesfully been created.");
 
+  fs.readFile(path, 'base64', (err, data) => {
+    console.log("Image data is " + data);
+    var base46Img = 'data:image/jpeg;base64,' + data
+
+    if (!fs.existsSync('./profile-pics')) {
+        fs.mkdirSync('./profile-pics')  
+    }
+
+    let filename = './profile-pics/' + $('#usernameField').val().split(' ').join('')
+    fs.writeFileSync(filename, base46Img)
+})
+
   let email = $('#emailField').val()
   console.log("Image path is " + path);
   fs.readFile(path, 'base64', (err, data) => {

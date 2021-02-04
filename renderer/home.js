@@ -1026,7 +1026,7 @@ function addChatListToHtml(name) {
                 '</div>' +
             '</div>' +
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
-                '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: white" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
+                '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: white; background-color: transparent;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="userDropdown">' +
                 '<a class="dropdown-item" href="#" onClick="closeDM(\'' + name + '\')">Close DM</a>' +
                 '<a class="dropdown-item" href="#">Block User</a>' +
@@ -1048,7 +1048,7 @@ function addGroupToHtml(friends, grpId) {
                 '<div style="padding-top: 6px; padding-bottom: 10px; color: white;" id="' + grpId + 'friends" class="row ' + grpId + '_nameclass"></div>' +
             '</div>' +
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
-                '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: white" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
+                '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: white; background-color: transparent;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="groupDropdown">' +
                     '<a class="dropdown-item" href="#" onClick="leaveGroup(\'' + grpId + '\')">Leave Group</a>' +
                     '<a class="dropdown-item" href="#">Something else here</a>' +
@@ -1341,11 +1341,11 @@ socket.on('friend_invite', (data) => {
     friendInvites.forEach((friend) => {
         let name = friend.split(' ').join('');
         pendingFriendsDiv.append(
-            '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
+            '<li id="' + name + '_inviteList" class="list-group-item friendListItem" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
                     '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col" style="padding: 0px">' + 
-                        '<div style="margin-top: 10px;">' + friend + '</div>' + 
+                        '<div style="margin-top: 10px; color: white;">' + friend + '</div>' + 
                     '</div>' + 
                 '</div>' + 
                 '<div class="btn-group" role="group" style="float: right">' + 
@@ -1479,11 +1479,11 @@ socket.on('friend_online', (friend) => {
     friendsOnline.forEach(friend => {
         let name = friend.split(' ').join('')
         onlineFriendsDiv.append(
-            '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
+            '<li id="' + name + '_inviteList" class="list-group-item friendListItem" aria-current="true">' + 
                 '<div class="btn-group" role="group" style="float: left">' + 
                     '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                     '<div class="col">' + 
-                        '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
+                        '<div style="margin-top: 2px; color: white;" class="row">' + friend + '</div>' + 
                         '<div class="row"> ' + 
                             '<small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>' + 
                         '</div>' + 
@@ -1518,11 +1518,11 @@ socket.on('friend_status', (data) => {
 
     // Append to div
     allFriendsDiv.append(
-        '<li id="' + name + '_inviteList" class="list-group-item" aria-current="true">' + 
-            '<div class="btn-group" role="group" style="float: left">' + 
+        '<li id="' + name + '_inviteList" class="list-group-item friendListItem" aria-current="true">' + 
+            '<div class="btn-group" role="group" style="float: left;">' + 
                 '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
                 '<div class="col">' + 
-                    '<div style="margin-top: 2px;" class="row">' + friend + '</div>' + 
+                    '<div style="margin-top: 2px; color: white;" class="row">' + friend + '</div>' + 
                     '<div class="row"> ' + 
                         '<small class="' + statusCol + '" style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">' + status + '</small>' + 
                     '</div>' + 

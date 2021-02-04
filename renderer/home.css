@@ -221,12 +221,16 @@ p {
   border-image-repeat: initial;
 }
 
+.friendsActionButton:active {
+  background-color: #18487a;
+}
+
 a:active {
   color: #6078c4;
 }
 
 #addFriendButton {
-  background-color: #007bff;
+  background-color: #18487a;
   border-right-color: #282a36;
   border-right-style: solid;
   border-right-width: 1px;
@@ -240,3 +244,16 @@ a:active {
   border-image-repeat: initial;
 }
 
+.friendListItem {
+  background-color: #282a36;
+  margin-right: 20px;
+  margin-left: 20px;  
+}
+
+.friendListItem:first-child, .friendListItem:last-child{
+  border-radius: 15px;
+}
+
+#userDropdown {
+  background-color: #282a36;
+}
