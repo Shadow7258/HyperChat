@@ -161,6 +161,7 @@ p {
 #chat-heading {
   padding-top: 5px;
   color: white;
+  background-color: transparent;
 }
 
 #message-color {
@@ -225,8 +226,8 @@ p {
   background-color: #18487a;
 }
 
-a:active {
-  color: #6078c4;
+.active {
+  background-color: #18487a !important;
 }
 
 #addFriendButton {

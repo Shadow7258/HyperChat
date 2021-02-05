@@ -324,6 +324,10 @@ $(document).ready(function() {
             console.log("User doesn't exist");
             dialog.showErrorBox("Error!", "User (" + friend + ") doesn't exist!")
         }
+        else if (friends.includes(friend)) {
+            console.log("Friend already exists!");
+            dialog.showErrorBox("Error!", "Friend already exists!");
+        }
         else {
             console.log("User exists");
             addFriend(friend)

@@ -156,13 +156,6 @@ class MessageLogic {
         var chatroom;
         var oldMessage;
 
-        // for (let i = 1; i < messages.length; i++) {
-        //     let message = messages[i];
-        //     if (message['to'] == messageData['to'] || (message['to'] == username && message['sender'] == username)) { // Either I sent a message to him or he sent a message to me
-        //         oldMessage = JSON.stringify(message)   
-        //     }
-        // }
-
         var i = messages.indexOf(messageData);
         oldMessage = messages[i-1];
 
