@@ -1,5 +1,5 @@
 {
-  "name": "code-atlas",
+  "name": "hacker-chat",
   "version": "1.0.1",
   "description": "Chat application",
   "main": "main.js",
@@ -34,7 +34,7 @@
     "jquery": "^3.5.1",
     "mongodb": "^3.6.4",
     "mousetrap": "^1.6.5",
-    "socket.io": "^2.3.0"
+    "socket.io": "^3.1.1"
   },
   "build": {
     "appId": "com.pranav.hyper-chat",
