@@ -20,9 +20,9 @@
   "author": "Pranav Doshi",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^9.3.4",
+    "electron": "^9.4.3",
     "electron-builder": "^22.9.1",
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.7"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -32,7 +32,7 @@
     "electron-window-state": "^5.0.3",
     "firebase": "^7.24.0",
     "jquery": "^3.5.1",
-    "mongodb": "^3.6.2",
+    "mongodb": "^3.6.4",
     "mousetrap": "^1.6.5",
     "socket.io": "^2.3.0"
   },

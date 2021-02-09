@@ -22,8 +22,8 @@ firebase.initializeApp(firebaseConfig);
 let messageLogic = new MessageLogic();
 
 var socket, friendClickedOn, groupName;
-socket = io.connect('http://34.93.56.182:3000')
-// socket = io.connect('http://localhost:3000')
+// socket = io.connect('http://34.93.56.182:3000')
+socket = io.connect('http://localhost:3000')
 
 var userExists = false, friendsAdded = false, groupClickedOn = false, friendTabClickedOn = false;
 
@@ -1032,9 +1032,9 @@ function addChatListToHtml(name) {
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + nameWithoutSpace + '_optionsid" style="border: none; padding: 0px; color: white; background-color: transparent;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
                 '<div class="dropdown-menu" id="userDropdown">' +
-                '<a class="dropdown-item" href="#" onClick="closeDM(\'' + name + '\')">Close DM</a>' +
-                '<a class="dropdown-item" href="#">Block User</a>' +
-                '<a class="dropdown-item" id="remove' + nameWithoutSpace + 'Option" onClick="removeFriend(\'' + name + '\')" href="#">Remove Friend</a>' +
+                '<a class="dropDownItem dropdown-item" href="#" onClick="closeDM(\'' + name + '\')">Close DM</a>' +
+                '<a class="dropDownItem dropdown-item" href="#" onClick="blockUser(\'' + name + '\')">Block User</a>' +
+                '<a class="dropDownItem dropdown-item" id="remove' + nameWithoutSpace + 'Option" onClick="removeFriend(\'' + name + '\')" href="#">Remove Friend</a>' +
             '</div>' +
             '</div>' +
         '</div>' +
@@ -1069,6 +1069,10 @@ function addGroupToHtml(friends, grpId) {
     console.log("Friends str is " + friendsStr);
     friendsGrp.html(friendsStr)
     chatheading.html(friendsStr)
+}
+
+function blockUser(friend) {
+    console.log("Blocking user " + friend);
 }
 
 function closeDM(friend) {

@@ -258,3 +258,7 @@ p {
 #userDropdown {
   background-color: #282a36;
 }
+
+.dropDownItem:hover {
+  background-color:#6272a4;
+}
