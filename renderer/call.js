@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 
-// const socket = io.connect('http://34.93.56.182:3000')
-const socket = io.connect('http://localhost:3000')
+const socket = io.connect('http://34.93.56.182:3000')
+// const socket = io.connect('http://localhost:3000')
 
 const { v4: uuidV4 } = require('uuid')
 
@@ -26,7 +26,7 @@ myVideo.muted = true
 const peers = {}
 navigator.mediaDevices.getUserMedia({
   video: true,
-  audio: true
+  audio: true,
 }).then(stream => {
   addVideoStream(myVideo, stream)
 
@@ -39,6 +39,7 @@ navigator.mediaDevices.getUserMedia({
   })
 
   socket.on('user-connected', userId => {
+    console.log("User connected: " + userId);
     connectToNewUser(userId, stream)
   })
 })
@@ -53,8 +54,9 @@ myPeer.on('open', id => {
 })
 
 function connectToNewUser(userId, stream) {
-  const call = myPeer.call(userId, stream)
+  console.log("Connecting new user");
   const video = document.createElement('video')
+  const call = myPeer.call(userId, stream)
   call.on('stream', userVideoStream => {
     addVideoStream(video, userVideoStream)
   })
