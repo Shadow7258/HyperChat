@@ -152,6 +152,36 @@ class MessageLogic {
         }
     }
 
+    sendGroupImage(groupMessages, messageData, username, grpId, image) {
+        var chatroom = $('#' + grpId + 'GroupChatroom');
+
+        let filename = './profile-pics/' + username.split(' ').join('')
+        var base46Img = fs.readFileSync(filename)
+
+        let i = groupMessages.indexOf(messageData)
+        let oldMessage = groupMessages[i-1]
+
+        if (oldMessage === undefined) {
+            // This is the first message
+            messageDisplay.displayNewImage(chatroom, username, image, base46Img);
+        }
+        else {
+            if (oldMessage["sender"] != username) {
+                // Someone sent the previous message to the group. 
+                messageDisplay.displayNewImage(chatroom, username, image, base46Img);
+            }
+            else {
+                // I sent the previous message.
+                if (oldMessage["type"] == "image") {
+                    messageDisplay.displayImage(chatroom, image, true);
+                }
+                else {
+                    messageDisplay.displayImage(chatroom, image, false);
+                }
+            }
+        }
+    }
+
     sendMessage(messages, messageData, username, friendClickedOn, message) {
         var chatroom;
         var oldMessage;

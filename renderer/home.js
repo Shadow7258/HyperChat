@@ -51,6 +51,8 @@ let pendingFriendsDiv = $('#pendingFriends')
 let blockedFriendsDiv = $('#blockedFriends')
 let addUserButton = $('#addUserButton')
 let friendsListGroup = $('#friendsListGroup')
+let callButton = $('#callButton')
+let videoButton = $('#videoButton')
 
 let message = {
     sender: "",
@@ -60,7 +62,7 @@ let message = {
     type: ""
 }
 
-let dmList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = []
+let dmList = [], messages = [], users = [], friendsInGroup = [], groups = [], groupMessages = [], chatListObj = [];
 let friends = [], pendingInvites = [], friendInvites = [], friendsBlocked = [], friendsOnline = [];
 
 remote.getCurrentWindow().on('close', () => {
@@ -109,6 +111,8 @@ $(document).ready(function() {
     friendInvitesDiv = $('#friendInvites')
     addUserButton = $('#addUserButton')
     friendsListGroup = $('#friendsListGroup')
+    videoButton = $('#videoButton')
+    callButton = $('#callButton')
 
     getUsers()
 
@@ -399,6 +403,15 @@ $(document).ready(function() {
         }, 3000)
     });
 
+    videoButton.on('click', () => {
+        console.log("Pressed video button");
+        ipcRenderer.send('openCallWindow', friendClickedOn);
+    })
+
+    callButton.on('click', () => {
+        console.log("Call button clicked");
+    })
+
     //on keydown, clear the countdown
     messageField.on('keydown', function () {
         if (groupClickedOn == false) {
@@ -573,13 +586,26 @@ function createGroup(friends) {
 function createChat(name) {
     console.log("Create chat button clicked.")
 
-    dmList.push(name);
+    var chatId = "" + username.split(' ').join('') + name.split(' ').join('')
+    chatId = chatId.split('').sort().join('');
+    console.log("Chat id generated is " + chatId);
 
     addChatListToHtml(name)
+
+    dmList.push(name);
 
     socket.emit('get_status', {username: name})
 
     ipcRenderer.send('getImage', name)
+
+    var chatData = {
+        friend: name, 
+        chatId: chatId,        
+    }
+
+    chatListObj.push(chatData);
+
+    fs.writeFileSync('chat-list', chatListObj);
 
     fs.appendFile("dm-list", name + '\n', (err) => {
         if (err) {
@@ -734,6 +760,26 @@ function sendGroupImage(imagePath) {
         }
 
         socket.emit('send_group_image', messageData)
+
+        groupMessages.push(messageData)
+
+        messageLogic.sendGroupImage(groupMessages, messageData, username, grpId, data)
+
+        if (groupMessages) {
+            let messagejson = JSON.stringify(groupMessages)
+    
+            console.log("Messages is " + JSON.stringify(messageData));
+    
+            fs.writeFile("group-messages", messagejson, (err) => {
+                if(err) {
+                    console.log("An error ocurred creating the file "+ err.message)
+                }
+                console.log("User file has succesfully been created.");
+            })
+        }
+    
+        messageField.val('');
+        grpChatroom.scrollTop(grpChatroom.prop("scrollHeight")); 
     })
 }
 
@@ -912,6 +958,16 @@ function addGroupMessages() {
             groupMessages = dataObj;
             messageArr = dataObj;
             messageLogic.addGroupMessages(messageArr, username)
+        }
+    }
+}
+
+function addChatObjList() {
+    if (fs.existsSync('chat-list')) {
+        let data = fs.readFileSync('chat-list')
+        if (data != '') {
+            dataObj = JSON.parse(data);
+            chatListObj = dataObj;
         }
     }
 }
@@ -1924,35 +1980,6 @@ socket.on('group_image_sent', (data) => {
 
     messageLogic.receiveGroupImage(groupMessages, messageData, sender, grpId, base46Message);
 
-    // let i = groupMessages.indexOf(messageData)
-    // let oldMessage = groupMessages[i-1]
-    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
-
-    // if (oldMessage === undefined) {
-    //     let filename = './profile-pics/' + sender.split(' ').join('')
-    //     var base46Img = fs.readFileSync(filename)
-    //     grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-    //         '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-    // }
-    // else {
-    //     if (oldMessage["sender"] != sender) {
-    //         let filename = './profile-pics/' + sender.split(' ').join('')
-    //         var base46Img = fs.readFileSync(filename)
-    //         grpChatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-    //             '<div class="row"><b>' + sender + '</b></div><div class="row"><img src="' + base46Message + '"></div></div></div>');
-    //     }
-    //     else {
-    //         if (oldMessage["type"] == "image") {
-    //             grpChatroom.append("<p  id='message-color' style='margin-left: 55px; margin-top: 5px;' class='message'><img src='" + base46Message + "'></p>")
-    //         }
-    //         else {
-    //             grpChatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'><img src='" + base46Message + "'></p>")
-    //         }
-    //     }
-    // }
-
     if (groupMessages) {
         let messagejson = JSON.stringify(groupMessages)
 
@@ -1999,36 +2026,6 @@ socket.on("message_sent", (data) => {
     }
 
     messages.push(messageData)
-
-    // let i = messages.indexOf(messageData)
-    // let oldMessage = messages[i-1]
-    // console.log("MESSAGE WHICH WAS SENT IS " + JSON.stringify(oldMessage));
-
-    // if (oldMessage === undefined) {
-    //     let nameWithoutSpace = sender.split(" ").join("")
-    //     chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    //     let filename = './profile-pics/' + sender.split(' ').join('')
-    //     var base46Img = fs.readFileSync(filename)
-    //     chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-    //         '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-    //         '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-    // }
-    // else {
-    //     if (oldMessage["sender"] != sender) {
-    //         let nameWithoutSpace = sender.split(" ").join("")
-    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    //         let filename = './profile-pics/' + sender.split(' ').join('')
-    //         var base46Img = fs.readFileSync(filename)
-    //         chatroom.append('<div  id="message-color" style="margin-top: 15px; margin-right: 15px;" class="row"><div class="col" style="flex-grow: 0">' + 
-    //             '<img style="width: 40px; height: 40px; border-radius: 50%;" src="' + base46Img + '"></div><div style="float: left" class="col-md-auto">' + 
-    //             '<div class="row"><b>' + sender + '</b></div><div class="row">' + message + '</div></div></div>');
-    //     }
-    //     else {
-    //         let nameWithoutSpace = sender.split(" ").join("")
-    //         chatroom = $('#' + nameWithoutSpace + 'Chatroom')
-    //         chatroom.append("<p  id='message-color' style='margin-left: 55px;' class='message'>" + message + "</p>")
-    //     }
-    // }
 
     messageLogic.receiveMessage(messages, messageData, message, sender);
 
@@ -2343,6 +2340,7 @@ function getUsername() {
                 if (friendsAdded) {
                     addMessages()
                     addGroupMessages()
+                    addChatObjList()
                 }
             }, 10)
         })

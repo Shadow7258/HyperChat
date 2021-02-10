@@ -19,6 +19,7 @@ group-list
 group-messages
 friends
 profile-pics
+chat-list
 
 # Firebase cache
 .firebase/
