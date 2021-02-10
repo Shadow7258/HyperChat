@@ -1053,9 +1053,9 @@ function addGroupToHtml(friends, grpId) {
             '</div>' +
             '<div class="col-2 dropdown" style="padding-left: 0px">' +
                 '<a href="#" id="' + grpId + '_optionsid" style="border: none; padding: 0px; color: white; background-color: transparent;" data-toggle="dropdown"><i class="fa fa-ellipsis-h" style="margin-top: 12px"></i></a>' +
-                '<div class="dropdown-menu" id="groupDropdown">' +
-                    '<a class="dropdown-item" href="#" onClick="leaveGroup(\'' + grpId + '\')">Leave Group</a>' +
-                    '<a class="dropdown-item" href="#">Something else here</a>' +
+                '<div class="dropdown-menu" id="userDropdown">' +
+                    '<a class="dropDownItem dropdown-item" href="#" onClick="leaveGroup(\'' + grpId + '\')">Leave Group</a>' +
+                    '<a class="dropDownItem dropdown-item" href="#">Something else here</a>' +
                 '</div>' +
             '</div>' +
         '</div>' +
@@ -1073,6 +1073,20 @@ function addGroupToHtml(friends, grpId) {
 
 function blockUser(friend) {
     console.log("Blocking user " + friend);
+    friendsBlocked.push(friend);
+    let name = friend.split(' ').join('')
+        onlineFriendsDiv.append(
+            '<li id="' + name + '_inviteList" class="list-group-item friendListItem" aria-current="true">' + 
+                '<div class="btn-group" role="group" style="float: left">' + 
+                    '<img style="border-radius: 50%; width: 45px; margin-right: 13px" src="../assets/images/avatar.jpg" alt="Avatar">' + 
+                    '<div class="col">' + 
+                        '<div style="margin-top: 2px; color: white;" class="row">' + friend + '</div>' + 
+                        '<div class="row"> ' + 
+                            '<small style="height: 21px; color: rgb(24,158,73); margin-top: -3px;">online</small>' + 
+                        '</div>' + 
+                    '</div>' + 
+                '</div>' + 
+            '</li>');
 }
 
 function closeDM(friend) {
