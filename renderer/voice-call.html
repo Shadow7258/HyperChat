@@ -11,21 +11,27 @@
   <title>Call</title>
   <style>
     #video-grid {
+      overflow: hidden;
       display: grid;
       grid-template-columns: repeat(auto-fill, 400px);
       grid-auto-rows: 400px;
       transform: scaleX(-1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
     body {
       background-color: #44475a;
     }
+
+    img { 
+      height: 75%;
+      border-radius: 50%;
+    }
     
-    video {
-      width: 98%;
+    #voiceCallGrid {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 98%;
       object-fit: cover;
       margin-top: 1%;

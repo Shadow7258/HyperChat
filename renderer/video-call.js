@@ -5,13 +5,15 @@ const socket = io.connect('http://localhost:3000')
 
 ipcRenderer.send('get_chat_data')
 
-var chatId, friend;
+var chatId, friend, username;
 
-ipcRenderer.on('chat_data', (event, chatIdName, friendName) => {
+ipcRenderer.on('chat_data', (event, chatIdName, friendName, user_name) => {
   chatId = chatIdName;
   friend = friendName;
+  username = user_name;
   console.log("Chat id is " + chatId);
   console.log("Friend is " + friend);
+  console.log("Username is " + username);
 })
 
 const videoGrid = document.getElementById('video-grid')

@@ -230,17 +230,20 @@ ipcMain.on('homePageFromLogin', (event, arg) => {
 })
 
 var friendClickedOn;
+var username;
 //  = 'User 1';
 
-ipcMain.on('openVideoCallWindow', (event, friend) => {
+ipcMain.on('openVideoCallWindow', (event, friend, user) => {
   console.log("Opening video call window");
   friendClickedOn = friend;
+  username = user;
   createVideoCallWindow();
 })
 
-ipcMain.on('openVoiceCallWindow', (event, friend) => {
+ipcMain.on('openVoiceCallWindow', (event, friend, user) => {
   console.log("Opening audio call window");
   friendClickedOn = friend;
+  username = user;
   createVoiceCallWindow();
 })
 
@@ -254,12 +257,19 @@ ipcMain.on('get_chat_data', (event) => {
         dataObj.forEach(chat => {
           if (chat['friend'] == friendClickedOn) {
             chatId = chat['chatId']
+            console.log("Chat Id: " + chatId);
           }
         })
     }
   }
-  event.reply('chat_data', chatId, friendClickedOn);
+  setTimeout(() => {
+    event.reply('chat_data', chatId, friendClickedOn, username);
+  }, 500)
 })
+
+function getChatId() {
+  
+}
 
 function createUserFile(email)
 {

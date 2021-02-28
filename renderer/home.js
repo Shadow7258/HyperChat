@@ -405,12 +405,12 @@ $(document).ready(function() {
 
     videoButton.on('click', () => {
         console.log("Pressed video button");
-        ipcRenderer.send('openVideoCallWindow', friendClickedOn);
+        ipcRenderer.send('openVideoCallWindow', friendClickedOn, username);
     })
 
     callButton.on('click', () => {
         console.log("Call button clicked");
-        ipcRenderer.send('openVoiceCallWindow', friendClickedOn);
+        ipcRenderer.send('openVoiceCallWindow', friendClickedOn, username);
     })
 
     //on keydown, clear the countdown
