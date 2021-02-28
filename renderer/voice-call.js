@@ -19,6 +19,9 @@ ipcRenderer.on('chat_data', (event, chatIdName, friendName, user_name) => {
   let filename = './profile-pics/' + username.split(' ').join('')
   userImage = fs.readFileSync(filename);
 
+  let friendfilename = './profile-pics/' + friend.split(' ').join('')
+  friendImage = fs.readFileSync(friendfilename);
+
   voiceCall();
 })
 
