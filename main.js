@@ -229,12 +229,19 @@ ipcMain.on('homePageFromLogin', (event, arg) => {
   }, 1000);
 })
 
-var friendClickedOn = 'User 1';
+var friendClickedOn;
+//  = 'User 1';
 
-ipcMain.on('openCallWindow', (event, friend) => {
-  console.log("Opening call window");
+ipcMain.on('openVideoCallWindow', (event, friend) => {
+  console.log("Opening video call window");
   friendClickedOn = friend;
-  createCallWindow();
+  createVideoCallWindow();
+})
+
+ipcMain.on('openVoiceCallWindow', (event, friend) => {
+  console.log("Opening audio call window");
+  friendClickedOn = friend;
+  createVoiceCallWindow();
 })
 
 ipcMain.on('get_chat_data', (event) => {
@@ -276,7 +283,7 @@ function createHomeWindow()
   mainWindow.webContents.openDevTools();
 }
 
-function createCallWindow() { 
+function createVideoCallWindow() { 
   callWindow = new BrowserWindow({
     width: 1000,
     height: 700,
@@ -287,7 +294,7 @@ function createCallWindow() {
     }
   })
 
-  callWindow.loadFile('renderer/call.html')
+  callWindow.loadFile('renderer/video-call.html')
 
   callWindow.webContents.openDevTools();
 
@@ -296,6 +303,25 @@ function createCallWindow() {
   })
 }
 
+function createVoiceCallWindow() { 
+  callWindow = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
+    webPreferences: { 
+      nodeIntegration: true,
+      enableRemoteModule: true, 
+    }
+  })
+
+  callWindow.loadFile('renderer/voice-call.html')
+
+  callWindow.webContents.openDevTools();
+
+  callWindow.on('closed',  () => {
+    callWindow = null
+  })
+}
 
 // function createTray()
 // {
@@ -321,46 +347,46 @@ function onReady()
   // setTimeout(updater, 1500)
   // createTray()
 
-  // mainWindow = new BrowserWindow({
-  //   width: 800,
-  //   height: 650,
-  //   x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
-  //   frame: false, titleBarStyle: 'hidden',
-  //   webPreferences: { nodeIntegration: true , enableRemoteModule: true}
-  // })
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 650,
+    x: screen.getPrimaryDisplay.width / 2, y: screen.getPrimaryDisplay.height / 2,
+    frame: false, titleBarStyle: 'hidden',
+    webPreferences: { nodeIntegration: true , enableRemoteModule: true}
+  })
 
-  // mainWindow.resizable = true;
+  mainWindow.resizable = true;
 
-  // let focused = true;
-  // let focusedTimeout = null;
+  let focused = true;
+  let focusedTimeout = null;
 
-  // mainWindow.on('blur', () => {
-  //   focused = false;
-  //   focusedTimeout = setTimeout(() => {
-  //     mainWindow.webContents.send('status_idle', {})
-  //   }, 5000)
-  // })
+  mainWindow.on('blur', () => {
+    focused = false;
+    focusedTimeout = setTimeout(() => {
+      mainWindow.webContents.send('status_idle', {})
+    }, 5000)
+  })
 
-  // mainWindow.on('focus', () => {
-  //   focused = true;
-  //   if (focusedTimeout) {
-  //     clearTimeout(focusedTimeout)
-  //     mainWindow.webContents.send('status_online', {})
-  //   }
-  //   focusedTimeout  = null;
-  // })
-  createCallWindow();
+  mainWindow.on('focus', () => {
+    focused = true;
+    if (focusedTimeout) {
+      clearTimeout(focusedTimeout)
+      mainWindow.webContents.send('status_online', {})
+    }
+    focusedTimeout  = null;
+  })
+  // createVideoCallWindow();
 
-//   fs.readFile('logged-in', 'utf-8', (err, data) => {
-//     if(err) {
-//       createLoginWindow()
-//       return;
-//     }
-//     else
-//     {
-//       createHomeWindow()
-//     }
-// });
+  fs.readFile('logged-in', 'utf-8', (err, data) => {
+    if(err) {
+      createLoginWindow()
+      return;
+    }
+    else
+    {
+      createHomeWindow()
+    }
+});
 
 }
 

@@ -405,11 +405,12 @@ $(document).ready(function() {
 
     videoButton.on('click', () => {
         console.log("Pressed video button");
-        ipcRenderer.send('openCallWindow', friendClickedOn);
+        ipcRenderer.send('openVideoCallWindow', friendClickedOn);
     })
 
     callButton.on('click', () => {
         console.log("Call button clicked");
+        ipcRenderer.send('openVoiceCallWindow', friendClickedOn);
     })
 
     //on keydown, clear the countdown
@@ -1612,34 +1613,36 @@ socket.on('friend_status', (data) => {
 })
 //Listen on user status
 socket.on('get_status', (data) => {
-    var status, statusCol;
-    let nameWithoutSpace = data.username.split(" ").join("")
-    console.log("Received status from username: " + data.username);
-    if (data.status === undefined) {
-        status = "offline"
-        statusCol = false;
+    if (data) {
+        var status, statusCol;
+        let nameWithoutSpace = data.username.split(" ").join("")
+        console.log("Received status from username: " + data.username);
+        if (data.status === undefined) {
+            status = "offline"
+            statusCol = false;
+        }
+        else if(data.status == "invisible" || data.status == "offline") {
+            status = "offline"
+            statusCol = false;
+        }
+        else {
+            status = data.status;
+            statusCol = true;
+        }
+        let statusid = $('#' + nameWithoutSpace + '_statusid')
+        if (statusCol == false) {
+            statusid.removeClass("text-success")
+            statusid.addClass("text-danger")
+            let i = friendsOnline.indexOf(data.username)
+            friendsOnline.splice(i, 1)
+        }
+        else {
+            statusid.removeClass("text-danger")
+            statusid.addClass("text-success")
+        }
+        console.log("Status is " + status + " and color is " + statusCol);
+        statusid.text(status)   
     }
-    else if(data.status == "invisible" || data.status == "offline") {
-        status = "offline"
-        statusCol = false;
-    }
-    else {
-        status = data.status;
-        statusCol = true;
-    }
-    let statusid = $('#' + nameWithoutSpace + '_statusid')
-    if (statusCol == false) {
-        statusid.removeClass("text-success")
-        statusid.addClass("text-danger")
-        let i = friendsOnline.indexOf(data.username)
-        friendsOnline.splice(i, 1)
-    }
-    else {
-        statusid.removeClass("text-danger")
-        statusid.addClass("text-success")
-    }
-    console.log("Status is " + status + " and color is " + statusCol);
-    statusid.text(status)
 })
 
 socket.on("image_sent", (data) => {

@@ -3,8 +3,6 @@ const { ipcRenderer } = require('electron');
 // const socket = io.connect('http://34.93.56.182:3000')
 const socket = io.connect('http://localhost:3000')
 
-const { v4: uuidV4 } = require('uuid')
-
 ipcRenderer.send('get_chat_data')
 
 var chatId, friend;
