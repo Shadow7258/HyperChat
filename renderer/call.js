@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 
-const socket = io.connect('http://34.93.56.182:3000')
-// const socket = io.connect('http://localhost:3000')
+// const socket = io.connect('http://34.93.56.182:3000')
+const socket = io.connect('http://localhost:3000')
 
 const { v4: uuidV4 } = require('uuid')
 
@@ -17,34 +17,46 @@ ipcRenderer.on('chat_data', (event, chatIdName, friendName) => {
 })
 
 const videoGrid = document.getElementById('video-grid')
-const myPeer = new Peer(undefined, {
+const myPeer = new Peer({
   host: '127.0.0.1',
-  port: '3001'
+  port: '3001',
+  debug: 3
 })
 const myVideo = document.createElement('video')
 myVideo.muted = true
 const peers = {}
+
+var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+myPeer.on('call', function(call) {
+  getUserMedia({video: true, audio: true}, function(stream) {
+    call.answer(stream); 
+    const video = document.createElement('video')
+    call.on('stream', function(remoteStream) {
+      addVideoStream(video, remoteStream)
+    });
+    call.on('close', () => {
+      video.remove()
+    })
+  }, function(err) {
+    console.log('Failed to get local stream', err);
+  });
+});
+
 navigator.mediaDevices.getUserMedia({
   video: true,
   audio: true,
 }).then(stream => {
   addVideoStream(myVideo, stream)
 
-  myPeer.on('call', call => {
-    call.answer(stream)
-    const video = document.createElement('video')
-    call.on('stream', userVideoStream => {
-      addVideoStream(video, userVideoStream)
-    })
-  })
-
   socket.on('user-connected', userId => {
-    console.log("User connected: " + userId);
+    console.log("User connected to the room : " + userId);
     connectToNewUser(userId, stream)
   })
 })
 
 socket.on('user-disconnected', userId => {
+  console.log("Peer's user id is " + peers[userId]);
   if (peers[userId]) peers[userId].close()
 })
 
@@ -54,9 +66,9 @@ myPeer.on('open', id => {
 })
 
 function connectToNewUser(userId, stream) {
-  console.log("Connecting new user");
-  const video = document.createElement('video')
   const call = myPeer.call(userId, stream)
+  console.log("Calling new user: " + userId);
+  const video = document.createElement('video')
   call.on('stream', userVideoStream => {
     addVideoStream(video, userVideoStream)
   })
