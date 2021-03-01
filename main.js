@@ -267,10 +267,6 @@ ipcMain.on('get_chat_data', (event) => {
   }, 500)
 })
 
-function getChatId() {
-  
-}
-
 function createUserFile(email)
 {
   fs.writeFile("logged-in", email, (err) => {

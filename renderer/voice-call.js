@@ -73,6 +73,91 @@ function voiceCall() {
       connectToNewUser(userId, stream)
     })
   })
+
+  socket.on('room-length', roomLength => {
+    setTimeout(() => {
+      console.log("Room length is now " + roomLength);
+      switch (roomLength) {
+        case 0:
+          $('#video-grid').css('grid-template-columns', '1fr')
+          $('#video-grid').css('grid-template-rows', '1fr')
+          $('img').css('height', 'inherit')
+          $('img').css('width', 'inherit')
+          $('img').css('padding', '0')
+          break;
+        case 1:
+          $('#video-grid').css('grid-template-columns', '1fr')
+          $('#video-grid').css('grid-template-rows', '1fr')
+          $('img').css('height', 'inherit')
+          $('img').css('width', 'inherit')
+          $('img').css('padding', '0')
+          break;
+        case 2:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr')       
+          $('img').css('height', 'inherit')
+          $('img').css('width', 'inherit')
+          $('img').css('padding', '0')
+          break;
+        case 3:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 4:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 5:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 6:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 7:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 8:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        case 9:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
+          $('img').css('height', '-webkit-fill-available')
+          $('img').css('width', '-webkit-fill-available')
+          $('img').css('padding', '50')
+          break;
+        default:
+          $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
+          $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
+            $('img').css('height', '-webkit-fill-available')
+            $('img').css('width', '-webkit-fill-available')
+            $('img').css('padding', '50')
+          break;
+      }
+    }, 300);
+  })
   
   socket.on('user-disconnected', userId => {
     console.log("Peer's user id is " + peers[userId]);
