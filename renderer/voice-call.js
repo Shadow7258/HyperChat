@@ -81,44 +81,44 @@ function voiceCall() {
         case 0:
           $('#video-grid').css('grid-template-columns', '1fr')
           $('#video-grid').css('grid-template-rows', '1fr')
-          $('img').css('height', 'inherit')
-          $('img').css('width', 'inherit')
+          $('img').css('height', '60%')
+          $('img').css('width', '60%')
           $('img').css('padding', '0')
           break;
         case 1:
           $('#video-grid').css('grid-template-columns', '1fr')
           $('#video-grid').css('grid-template-rows', '1fr')
-          $('img').css('height', 'inherit')
-          $('img').css('width', 'inherit')
+          $('img').css('height', '60%')
+          $('img').css('width', '60%')
           $('img').css('padding', '0')
           break;
         case 2:
           $('#video-grid').css('grid-template-columns', '1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr')       
-          $('img').css('height', 'inherit')
-          $('img').css('width', 'inherit')
+          $('img').css('height', '40%')
+          $('img').css('width', '65%')
           $('img').css('padding', '0')
           break;
         case 3:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '32%')
+          $('img').css('width', '80%')
+          $('img').css('padding', '0')
           break;
         case 4:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '55%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
         case 5:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '55%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
         case 6:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
@@ -130,30 +130,30 @@ function voiceCall() {
         case 7:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '70%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
         case 8:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '70%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
         case 9:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
-          $('img').css('height', '-webkit-fill-available')
-          $('img').css('width', '-webkit-fill-available')
-          $('img').css('padding', '50')
+          $('img').css('height', '70%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
         default:
           $('#video-grid').css('grid-template-columns', '1fr 1fr 1fr')
           $('#video-grid').css('grid-template-rows', '1fr 1fr 1fr')
-            $('img').css('height', '-webkit-fill-available')
-            $('img').css('width', '-webkit-fill-available')
-            $('img').css('padding', '50')
+          $('img').css('height', '70%')
+          $('img').css('width', '70%')
+          $('img').css('padding', '0')
           break;
       }
     }, 300);
